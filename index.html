@@ -43,11 +43,10 @@
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between select-none">
 
-    <!-- TOP NAVIGATION BAR (Icon-only, exact required sequence) -->
     <header class="bg-indigo-700 text-white shadow-lg sticky top-0 z-30 px-4 py-3">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             
-            <!-- App Logo / Title -->
+            <!-- App Logo / Title with Version Badge -->
             <div class="flex items-center space-x-3">
                 <div class="bg-amber-400 p-2.5 rounded-2xl text-slate-900 shadow-md">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -55,36 +54,34 @@
                     </svg>
                 </div>
                 <div>
-                    <h1 class="text-xl sm:text-2xl font-black tracking-wide leading-tight">旗語解密大行動</h1>
-                    <span class="text-xs bg-indigo-800 text-indigo-200 px-2 py-0.5 rounded-full font-bold">國小數學．週期規律</span>
+                    <div class="flex items-center space-x-2">
+                        <h1 class="text-xl sm:text-2xl font-black tracking-wide leading-tight">旗語解密大行動</h1>
+                        <!-- Version Control Badge placed right next to title -->
+                        <span id="version-badge" class="text-xs bg-amber-400 text-slate-900 font-black px-2.5 py-0.5 rounded-full shadow">v1.1.0</span>
+                    </div>
+                    <!-- Sub-badge with "國小數學" strictly deleted -->
+                    <span class="text-xs bg-indigo-800 text-indigo-200 px-2.5 py-0.5 rounded-full font-bold mt-0.5 inline-block">週期規律</span>
                 </div>
             </div>
 
-            <!-- Header Action Buttons (Strictly ICON-ONLY as required: QR -> Fullscreen -> Teacher -> Guide) -->
+            <!-- Header Action Buttons (Strictly ICON-ONLY: ① QR Code ➔ ② Fullscreen ➔ ③ Course Guide) -->
             <div class="flex items-center space-x-2 sm:space-x-3">
                 <!-- ① QR Code Scan Icon -->
-                <button onclick="openQRCodeModal()" class="touch-btn bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-800 p-3 rounded-2xl shadow border-2 border-indigo-400/40 focus:outline-none" aria-label="QR Code">
+                <button onclick="openQRCodeModal()" class="touch-btn bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-800 p-3 rounded-2xl shadow border-2 border-indigo-400/40 focus:outline-none" aria-label="QR Code" title="掃描 QR Code">
                     <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-6v-3m6 3.5a1.5 1.5 0 01-3 0 1.5 1.5 0 013 0zm-10-7a1.5 1.5 0 01-3 0 1.5 1.5 0 013 0zm0 10a1.5 1.5 0 01-3 0 1.5 1.5 0 013 0zM3 3h6v6H3V3zm12 0h6v6h-6V3zm0 12h6v6h-6v-6zM3 15h6v6H3v-6z" />
                     </svg>
                 </button>
 
                 <!-- ② Fullscreen Toggle Icon -->
-                <button onclick="toggleFullScreen()" class="touch-btn bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-800 p-3 rounded-2xl shadow border-2 border-indigo-400/40 focus:outline-none" aria-label="Maximize">
+                <button onclick="toggleFullScreen()" class="touch-btn bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-800 p-3 rounded-2xl shadow border-2 border-indigo-400/40 focus:outline-none" aria-label="全螢幕切換" title="全螢幕切換">
                     <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
                     </svg>
                 </button>
 
-                <!-- ③ Teacher Zone Icon -->
-                <button onclick="openTeacherAuthModal()" class="touch-btn bg-amber-500 hover:bg-amber-400 active:bg-amber-600 text-slate-900 p-3 rounded-2xl shadow border-2 border-amber-300 focus:outline-none" aria-label="Teacher Zone">
-                    <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0112 20.055a11.952 11.952 0 01-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14zm-4 6v-7.5l4-2.222" />
-                    </svg>
-                </button>
-
-                <!-- ④ Course Guide Icon -->
-                <button onclick="openGuideModal()" class="touch-btn bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-800 p-3 rounded-2xl shadow border-2 border-indigo-400/40 focus:outline-none" aria-label="Course Guide">
+                <!-- ③ Course Guide Icon -->
+                <button onclick="openGuideModal()" class="touch-btn bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-800 p-3 rounded-2xl shadow border-2 border-indigo-400/40 focus:outline-none" aria-label="課程指引" title="課程指引">
                     <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                     </svg>
@@ -93,22 +90,26 @@
         </div>
     </header>
 
-    <!-- MAIN TAB NAVIGATION (3 Core Activities) -->
     <main class="max-w-7xl mx-auto w-full px-4 py-4 flex-grow flex flex-col">
         
-        <!-- Tab Navigation Buttons -->
-        <div class="grid grid-cols-3 gap-2 sm:gap-4 mb-6">
-            <button id="tab-btn-1" onclick="switchTab(1)" class="touch-btn p-3 sm:p-4 rounded-2xl font-black text-base sm:text-xl text-center shadow-md border-4 border-indigo-500 bg-indigo-600 text-white flex items-center justify-center space-x-2">
+        <!-- Tab Navigation Buttons (4 Tabs including Student Showcase Wall) -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-6">
+            <button id="tab-btn-1" onclick="switchTab(1)" class="touch-btn p-3 sm:p-4 rounded-2xl font-black text-base sm:text-lg text-center shadow-md border-4 border-indigo-500 bg-indigo-600 text-white flex items-center justify-center space-x-2">
                 <span class="text-xl sm:text-2xl">🚩</span>
                 <span class="hidden sm:inline">活動一：</span><span>課程導入</span>
             </button>
-            <button id="tab-btn-2" onclick="switchTab(2)" class="touch-btn p-3 sm:p-4 rounded-2xl font-black text-base sm:text-xl text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-2">
+            <button id="tab-btn-2" onclick="switchTab(2)" class="touch-btn p-3 sm:p-4 rounded-2xl font-black text-base sm:text-lg text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-2">
                 <span class="text-xl sm:text-2xl">🎨</span>
                 <span class="hidden sm:inline">活動二：</span><span>核心發展</span>
             </button>
-            <button id="tab-btn-3" onclick="switchTab(3)" class="touch-btn p-3 sm:p-4 rounded-2xl font-black text-base sm:text-xl text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-2">
+            <button id="tab-btn-3" onclick="switchTab(3)" class="touch-btn p-3 sm:p-4 rounded-2xl font-black text-base sm:text-lg text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-2">
                 <span class="text-xl sm:text-2xl">🕵️</span>
                 <span class="hidden sm:inline">活動三：</span><span>綜合歸納</span>
+            </button>
+            <button id="tab-btn-4" onclick="switchTab(4)" class="touch-btn p-3 sm:p-4 rounded-2xl font-black text-base sm:text-lg text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-2">
+                <span class="text-xl sm:text-2xl">🌟</span>
+                <span class="hidden sm:inline">展示：</span><span>成果展示牆</span>
+                <span id="showcase-badge" class="ml-1 bg-amber-400 text-slate-900 text-xs px-2 py-0.5 rounded-full font-black">0</span>
             </button>
         </div>
 
@@ -213,7 +214,7 @@
                     <h2 class="text-xl sm:text-2xl font-black text-slate-800">創設數位幾何密碼與「第零個迷思」大破解</h2>
                 </div>
                 <p class="text-slate-600 text-base sm:text-lg">
-                    設計屬於你們小組的規律密碼陣列！繪製完畢後出題考考鄰座同學，並破解最棘手的「餘數為零」迷思！
+                    設計屬於你們小組的規律密碼圖案！繪製完畢後點擊生成密碼陣列，考考鄰座同學，並破解最棘手的「餘數為零」盲區！
                 </p>
             </div>
 
@@ -316,8 +317,17 @@
                     <h2 class="text-xl sm:text-2xl font-black text-slate-800">運用 4F 引導反思法進行小組討論</h2>
                 </div>
                 <p class="text-slate-600 text-base sm:text-lg">
-                    請小組成員討論後，將想法記錄在偵探筆記中。欄位保持空白，請開始寫下你們的發現！
+                    請各組討論後，將想法記錄在偵探筆記中。完成提交後作品將直接發布在「成果展示牆」與全班分享！
                 </p>
+            </div>
+
+            <!-- Group Identification Field -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
+                <div class="flex items-center space-x-2">
+                    <span class="text-xl">🏷️</span>
+                    <label for="group-name-input" class="font-black text-slate-700 text-base">填寫小組名稱 / 座號：</label>
+                </div>
+                <input type="text" id="group-name-input" class="p-2.5 px-4 rounded-xl border-2 border-indigo-200 focus:border-indigo-500 focus:outline-none font-bold text-slate-800 text-base w-full sm:w-64" placeholder="例如：第 3 組 解密小隊">
             </div>
 
             <!-- 4F Form Grid (Inputs cleared by default) -->
@@ -366,16 +376,66 @@
             <!-- Submit Notebook Button -->
             <div class="flex justify-center pt-2">
                 <button onclick="submitNotebook()" class="touch-btn bg-emerald-600 hover:bg-emerald-500 text-white font-black text-lg sm:text-xl px-10 py-4 rounded-2xl shadow-xl border-4 border-emerald-400 flex items-center space-x-2">
-                    <span>💾 儲存並提交偵探筆記</span>
+                    <span>🚀 儲存並發布至成果展示牆</span>
                 </button>
+            </div>
+        </section>
+
+        <!-- ACTIVITY 4: 成果展示牆 (Direct Public Student Showcase Wall) -->
+        <section id="activity-4" class="hidden space-y-6 flex-grow">
+            <!-- Header -->
+            <div class="bg-white p-5 sm:p-6 rounded-3xl shadow-lg border-2 border-slate-200 flex flex-wrap justify-between items-center gap-4">
+                <div>
+                    <div class="flex items-center space-x-3 mb-2">
+                        <span class="bg-amber-100 text-amber-800 font-black px-3 py-1 rounded-full text-sm sm:text-base">即時作品牆</span>
+                        <h2 class="text-xl sm:text-2xl font-black text-slate-800">小組學習歷程與成果展示</h2>
+                    </div>
+                    <p class="text-slate-600 text-base sm:text-lg">
+                        學生的幾何密碼創作與 4F 偵探筆記將直接展示於此，支援全班觀摩與愛心互評！
+                    </p>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <button onclick="exportShowcaseCSV()" class="touch-btn bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2.5 rounded-2xl text-sm sm:text-base shadow flex items-center space-x-1.5">
+                        <span>📥 匯出成果 CSV</span>
+                    </button>
+                    <button onclick="confirmClearAllShowcase()" class="touch-btn bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold px-4 py-2.5 rounded-2xl text-sm sm:text-base border border-rose-300">
+                        🗑️ 清空展示
+                    </button>
+                </div>
+            </div>
+
+            <!-- Showcase Overview Stats Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-indigo-50 p-4 rounded-2xl border-2 border-indigo-100 text-center">
+                    <span class="text-xs text-indigo-600 font-bold">已展示小組作品</span>
+                    <p id="stat-total-submissions" class="text-3xl font-black text-indigo-900 mt-1">0 組</p>
+                </div>
+                <div class="bg-amber-50 p-4 rounded-2xl border-2 border-amber-100 text-center">
+                    <span class="text-xs text-amber-600 font-bold">第 100 面旗挑戰狀況</span>
+                    <p id="stat-act1-status" class="text-2xl font-black text-amber-900 mt-1">未作答</p>
+                </div>
+                <div class="bg-emerald-50 p-4 rounded-2xl border-2 border-emerald-100 text-center">
+                    <span class="text-xs text-emerald-600 font-bold">「第零個迷思」突破</span>
+                    <p id="stat-act2-status" class="text-2xl font-black text-emerald-900 mt-1">未破解</p>
+                </div>
+            </div>
+
+            <!-- Showcase Cards Container -->
+            <div id="showcase-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Empty State Placeholder -->
+                <div id="showcase-empty" class="col-span-full py-16 text-center bg-white rounded-3xl border-2 border-dashed border-slate-300 text-slate-400 space-y-3">
+                    <div class="text-5xl">🎨</div>
+                    <p class="text-lg font-bold text-slate-500">目前尚無已發布的作品</p>
+                    <p class="text-sm text-slate-400">請先在「活動二」繪圖或在「活動三」填寫 4F 偵探筆記並點擊發布！</p>
+                </div>
             </div>
         </section>
     </main>
 
-    <!-- FOOTER (Strict requirement: Centered only with specified text) -->
+    <!-- FOOTER (Centered with exact specified text: 數感實驗室  | 互動學習系統 | Design：S.C. Kuo) -->
     <footer class="bg-slate-900 text-slate-400 py-4 px-4 text-center mt-8 border-t border-slate-800">
         <p class="text-sm sm:text-base font-medium tracking-wider">
-            數感實驗室 &nbsp;|&nbsp; 互動學習系統 &nbsp;|&nbsp; 教材設計：S.C. Kuo
+            數感實驗室 &nbsp;|&nbsp; 互動學習系統 &nbsp;|&nbsp; Design：S.C. Kuo
         </p>
     </footer>
 
@@ -403,7 +463,7 @@
             <button onclick="closeModal('guideModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2 text-2xl font-bold">✕</button>
             
             <div class="flex items-center space-x-3 border-b border-slate-200 pb-4">
-                <div class="bg-indigo-100 p-3 rounded-2xl text-indigo-700">📖</div>
+                <div class="bg-indigo-100 p-3 rounded-2xl text-indigo-700 text-2xl">📖</div>
                 <div>
                     <h3 class="text-2xl font-black text-slate-800">課程指引</h3>
                     <p class="text-sm text-slate-500">單元主題：旗語解密大行動（週期規律）</p>
@@ -421,73 +481,25 @@
                 <div class="space-y-2">
                     <h4 class="font-bold text-slate-800">📌 活動步驟：</h4>
                     <ul class="list-disc list-inside space-y-1 text-slate-600">
-                        <li><b>活動一 (課程導入)：</b>觀察旗語擺動規律，以算式 $100 \div 3 = 33 \dots 1$ 推算第 100 面旗顏色。</li>
-                        <li><b>活動二 (核心發展)：</b>利用 Canva 畫布創設圖樣，出題給鄰座同學，並破解餘數為 0 的迷思。</li>
+                        <li><b>活動一 (課程導入)：</b>觀察旗語擺動規律，以算式 100 ÷ 3 = 33 ... 1 推算第 100 面旗顏色。</li>
+                        <li><b>活動二 (核心發展)：</b>利用畫布創設圖樣，出題給鄰座同學，並破解餘數為 0 的迷思。</li>
                         <li><b>活動三 (綜合歸納)：</b>小組討論並完成 4F 反思偵探筆記（Facts, Feelings, Findings, Future）。</li>
+                        <li><b>成果展示牆：</b>發布小組成果，相互觀摩並給予愛心肯定，可直接匯出全班 CSV 報表。</li>
                     </ul>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- MODAL 3: Teacher Zone Password Prompt Modal (Strict: no password hint displayed) -->
-    <div id="teacherAuthModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-5 shadow-2xl relative border-4 border-amber-500">
-            <button onclick="closeModal('teacherAuthModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2 text-xl font-bold">✕</button>
-            <div class="bg-amber-100 w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-amber-600 text-2xl font-bold">🔐</div>
-            <h3 class="text-xl font-black text-slate-800">教師專區身份驗證</h3>
-            
-            <input type="password" id="teacher-password-input" class="w-full p-3.5 border-2 border-slate-300 rounded-2xl text-center text-lg focus:border-amber-500 focus:outline-none" placeholder="請輸入教師密碼" onkeypress="if(event.key==='Enter') verifyTeacherPassword()">
-
-            <button onclick="verifyTeacherPassword()" class="touch-btn w-full bg-amber-500 hover:bg-amber-400 text-slate-900 font-black py-3 rounded-2xl text-base shadow">
-                進入教師專區
-            </button>
-        </div>
-    </div>
-
-    <!-- MODAL 4: Teacher Dashboard (Learning Analytics & Student History) -->
-    <div id="teacherDashboardModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-4xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative border-4 border-amber-500 max-h-[90vh] overflow-y-auto">
-            <button onclick="closeModal('teacherDashboardModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2 text-2xl font-bold">✕</button>
-            
-            <div class="flex justify-between items-center border-b border-slate-200 pb-4">
-                <div class="flex items-center space-x-3">
-                    <div class="bg-amber-500 text-slate-900 p-3 rounded-2xl text-xl font-bold">📊</div>
-                    <div>
-                        <h3 class="text-2xl font-black text-slate-800">教師專區 - 學習歷程與成效分析</h3>
-                        <!-- Updated Version Tag requirement -->
-                        <p class="text-xs text-amber-600 font-bold">系統版本：v1.0.1 - Build 2026.08</p>
-                    </div>
-                </div>
-                <button onclick="resetAllData()" class="touch-btn text-xs bg-red-100 hover:bg-red-200 text-red-600 font-bold px-3 py-2 rounded-xl border border-red-200">
-                    🗑️ 重置所有歷程數據
-                </button>
-            </div>
-
-            <!-- Analytics Dashboard Overview Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-100 text-center">
-                    <span class="text-xs text-indigo-600 font-bold">活動一 (100面旗挑戰)</span>
-                    <p id="dash-act1-status" class="text-2xl font-black text-indigo-900 mt-1">未作答</p>
-                </div>
-                <div class="bg-amber-50 p-4 rounded-2xl border border-amber-100 text-center">
-                    <span class="text-xs text-amber-600 font-bold">活動二 (餘數為0迷思突破)</span>
-                    <p id="dash-act2-status" class="text-2xl font-black text-amber-900 mt-1">未破解</p>
-                </div>
-                <div class="bg-emerald-50 p-4 rounded-2xl border border-emerald-100 text-center">
-                    <span class="text-xs text-emerald-600 font-bold">活動三 (4F筆記提交狀態)</span>
-                    <p id="dash-act3-status" class="text-2xl font-black text-emerald-900 mt-1">待提交</p>
-                </div>
-            </div>
-
-            <!-- Submitted Student 4F Notebook View -->
-            <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3">
-                <h4 class="font-black text-slate-800 text-base flex items-center">
-                    <span class="mr-2">📝</span> 學生小組提交的偵探筆記內容：
-                </h4>
-                <div id="dash-notebook-records" class="space-y-2 text-sm text-slate-600">
-                    <p class="italic text-slate-400">尚無已提交的筆記資料。</p>
-                </div>
+    <!-- Custom Confirm Modal (Zero native confirm usage) -->
+    <div id="confirmModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-5 shadow-2xl relative border-4 border-rose-500">
+            <div class="text-4xl">⚠️</div>
+            <h3 class="text-xl font-black text-slate-800">確認清空作品牆？</h3>
+            <p class="text-sm text-slate-600">清空後所有已發布的小組作品將會重置，此操作無法復原。</p>
+            <div class="grid grid-cols-2 gap-3 pt-2">
+                <button onclick="closeModal('confirmModal')" class="touch-btn py-3 bg-slate-200 hover:bg-slate-300 rounded-xl font-bold text-slate-700">取消</button>
+                <button onclick="executeClearAllShowcase()" class="touch-btn py-3 bg-rose-600 hover:bg-rose-700 rounded-xl font-bold text-white shadow">確認清空</button>
             </div>
         </div>
     </div>
@@ -503,51 +515,55 @@
             act1Answered: false,
             act1Correct: false,
             act2TrapSolved: false,
-            notebookSubmitted: false,
-            notebookData: { facts: '', feelings: '', findings: '', future: '' }
+            submissions: [] // Public student works directly presented on webpage
         };
 
         let isAnimatingFlags = true;
         let flagAnimFrame = 0;
         let drawColor = '#ef4444';
         let isDrawing = false;
+        let lastCreatedCipherDataUrl = null;
 
         /* ----------------------------------------------------
-           TAB NAVIGATION LOGIC
+           TAB NAVIGATION LOGIC (4 Tabs)
         ---------------------------------------------------- */
         function switchTab(tabNum) {
-            // Hide all activity tabs
-            document.getElementById('activity-1').classList.add('hidden');
-            document.getElementById('activity-2').classList.add('hidden');
-            document.getElementById('activity-3').classList.add('hidden');
-
-            // Reset tab button visual styling
-            for (let i = 1; i <= 3; i++) {
+            // Hide all 4 activity tabs
+            for (let i = 1; i <= 4; i++) {
+                const sec = document.getElementById(`activity-${i}`);
+                if (sec) sec.classList.add('hidden');
+                
                 const btn = document.getElementById(`tab-btn-${i}`);
-                btn.className = "touch-btn p-3 sm:p-4 rounded-2xl font-black text-base sm:text-xl text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-2";
+                if (btn) {
+                    btn.className = "touch-btn p-3 sm:p-4 rounded-2xl font-black text-base sm:text-lg text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-2";
+                }
             }
 
             // Show active tab
-            document.getElementById(`activity-${tabNum}`).classList.remove('hidden');
+            const activeSec = document.getElementById(`activity-${tabNum}`);
+            if (activeSec) activeSec.classList.remove('hidden');
+
             const activeBtn = document.getElementById(`tab-btn-${tabNum}`);
-            activeBtn.className = "touch-btn p-3 sm:p-4 rounded-2xl font-black text-base sm:text-xl text-center shadow-md border-4 border-indigo-500 bg-indigo-600 text-white flex items-center justify-center space-x-2";
+            if (activeBtn) {
+                activeBtn.className = "touch-btn p-3 sm:p-4 rounded-2xl font-black text-base sm:text-lg text-center shadow-md border-4 border-indigo-500 bg-indigo-600 text-white flex items-center justify-center space-x-2";
+            }
 
             if (tabNum === 2) {
                 initCustomDrawCanvas();
+            } else if (tabNum === 4) {
+                renderShowcaseCards();
             }
         }
 
         /* ----------------------------------------------------
-           HEADER ACTIONS (QR, Fullscreen, Teacher, Guide)
+           HEADER ACTIONS (QR Code, Fullscreen, Guide)
         ---------------------------------------------------- */
-        // ① QR Code Modal & Generation
+        // ① QR Code Modal & Dynamic Generation
         function openQRCodeModal() {
             const qrContainer = document.getElementById('qrcode-target');
             qrContainer.innerHTML = ''; // Clear previous QR Code
             
-            // Dynamic URL generation for active browser location
             const currentURL = window.location.href;
-            
             try {
                 new QRCode(qrContainer, {
                     text: currentURL,
@@ -590,7 +606,7 @@
             const doc = document.documentElement;
             if (!document.fullscreenElement && !document.webkitFullscreenElement) {
                 if (doc.requestFullscreen) {
-                    doc.requestFullscreen().catch(() => showToast('⚠️ 您的裝置或瀏覽器限制全螢幕操作'));
+                    doc.requestFullscreen().catch(() => showToast('⚠️ 您的裝置限制全螢幕操作'));
                 } else if (doc.webkitRequestFullscreen) {
                     doc.webkitRequestFullscreen();
                 }
@@ -603,77 +619,14 @@
             }
         }
 
-        // ③ Teacher Zone Logic
-        function openTeacherAuthModal() {
-            document.getElementById('teacher-password-input').value = '';
-            document.getElementById('teacherAuthModal').classList.remove('hidden');
-        }
-
-        function verifyTeacherPassword() {
-            const pwd = document.getElementById('teacher-password-input').value;
-            if (pwd === 'teacher') {
-                closeModal('teacherAuthModal');
-                updateTeacherDashboardUI();
-                document.getElementById('teacherDashboardModal').classList.remove('hidden');
-            } else {
-                showToast('❌ 密碼錯誤，請重新輸入！');
-                document.getElementById('teacher-password-input').value = '';
-            }
-        }
-
-        function updateTeacherDashboardUI() {
-            document.getElementById('dash-act1-status').textContent = learningState.act1Answered 
-                ? (learningState.act1Correct ? '✅ 答對(🔴紅色)' : '❌ 答錯') 
-                : '未作答';
-            
-            document.getElementById('dash-act2-status').textContent = learningState.act2TrapSolved 
-                ? '✅ 成功破解迷思' 
-                : '未破解';
-
-            document.getElementById('dash-act3-status').textContent = learningState.notebookSubmitted 
-                ? '✅ 已完成提交' 
-                : '待提交';
-
-            const recordsDiv = document.getElementById('dash-notebook-records');
-            if (learningState.notebookSubmitted) {
-                recordsDiv.innerHTML = `
-                    <p class="p-2 bg-white rounded-xl border"><b>[Facts 事實]：</b>${escapeHtml(learningState.notebookData.facts)}</p>
-                    <p class="p-2 bg-white rounded-xl border"><b>[Feelings 感受]：</b>${escapeHtml(learningState.notebookData.feelings)}</p>
-                    <p class="p-2 bg-white rounded-xl border"><b>[Findings 發現]：</b>${escapeHtml(learningState.notebookData.findings)}</p>
-                    <p class="p-2 bg-white rounded-xl border"><b>[Future 應用]：</b>${escapeHtml(learningState.notebookData.future)}</p>
-                `;
-            } else {
-                recordsDiv.innerHTML = `<p class="italic text-slate-400">尚無已提交的筆記資料。</p>`;
-            }
-        }
-
-        function resetAllData() {
-            learningState = {
-                act1Answered: false,
-                act1Correct: false,
-                act2TrapSolved: false,
-                notebookSubmitted: false,
-                notebookData: { facts: '', feelings: '', findings: '', future: '' }
-            };
-            document.getElementById('note-facts').value = '';
-            document.getElementById('note-feelings').value = '';
-            document.getElementById('note-findings').value = '';
-            document.getElementById('note-future').value = '';
-            
-            document.getElementById('act1-feedback').className = 'hidden';
-            document.getElementById('zero-trap-feedback').className = 'hidden';
-
-            updateTeacherDashboardUI();
-            showToast('🧹 已重置所有學生學習數據！');
-        }
-
-        // ④ Course Guide Modal
+        // ③ Course Guide Modal
         function openGuideModal() {
             document.getElementById('guideModal').classList.remove('hidden');
         }
 
         function closeModal(modalId) {
-            document.getElementById(modalId).classList.add('hidden');
+            const m = document.getElementById(modalId);
+            if (m) m.classList.add('hidden');
         }
 
         /* ----------------------------------------------------
@@ -755,12 +708,16 @@
             const feedback = document.getElementById('act1-feedback');
             feedback.classList.remove('hidden');
 
+            const statAct1 = document.getElementById('stat-act1-status');
+
             if (selectedColor === 'red') {
                 learningState.act1Correct = true;
+                if (statAct1) statAct1.textContent = '✅ 答對(🔴紅色)';
                 feedback.className = 'p-4 rounded-2xl font-bold text-base bg-emerald-100 text-emerald-800 border-2 border-emerald-300';
                 feedback.innerHTML = '🎉 太棒了！答對了！<br>因為 100 ÷ 3 = 33 ... 餘數 1，第 1 個顏色就是【🔴 紅色】！';
             } else {
                 learningState.act1Correct = false;
+                if (statAct1) statAct1.textContent = '❌ 答錯再思考';
                 feedback.className = 'p-4 rounded-2xl font-bold text-base bg-rose-100 text-rose-800 border-2 border-rose-300';
                 feedback.innerHTML = '💭 再思考看看喔！<br>100 ÷ 3 = 33 餘數是 1，代表多出 1 面旗幟，應該對應循環單元的第 1 個顏色！';
             }
@@ -776,11 +733,12 @@
             if (!customCanvas) return;
             customCtx = customCanvas.getContext('2d');
             
-            // Event bindings for touch and mouse drawing
+            // Event bindings for mouse
             customCanvas.onmousedown = startDrawing;
             customCanvas.onmousemove = draw;
             customCanvas.onmouseup = stopDrawing;
 
+            // Touch events for iPad with preventDefault to eliminate scrolling
             customCanvas.ontouchstart = (e) => { e.preventDefault(); startDrawing(e.touches[0]); };
             customCanvas.ontouchmove = (e) => { e.preventDefault(); draw(e.touches[0]); };
             customCanvas.ontouchend = stopDrawing;
@@ -819,18 +777,19 @@
             if (customCtx) {
                 customCtx.clearRect(0, 0, customCanvas.width, customCanvas.height);
             }
+            lastCreatedCipherDataUrl = null;
         }
 
         function generateArrayFromCanvas() {
             const container = document.getElementById('patternArrayContainer');
-            const dataUrl = customCanvas.toDataURL();
+            lastCreatedCipherDataUrl = customCanvas.toDataURL();
             
             container.innerHTML = '';
             for (let i = 1; i <= 6; i++) {
                 const box = document.createElement('div');
                 box.className = 'flex flex-col items-center bg-purple-900/90 p-2 rounded-xl border border-purple-700 shadow';
                 box.innerHTML = `
-                    <img src="${dataUrl}" class="w-12 h-12 object-contain bg-white rounded-lg p-0.5">
+                    <img src="${lastCreatedCipherDataUrl}" class="w-12 h-12 object-contain bg-white rounded-lg p-0.5">
                     <span class="text-[10px] text-amber-200 mt-1 font-bold">第${i}項</span>
                 `;
                 container.appendChild(box);
@@ -846,36 +805,185 @@
         function checkZeroTrap(choice) {
             const feedback = document.getElementById('zero-trap-feedback');
             feedback.classList.remove('hidden');
+            const statTrap = document.getElementById('stat-act2-status');
 
             if (choice === 'C') {
                 learningState.act2TrapSolved = true;
+                if (statTrap) statTrap.textContent = '✅ 已成功突破';
                 feedback.className = 'p-4 rounded-2xl font-bold text-base bg-emerald-100 text-emerald-800 border-2 border-emerald-300';
-                feedback.innerHTML = '🎯 答對了！恭喜突破「第零個迷思」！<br>當餘數為 0 時，代表正好完整排滿整組循環，因此對應的是循環單元的【最後一個】元素（第 3 個圖案）！';
+                feedback.innerHTML = '🎯 答對了！恭喜突破「第零個迷思」！<br>當餘數為 0 時，代表剛好完整排滿整組循環，因此對應的是循環單元的【最後一個】元素（第 3 個圖案）！';
             } else {
                 learningState.act2TrapSolved = false;
+                if (statTrap) statTrap.textContent = '⚠️ 尚在探索中';
                 feedback.className = 'p-4 rounded-2xl font-bold text-base bg-rose-100 text-rose-800 border-2 border-rose-300';
-                feedback.innerHTML = '💡 差一點點！提示：<br>12 ÷ 3 = 4 代表剛好完美繞完 4 個完整循環，最後一個正是第 3 個圖案喔！';
+                feedback.innerHTML = '💡 差一點點！提示：<br>12 ÷ 3 = 4 代表剛好完美排滿 4 個完整循環，最後一個正是第 3 個圖案喔！';
             }
         }
 
         /* ----------------------------------------------------
-           ACTIVITY 3: 4F NOTEBOOK SUBMISSION
+           ACTIVITY 3: 4F NOTEBOOK SUBMISSION & SHOWCASE
         ---------------------------------------------------- */
         function submitNotebook() {
+            const groupName = document.getElementById('group-name-input').value.trim() || '未具名小隊';
             const facts = document.getElementById('note-facts').value.trim();
             const feelings = document.getElementById('note-feelings').value.trim();
             const findings = document.getElementById('note-findings').value.trim();
             const future = document.getElementById('note-future').value.trim();
 
             if (!facts || !feelings || !findings || !future) {
-                showToast('⚠️ 請完整填寫 4 個欄位後再提交喔！');
+                showToast('⚠️ 請完整填寫 4 個反思欄位後再提交喔！');
                 return;
             }
 
-            learningState.notebookData = { facts, feelings, findings, future };
-            learningState.notebookSubmitted = true;
+            // Create submission record
+            const submission = {
+                id: Date.now(),
+                groupName: groupName,
+                timestamp: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }),
+                facts: facts,
+                feelings: feelings,
+                findings: findings,
+                future: future,
+                likes: 0,
+                cipherImage: lastCreatedCipherDataUrl || null
+            };
 
-            showToast('🎉 偵探筆記提交成功！成果已傳送至教師專區！');
+            learningState.submissions.unshift(submission);
+            updateShowcaseBadge();
+
+            // Clear input fields for next entry
+            document.getElementById('note-facts').value = '';
+            document.getElementById('note-feelings').value = '';
+            document.getElementById('note-findings').value = '';
+            document.getElementById('note-future').value = '';
+
+            showToast('🎉 偵探筆記成功發布至「成果展示牆」！');
+            switchTab(4); // Seamlessly navigate to Showcase Wall
+        }
+
+        /* ----------------------------------------------------
+           ACTIVITY 4: STUDENT SHOWCASE WALL RENDERING
+        ---------------------------------------------------- */
+        function updateShowcaseBadge() {
+            const count = learningState.submissions.length;
+            const badge = document.getElementById('showcase-badge');
+            if (badge) badge.textContent = count;
+            const statTotal = document.getElementById('stat-total-submissions');
+            if (statTotal) statTotal.textContent = `${count} 組`;
+        }
+
+        function renderShowcaseCards() {
+            const container = document.getElementById('showcase-cards-container');
+            const emptyNotice = document.getElementById('showcase-empty');
+            
+            if (learningState.submissions.length === 0) {
+                if (emptyNotice) emptyNotice.classList.remove('hidden');
+                container.innerHTML = '';
+                container.appendChild(emptyNotice);
+                return;
+            }
+
+            container.innerHTML = '';
+            learningState.submissions.forEach((item, index) => {
+                const card = document.createElement('div');
+                card.className = "bg-white p-6 rounded-3xl shadow-lg border-2 border-slate-200 flex flex-col justify-between space-y-4";
+                
+                let cipherPreviewHTML = '';
+                if (item.cipherImage) {
+                    cipherPreviewHTML = `
+                        <div class="bg-purple-950 p-3 rounded-2xl flex items-center space-x-2 overflow-x-auto">
+                            <span class="text-xs font-bold text-amber-300 shrink-0">密碼圖樣：</span>
+                            <img src="${item.cipherImage}" class="w-10 h-10 object-contain bg-white rounded-lg p-0.5 shrink-0">
+                            <span class="text-xs text-purple-200">➔ 週期重複陣列</span>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="space-y-3">
+                        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
+                            <div class="flex items-center space-x-2">
+                                <span class="bg-indigo-600 text-white w-8 h-8 rounded-xl flex items-center justify-center font-bold text-sm">#${learningState.submissions.length - index}</span>
+                                <h3 class="font-black text-slate-800 text-lg sm:text-xl">${escapeHtml(item.groupName)}</h3>
+                            </div>
+                            <span class="text-xs text-slate-400 font-bold">${item.timestamp}</span>
+                        </div>
+
+                        ${cipherPreviewHTML}
+
+                        <div class="space-y-2 text-sm sm:text-base">
+                            <div class="p-2.5 rounded-xl bg-sky-50 border border-sky-100">
+                                <span class="font-black text-sky-800">[Facts 事實]：</span>
+                                <span class="text-slate-700">${escapeHtml(item.facts)}</span>
+                            </div>
+                            <div class="p-2.5 rounded-xl bg-rose-50 border border-rose-100">
+                                <span class="font-black text-rose-800">[Feelings 感受]：</span>
+                                <span class="text-slate-700">${escapeHtml(item.feelings)}</span>
+                            </div>
+                            <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-100">
+                                <span class="font-black text-amber-800">[Findings 發現]：</span>
+                                <span class="text-slate-700">${escapeHtml(item.findings)}</span>
+                            </div>
+                            <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-100">
+                                <span class="font-black text-emerald-800">[Future 應用]：</span>
+                                <span class="text-slate-700">${escapeHtml(item.future)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="pt-3 border-t border-slate-100 flex justify-between items-center">
+                        <button onclick="likeSubmission(${item.id})" class="touch-btn bg-pink-50 hover:bg-pink-100 text-pink-600 font-bold px-4 py-2 rounded-xl text-sm flex items-center space-x-1.5 border border-pink-200">
+                            <span>❤️ 讚賞作品</span>
+                            <span id="like-count-${item.id}" class="bg-pink-200 text-pink-800 text-xs px-2 py-0.5 rounded-full font-black">${item.likes}</span>
+                        </button>
+                        <span class="text-xs text-emerald-600 font-bold bg-emerald-50 px-2.5 py-1 rounded-lg">4F 完成審核</span>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function likeSubmission(id) {
+            const item = learningState.submissions.find(s => s.id === id);
+            if (item) {
+                item.likes++;
+                const countElem = document.getElementById(`like-count-${id}`);
+                if (countElem) countElem.textContent = item.likes;
+                showToast('💖 已為該組送出鼓勵！');
+            }
+        }
+
+        function exportShowcaseCSV() {
+            if (learningState.submissions.length === 0) {
+                showToast('⚠️ 目前尚無任何作品可供匯出！');
+                return;
+            }
+
+            let csvContent = '\uFEFF組別,時間,[Facts]事實,[Feelings]感受,[Findings]發現,[Future]應用,讚賞次數\n';
+            learningState.submissions.forEach(item => {
+                csvContent += `"${item.groupName}","${item.timestamp}","${item.facts.replace(/"/g, '""')}","${item.feelings.replace(/"/g, '""')}","${item.findings.replace(/"/g, '""')}","${item.future.replace(/"/g, '""')}",${item.likes}\n`;
+            });
+
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.setAttribute('download', `旗語解密大行動_全班成果紀錄_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            showToast('📥 成果 CSV 已成功下載！');
+        }
+
+        function confirmClearAllShowcase() {
+            document.getElementById('confirmModal').classList.remove('hidden');
+        }
+
+        function executeClearAllShowcase() {
+            learningState.submissions = [];
+            closeModal('confirmModal');
+            updateShowcaseBadge();
+            renderShowcaseCards();
+            showToast('🧹 已成功清空所有作品展示！');
         }
 
         /* ----------------------------------------------------
@@ -902,6 +1010,7 @@
             resizeFlagCanvas();
             window.addEventListener('resize', resizeFlagCanvas);
             drawAnimatedFlags();
+            updateShowcaseBadge();
         };
     </script>
 </body>
