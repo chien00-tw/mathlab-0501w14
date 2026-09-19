@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>旗語解密大行動 - 數感互動學習系統</title>
-    <!-- Tailwind CSS for UI styling -->
+    <!-- Tailwind CSS for modern responsive styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- QRCode.js library for dynamic QR Code generation -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- html2canvas library for high-resolution PNG image export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap');
@@ -18,15 +20,15 @@
             -webkit-tap-highlight-color: transparent;
         }
 
-        /* High contrast touch response styles for iPad touchable buttons */
+        /* iPad and touch device button feedback */
         .touch-btn {
             transition: transform 0.12s ease, box-shadow 0.12s ease;
         }
         .touch-btn:active {
-            transform: scale(0.94);
+            transform: scale(0.95);
         }
 
-        /* Custom scrollbar styling for seamless modal viewing */
+        /* Smooth scrollbars */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -43,10 +45,11 @@
 </head>
 <body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between select-none">
 
+    <!-- HEADER: App Logo, Version Badge & Strict Icon-Only Actions (① QR ➔ ② Fullscreen ➔ ③ Course Guide) -->
     <header class="bg-indigo-700 text-white shadow-lg sticky top-0 z-30 px-4 py-3">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             
-            <!-- App Logo / Title with Version Badge -->
+            <!-- Logo & Title with Incremented Version Badge (v1.2.0) -->
             <div class="flex items-center space-x-3">
                 <div class="bg-amber-400 p-2.5 rounded-2xl text-slate-900 shadow-md">
                     <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -57,9 +60,9 @@
                     <div class="flex items-center space-x-2">
                         <h1 class="text-xl sm:text-2xl font-black tracking-wide leading-tight">旗語解密大行動</h1>
                         <!-- Version Control Badge placed right next to title -->
-                        <span id="version-badge" class="text-xs bg-amber-400 text-slate-900 font-black px-2.5 py-0.5 rounded-full shadow">v1.1.0</span>
+                        <span id="version-badge" class="text-xs bg-amber-400 text-slate-900 font-black px-2.5 py-0.5 rounded-full shadow">v1.2.0</span>
                     </div>
-                    <!-- Sub-badge with "國小數學" strictly deleted -->
+                    <!-- Sub-badge strictly with "週期規律" -->
                     <span class="text-xs bg-indigo-800 text-indigo-200 px-2.5 py-0.5 rounded-full font-bold mt-0.5 inline-block">週期規律</span>
                 </div>
             </div>
@@ -92,23 +95,27 @@
 
     <main class="max-w-7xl mx-auto w-full px-4 py-4 flex-grow flex flex-col">
         
-        <!-- Tab Navigation Buttons (4 Tabs including Student Showcase Wall) -->
-        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 sm:gap-3 mb-6">
-            <button id="tab-btn-1" onclick="switchTab(1)" class="touch-btn p-3 sm:p-4 rounded-2xl font-black text-base sm:text-lg text-center shadow-md border-4 border-indigo-500 bg-indigo-600 text-white flex items-center justify-center space-x-2">
-                <span class="text-xl sm:text-2xl">🚩</span>
-                <span class="hidden sm:inline">活動一：</span><span>課程導入</span>
+        <!-- Tab Navigation Buttons (5 Stages: Act 1 ➔ Act 2 ➔ Game Challenge ➔ Act 3 ➔ Showcase) -->
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3 mb-6">
+            <button id="tab-btn-1" onclick="switchTab(1)" class="touch-btn p-3 rounded-2xl font-black text-sm sm:text-base text-center shadow-md border-4 border-indigo-500 bg-indigo-600 text-white flex items-center justify-center space-x-1.5">
+                <span class="text-xl">🚩</span>
+                <span class="hidden md:inline">活動一：</span><span>課程導入</span>
             </button>
-            <button id="tab-btn-2" onclick="switchTab(2)" class="touch-btn p-3 sm:p-4 rounded-2xl font-black text-base sm:text-lg text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-2">
-                <span class="text-xl sm:text-2xl">🎨</span>
-                <span class="hidden sm:inline">活動二：</span><span>核心發展</span>
+            <button id="tab-btn-2" onclick="switchTab(2)" class="touch-btn p-3 rounded-2xl font-black text-sm sm:text-base text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-1.5">
+                <span class="text-xl">🎨</span>
+                <span class="hidden md:inline">活動二：</span><span>核心發展</span>
             </button>
-            <button id="tab-btn-3" onclick="switchTab(3)" class="touch-btn p-3 sm:p-4 rounded-2xl font-black text-base sm:text-lg text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-2">
-                <span class="text-xl sm:text-2xl">🕵️</span>
-                <span class="hidden sm:inline">活動三：</span><span>綜合歸納</span>
+            <button id="tab-btn-3" onclick="switchTab(3)" class="touch-btn p-3 rounded-2xl font-black text-sm sm:text-base text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-1.5">
+                <span class="text-xl">⚡</span>
+                <span class="hidden md:inline">挑戰賽：</span><span>極速解密</span>
             </button>
-            <button id="tab-btn-4" onclick="switchTab(4)" class="touch-btn p-3 sm:p-4 rounded-2xl font-black text-base sm:text-lg text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-2">
-                <span class="text-xl sm:text-2xl">🌟</span>
-                <span class="hidden sm:inline">展示：</span><span>成果展示牆</span>
+            <button id="tab-btn-4" onclick="switchTab(4)" class="touch-btn p-3 rounded-2xl font-black text-sm sm:text-base text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-1.5">
+                <span class="text-xl">🕵️</span>
+                <span class="hidden md:inline">活動三：</span><span>綜合歸納</span>
+            </button>
+            <button id="tab-btn-5" onclick="switchTab(5)" class="touch-btn p-3 rounded-2xl font-black text-sm sm:text-base text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-1.5">
+                <span class="text-xl">🌟</span>
+                <span class="hidden md:inline">展示：</span><span>成果展示牆</span>
                 <span id="showcase-badge" class="ml-1 bg-amber-400 text-slate-900 text-xs px-2 py-0.5 rounded-full font-black">0</span>
             </button>
         </div>
@@ -163,7 +170,6 @@
                     將規律轉換為數學算式
                 </h3>
 
-                <!-- Math Equation Helper -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
                     <div class="space-y-4">
                         <div class="bg-white p-4 rounded-2xl shadow-sm border border-indigo-100">
@@ -308,8 +314,132 @@
             </div>
         </section>
 
-        <!-- ACTIVITY 3: 綜合歸納 (4F Reflection Detective Notebook) -->
+        <!-- GAME CHALLENGE: 限時 1 分鐘極速解密挑戰賽 (Knockout after 3 strikes) -->
         <section id="activity-3" class="hidden space-y-6 flex-grow">
+            <!-- Header & Game Rules Card -->
+            <div class="bg-white p-5 sm:p-6 rounded-3xl shadow-lg border-2 border-slate-200 flex flex-wrap justify-between items-center gap-4">
+                <div>
+                    <div class="flex items-center space-x-3 mb-2">
+                        <span class="bg-amber-500 text-white font-black px-3 py-1 rounded-full text-sm sm:text-base">限時考驗</span>
+                        <h2 class="text-xl sm:text-2xl font-black text-slate-800">旗語極速解密王 (限時 1 分鐘)</h2>
+                    </div>
+                    <p class="text-slate-600 text-base sm:text-lg">
+                        運用「週期除法與餘數規律」快速答題！<b>限時 60 秒</b>，注意：<b>答錯累計 3 次遊戲立即終止</b>！
+                    </p>
+                </div>
+
+                <!-- Live Status Indicators: Timer & Strikes/Lives -->
+                <div class="flex items-center space-x-3">
+                    <!-- Timer Badge -->
+                    <div class="bg-slate-900 text-white px-5 py-3 rounded-2xl border-2 border-slate-700 text-center">
+                        <span class="text-xs text-slate-400 font-bold block">剩餘時間</span>
+                        <span id="game-timer" class="text-2xl sm:text-3xl font-black text-amber-400 font-mono">01:00</span>
+                    </div>
+                    <!-- Hearts / Strikes Remaining -->
+                    <div class="bg-rose-50 border-2 border-rose-200 px-5 py-3 rounded-2xl text-center">
+                        <span class="text-xs text-rose-600 font-bold block">剩餘生命值</span>
+                        <span id="game-hearts" class="text-2xl sm:text-3xl font-black text-rose-600">❤️❤️❤️</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Game Arena / Question Board -->
+            <div id="game-arena" class="bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl border-4 border-slate-800 text-white relative">
+                
+                <!-- Countdown Progress Bar -->
+                <div class="w-full bg-slate-800 h-3 rounded-full mb-6 overflow-hidden">
+                    <div id="game-progress-bar" class="bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-500 h-full w-full transition-all duration-1000 ease-linear"></div>
+                </div>
+
+                <!-- Start Screen -->
+                <div id="game-start-screen" class="text-center py-10 space-y-6">
+                    <div class="text-6xl animate-bounce">⏱️🚩</div>
+                    <h3 class="text-2xl sm:text-3xl font-black text-amber-300">準備好接受 1 分鐘極速旗語挑戰了嗎？</h3>
+                    <p class="text-slate-300 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
+                        系統將隨機產生旗語排列與目標項數，利用算式快速判斷旗幟顏色。<br>
+                        <span class="text-rose-400 font-bold">警報提醒：累積 3 次錯誤會直接出局喔！</span>
+                    </p>
+                    <button onclick="startGameSession()" class="touch-btn bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black text-xl px-10 py-4 rounded-2xl shadow-xl border-4 border-emerald-300">
+                        🚀 開始 1 分鐘挑戰！
+                    </button>
+                </div>
+
+                <!-- Active Question Screen -->
+                <div id="game-question-screen" class="hidden space-y-6">
+                    <!-- Current Score & Combo -->
+                    <div class="flex justify-between items-center bg-slate-800 px-4 py-2.5 rounded-2xl border border-slate-700 text-sm sm:text-base">
+                        <div class="flex items-center space-x-2">
+                            <span class="text-slate-400">目前得分：</span>
+                            <span id="game-score" class="font-black text-amber-400 text-xl">0</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-slate-400">連擊 Combo：</span>
+                            <span id="game-combo" class="font-black text-emerald-400 text-xl">0</span>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="text-slate-400">已失誤：</span>
+                            <span id="game-strikes-count" class="font-black text-rose-400 text-xl">0 / 3</span>
+                        </div>
+                    </div>
+
+                    <!-- Question Content -->
+                    <div class="bg-slate-800/90 p-5 sm:p-6 rounded-2xl border-2 border-slate-700 text-center space-y-4">
+                        <div class="inline-block bg-indigo-900/90 text-indigo-200 text-sm font-bold px-4 py-1 rounded-full border border-indigo-500">
+                            循環週期：<span id="game-cycle-length">3</span> 個圖案一組
+                        </div>
+                        <div id="game-cycle-preview" class="flex justify-center items-center gap-3 text-lg font-bold">
+                            <!-- Injected dynamically -->
+                        </div>
+                        <div class="text-2xl sm:text-3xl font-black text-amber-300">
+                            請問：第 <span id="game-target-num" class="text-4xl text-white font-mono bg-indigo-600 px-3 py-1 rounded-xl mx-1 shadow">25</span> 面旗幟是什麼顏色？
+                        </div>
+                    </div>
+
+                    <!-- Choice Options (Big touch buttons) -->
+                    <div id="game-options-container" class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                        <!-- Options generated dynamically -->
+                    </div>
+
+                    <!-- Instant Answer Feedback Banner -->
+                    <div id="game-answer-feedback" class="hidden p-4 rounded-2xl font-bold text-center text-base sm:text-lg transition-all"></div>
+                </div>
+
+                <!-- Game Over / Result Screen -->
+                <div id="game-over-screen" class="hidden text-center py-8 space-y-5">
+                    <div id="game-over-icon" class="text-6xl">🏆</div>
+                    <h3 id="game-over-title" class="text-2xl sm:text-3xl font-black text-amber-400">挑戰結算</h3>
+                    <p id="game-over-reason" class="text-slate-300 text-base font-bold"></p>
+
+                    <!-- Score Stats Summary -->
+                    <div class="grid grid-cols-3 gap-3 max-w-lg mx-auto bg-slate-800 p-4 rounded-2xl border border-slate-700">
+                        <div>
+                            <span class="text-xs text-slate-400 block">最終得分</span>
+                            <span id="game-final-score" class="text-2xl sm:text-3xl font-black text-amber-400">0</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">答對題數</span>
+                            <span id="game-final-correct" class="text-2xl sm:text-3xl font-black text-emerald-400">0</span>
+                        </div>
+                        <div>
+                            <span class="text-xs text-slate-400 block">最高連擊</span>
+                            <span id="game-final-maxcombo" class="text-2xl sm:text-3xl font-black text-sky-400">0</span>
+                        </div>
+                    </div>
+
+                    <div class="flex justify-center space-x-4 pt-2">
+                        <button onclick="startGameSession()" class="touch-btn bg-indigo-600 hover:bg-indigo-500 text-white font-black px-8 py-3 rounded-xl text-base shadow border border-indigo-400">
+                            🔄 再挑戰一次
+                        </button>
+                        <button onclick="switchTab(4)" class="touch-btn bg-emerald-600 hover:bg-emerald-500 text-white font-black px-8 py-3 rounded-xl text-base shadow border border-emerald-400">
+                            📝 前往填寫 4F 筆記
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ACTIVITY 4: 綜合歸納 (4F Reflection Detective Notebook) -->
+        <section id="activity-4" class="hidden space-y-6 flex-grow">
             <!-- Header -->
             <div class="bg-white p-5 sm:p-6 rounded-3xl shadow-lg border-2 border-slate-200">
                 <div class="flex items-center space-x-3 mb-2">
@@ -348,8 +478,8 @@
                         <span class="bg-rose-500 text-white w-8 h-8 rounded-xl flex items-center justify-center text-sm">F2</span>
                         <h3>[Feelings 感受]</h3>
                     </div>
-                    <label class="block text-slate-700 font-bold text-sm sm:text-base">預測出第 100 面旗幟顏色時，感覺如何？</label>
-                    <textarea id="note-feelings" rows="3" class="w-full p-4 rounded-2xl border-2 border-rose-200 focus:border-rose-500 focus:outline-none text-slate-800 text-base resize-none shadow-inner" placeholder="請在此輸入成功解密時的感受..."></textarea>
+                    <label class="block text-slate-700 font-bold text-sm sm:text-base">預測出第 100 面旗幟顏色或玩 1 分鐘挑戰時，感覺如何？</label>
+                    <textarea id="note-feelings" rows="3" class="w-full p-4 rounded-2xl border-2 border-rose-200 focus:border-rose-500 focus:outline-none text-slate-800 text-base resize-none shadow-inner" placeholder="請在此輸入成功解密與闖關時的感受..."></textarea>
                 </div>
 
                 <!-- 3. Findings -->
@@ -381,8 +511,8 @@
             </div>
         </section>
 
-        <!-- ACTIVITY 4: 成果展示牆 (Direct Public Student Showcase Wall) -->
-        <section id="activity-4" class="hidden space-y-6 flex-grow">
+        <!-- ACTIVITY 5: 成果展示牆 (Direct Public Student Showcase Wall with High-Res Image Export) -->
+        <section id="activity-5" class="hidden space-y-6 flex-grow">
             <!-- Header -->
             <div class="bg-white p-5 sm:p-6 rounded-3xl shadow-lg border-2 border-slate-200 flex flex-wrap justify-between items-center gap-4">
                 <div>
@@ -391,12 +521,13 @@
                         <h2 class="text-xl sm:text-2xl font-black text-slate-800">小組學習歷程與成果展示</h2>
                     </div>
                     <p class="text-slate-600 text-base sm:text-lg">
-                        學生的幾何密碼創作與 4F 偵探筆記將直接展示於此，支援全班觀摩與愛心互評！
+                        學生的幾何密碼創作、挑戰賽戰績與 4F 偵探筆記將直接展示於此，支援全班觀摩與<b>一鍵匯出高畫質圖檔</b>！
                     </p>
                 </div>
                 <div class="flex items-center space-x-3">
-                    <button onclick="exportShowcaseCSV()" class="touch-btn bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2.5 rounded-2xl text-sm sm:text-base shadow flex items-center space-x-1.5">
-                        <span>📥 匯出成果 CSV</span>
+                    <!-- Upgraded: Export Showcase as Image File (PNG) -->
+                    <button onclick="exportShowcaseImage()" class="touch-btn bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2.5 rounded-2xl text-sm sm:text-base shadow flex items-center space-x-1.5 border border-indigo-400">
+                        <span>🖼️ 匯出成果圖檔 (PNG)</span>
                     </button>
                     <button onclick="confirmClearAllShowcase()" class="touch-btn bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold px-4 py-2.5 rounded-2xl text-sm sm:text-base border border-rose-300">
                         🗑️ 清空展示
@@ -415,24 +546,27 @@
                     <p id="stat-act1-status" class="text-2xl font-black text-amber-900 mt-1">未作答</p>
                 </div>
                 <div class="bg-emerald-50 p-4 rounded-2xl border-2 border-emerald-100 text-center">
-                    <span class="text-xs text-emerald-600 font-bold">「第零個迷思」突破</span>
-                    <p id="stat-act2-status" class="text-2xl font-black text-emerald-900 mt-1">未破解</p>
+                    <span class="text-xs text-emerald-600 font-bold">1分鐘挑戰最佳戰績</span>
+                    <p id="stat-game-record" class="text-2xl font-black text-emerald-900 mt-1">-- 分</p>
                 </div>
             </div>
 
-            <!-- Showcase Cards Container -->
-            <div id="showcase-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Empty State Placeholder -->
-                <div id="showcase-empty" class="col-span-full py-16 text-center bg-white rounded-3xl border-2 border-dashed border-slate-300 text-slate-400 space-y-3">
-                    <div class="text-5xl">🎨</div>
-                    <p class="text-lg font-bold text-slate-500">目前尚無已發布的作品</p>
-                    <p class="text-sm text-slate-400">請先在「活動二」繪圖或在「活動三」填寫 4F 偵探筆記並點擊發布！</p>
+            <!-- Exportable Container Target for html2canvas -->
+            <div id="showcase-export-area" class="p-2 sm:p-4 rounded-3xl bg-slate-100">
+                <!-- Showcase Cards Container -->
+                <div id="showcase-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Empty State Placeholder -->
+                    <div id="showcase-empty" class="col-span-full py-16 text-center bg-white rounded-3xl border-2 border-dashed border-slate-300 text-slate-400 space-y-3">
+                        <div class="text-5xl">🎨</div>
+                        <p class="text-lg font-bold text-slate-500">目前尚無已發布的作品</p>
+                        <p class="text-sm text-slate-400">請先在「活動二」繪圖或在「活動三」填寫 4F 偵探筆記並點擊發布！</p>
+                    </div>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- FOOTER (Centered with exact specified text: 數感實驗室  | 互動學習系統 | Design：S.C. Kuo) -->
+    <!-- FOOTER: Centered with exact required text: 數感實驗室  | 互動學習系統 | Design：S.C. Kuo -->
     <footer class="bg-slate-900 text-slate-400 py-4 px-4 text-center mt-8 border-t border-slate-800">
         <p class="text-sm sm:text-base font-medium tracking-wider">
             數感實驗室 &nbsp;|&nbsp; 互動學習系統 &nbsp;|&nbsp; Design：S.C. Kuo
@@ -482,9 +616,10 @@
                     <h4 class="font-bold text-slate-800">📌 活動步驟：</h4>
                     <ul class="list-disc list-inside space-y-1 text-slate-600">
                         <li><b>活動一 (課程導入)：</b>觀察旗語擺動規律，以算式 100 ÷ 3 = 33 ... 1 推算第 100 面旗顏色。</li>
-                        <li><b>活動二 (核心發展)：</b>利用畫布創設圖樣，出題給鄰座同學，並破解餘數為 0 的迷思。</li>
+                        <li><b>活動二 (核心發展)：</b>利用畫布創設圖樣，出題給同學，並破解餘數為 0 的迷思。</li>
+                        <li><b>挑戰賽 (極速解密)：</b>限時 1 分鐘快速答題，失誤累計 3 次即刻淘汰，考驗餘數敏銳度。</li>
                         <li><b>活動三 (綜合歸納)：</b>小組討論並完成 4F 反思偵探筆記（Facts, Feelings, Findings, Future）。</li>
-                        <li><b>成果展示牆：</b>發布小組成果，相互觀摩並給予愛心肯定，可直接匯出全班 CSV 報表。</li>
+                        <li><b>成果展示牆：</b>展示全班成果與愛心互評，支援一鍵下載高解析度 PNG 圖片檔！</li>
                     </ul>
                 </div>
             </div>
@@ -509,13 +644,14 @@
 
     <script>
         /* ----------------------------------------------------
-           GLOBAL STATE MANAGEMENT (Default cleared / 0 state)
+           GLOBAL STATE MANAGEMENT
         ---------------------------------------------------- */
         let learningState = {
             act1Answered: false,
             act1Correct: false,
             act2TrapSolved: false,
-            submissions: [] // Public student works directly presented on webpage
+            bestGameScore: 0,
+            submissions: []
         };
 
         let isAnimatingFlags = true;
@@ -525,17 +661,37 @@
         let lastCreatedCipherDataUrl = null;
 
         /* ----------------------------------------------------
-           TAB NAVIGATION LOGIC (4 Tabs)
+           1-MINUTE GAME CHALLENGE STATE
+        ---------------------------------------------------- */
+        let gameActive = false;
+        let gameTimer = null;
+        let gameTimeRemaining = 60; // 1 minute countdown
+        let gameScore = 0;
+        let gameCombo = 0;
+        let gameMaxCombo = 0;
+        let gameStrikes = 0; // Strike count (max 3)
+        let gameCorrectCount = 0;
+        let currentQuestion = null;
+
+        // Color palettes used for game cycle problems
+        const COLOR_PALETTES = [
+            { name: '三色循環', colors: [{ label: '紅', hex: '#ef4444' }, { label: '白', hex: '#ffffff', textDark: true }, { label: '藍', hex: '#3b82f6' }] },
+            { name: '四色循環', colors: [{ label: '紅', hex: '#ef4444' }, { label: '黃', hex: '#eab308' }, { label: '綠', hex: '#10b981' }, { label: '藍', hex: '#3b82f6' }] },
+            { name: '五色循環', colors: [{ label: '紅', hex: '#ef4444' }, { label: '白', hex: '#ffffff', textDark: true }, { label: '黃', hex: '#eab308' }, { label: '綠', hex: '#10b981' }, { label: '紫', hex: '#a855f7' }] }
+        ];
+
+        /* ----------------------------------------------------
+           TAB NAVIGATION LOGIC (5 Tabs)
         ---------------------------------------------------- */
         function switchTab(tabNum) {
-            // Hide all 4 activity tabs
-            for (let i = 1; i <= 4; i++) {
+            // Hide all 5 activity sections
+            for (let i = 1; i <= 5; i++) {
                 const sec = document.getElementById(`activity-${i}`);
                 if (sec) sec.classList.add('hidden');
                 
                 const btn = document.getElementById(`tab-btn-${i}`);
                 if (btn) {
-                    btn.className = "touch-btn p-3 sm:p-4 rounded-2xl font-black text-base sm:text-lg text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-2";
+                    btn.className = "touch-btn p-3 rounded-2xl font-black text-sm sm:text-base text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-1.5";
                 }
             }
 
@@ -545,12 +701,12 @@
 
             const activeBtn = document.getElementById(`tab-btn-${tabNum}`);
             if (activeBtn) {
-                activeBtn.className = "touch-btn p-3 sm:p-4 rounded-2xl font-black text-base sm:text-lg text-center shadow-md border-4 border-indigo-500 bg-indigo-600 text-white flex items-center justify-center space-x-2";
+                activeBtn.className = "touch-btn p-3 rounded-2xl font-black text-sm sm:text-base text-center shadow-md border-4 border-indigo-500 bg-indigo-600 text-white flex items-center justify-center space-x-1.5";
             }
 
             if (tabNum === 2) {
                 initCustomDrawCanvas();
-            } else if (tabNum === 4) {
+            } else if (tabNum === 5) {
                 renderShowcaseCards();
             }
         }
@@ -558,10 +714,9 @@
         /* ----------------------------------------------------
            HEADER ACTIONS (QR Code, Fullscreen, Guide)
         ---------------------------------------------------- */
-        // ① QR Code Modal & Dynamic Generation
         function openQRCodeModal() {
             const qrContainer = document.getElementById('qrcode-target');
-            qrContainer.innerHTML = ''; // Clear previous QR Code
+            qrContainer.innerHTML = '';
             
             const currentURL = window.location.href;
             try {
@@ -574,7 +729,7 @@
                     correctLevel: QRCode.CorrectLevel.H
                 });
             } catch (err) {
-                console.error("QR Code Generation Error:", err);
+                console.error("QR Code Error:", err);
             }
 
             document.getElementById('qrModal').classList.remove('hidden');
@@ -601,7 +756,6 @@
             showToast('✅ 網址已成功複製到剪貼簿！');
         }
 
-        // ② Fullscreen Toggle with Safari/iPad WebKit fallback
         function toggleFullScreen() {
             const doc = document.documentElement;
             if (!document.fullscreenElement && !document.webkitFullscreenElement) {
@@ -619,7 +773,6 @@
             }
         }
 
-        // ③ Course Guide Modal
         function openGuideModal() {
             document.getElementById('guideModal').classList.remove('hidden');
         }
@@ -630,23 +783,22 @@
         }
 
         /* ----------------------------------------------------
-           ACTIVITY 1: ANIMATED FLAG CANVAS & QUESTION LOGIC
+           ACTIVITY 1: ANIMATED FLAG CANVAS & QUESTION
         ---------------------------------------------------- */
         const flagCanvas = document.getElementById('flagSequenceCanvas');
         const flagCtx = flagCanvas ? flagCanvas.getContext('2d') : null;
 
         function resizeFlagCanvas() {
             if (!flagCanvas || !flagCanvas.parentElement) return;
-            const container = flagCanvas.parentElement;
-            flagCanvas.width = container.clientWidth;
-            flagCanvas.height = container.clientHeight;
+            flagCanvas.width = flagCanvas.parentElement.clientWidth;
+            flagCanvas.height = flagCanvas.parentElement.clientHeight;
         }
 
         function drawAnimatedFlags() {
             if (!flagCtx) return;
             flagCtx.clearRect(0, 0, flagCanvas.width, flagCanvas.height);
 
-            const flagColors = ['#ef4444', '#ffffff', '#3b82f6']; // Red, White, Blue
+            const flagColors = ['#ef4444', '#ffffff', '#3b82f6'];
             const totalFlags = 7;
             const startX = 40;
             const spacing = (flagCanvas.width - 80) / (totalFlags - 1 || 1);
@@ -659,7 +811,6 @@
                 const x = startX + i * spacing;
                 const waveOffset = Math.sin(flagAnimFrame + i) * 8;
 
-                // Draw Flag Pole
                 flagCtx.beginPath();
                 flagCtx.strokeStyle = '#94a3b8';
                 flagCtx.lineWidth = 4;
@@ -667,7 +818,6 @@
                 flagCtx.lineTo(x, centerY + 30);
                 flagCtx.stroke();
 
-                // Draw Animated Flag Body
                 flagCtx.beginPath();
                 flagCtx.fillStyle = color;
                 flagCtx.strokeStyle = '#475569';
@@ -680,7 +830,6 @@
                 flagCtx.fill();
                 flagCtx.stroke();
 
-                // Flag Number Badge
                 flagCtx.fillStyle = '#cbd5e1';
                 flagCtx.font = 'bold 12px sans-serif';
                 flagCtx.textAlign = 'center';
@@ -733,12 +882,10 @@
             if (!customCanvas) return;
             customCtx = customCanvas.getContext('2d');
             
-            // Event bindings for mouse
             customCanvas.onmousedown = startDrawing;
             customCanvas.onmousemove = draw;
             customCanvas.onmouseup = stopDrawing;
 
-            // Touch events for iPad with preventDefault to eliminate scrolling
             customCanvas.ontouchstart = (e) => { e.preventDefault(); startDrawing(e.touches[0]); };
             customCanvas.ontouchmove = (e) => { e.preventDefault(); draw(e.touches[0]); };
             customCanvas.ontouchend = stopDrawing;
@@ -805,23 +952,214 @@
         function checkZeroTrap(choice) {
             const feedback = document.getElementById('zero-trap-feedback');
             feedback.classList.remove('hidden');
-            const statTrap = document.getElementById('stat-act2-status');
 
             if (choice === 'C') {
                 learningState.act2TrapSolved = true;
-                if (statTrap) statTrap.textContent = '✅ 已成功突破';
                 feedback.className = 'p-4 rounded-2xl font-bold text-base bg-emerald-100 text-emerald-800 border-2 border-emerald-300';
                 feedback.innerHTML = '🎯 答對了！恭喜突破「第零個迷思」！<br>當餘數為 0 時，代表剛好完整排滿整組循環，因此對應的是循環單元的【最後一個】元素（第 3 個圖案）！';
             } else {
                 learningState.act2TrapSolved = false;
-                if (statTrap) statTrap.textContent = '⚠️ 尚在探索中';
                 feedback.className = 'p-4 rounded-2xl font-bold text-base bg-rose-100 text-rose-800 border-2 border-rose-300';
                 feedback.innerHTML = '💡 差一點點！提示：<br>12 ÷ 3 = 4 代表剛好完美排滿 4 個完整循環，最後一個正是第 3 個圖案喔！';
             }
         }
 
         /* ----------------------------------------------------
-           ACTIVITY 3: 4F NOTEBOOK SUBMISSION & SHOWCASE
+           1-MINUTE SPEED GAME CHALLENGE (錯三次終止機制)
+        ---------------------------------------------------- */
+        function startGameSession() {
+            gameActive = true;
+            gameTimeRemaining = 60; // 60 seconds
+            gameScore = 0;
+            gameCombo = 0;
+            gameMaxCombo = 0;
+            gameStrikes = 0;
+            gameCorrectCount = 0;
+
+            document.getElementById('game-start-screen').classList.add('hidden');
+            document.getElementById('game-over-screen').classList.add('hidden');
+            document.getElementById('game-question-screen').classList.remove('hidden');
+
+            updateGameUIStats();
+            generateNewGameQuestion();
+
+            // Clear previous interval if any
+            if (gameTimer) clearInterval(gameTimer);
+
+            gameTimer = setInterval(() => {
+                gameTimeRemaining--;
+                const minutes = String(Math.floor(gameTimeRemaining / 60)).padStart(2, '0');
+                const seconds = String(gameTimeRemaining % 60).padStart(2, '0');
+                document.getElementById('game-timer').textContent = `${minutes}:${seconds}`;
+
+                // Update progress bar width
+                const pct = (gameTimeRemaining / 60) * 100;
+                document.getElementById('game-progress-bar').style.width = `${pct}%`;
+
+                if (gameTimeRemaining <= 0) {
+                    endGameSession('timeout');
+                }
+            }, 1000);
+        }
+
+        function updateGameUIStats() {
+            document.getElementById('game-score').textContent = gameScore;
+            document.getElementById('game-combo').textContent = gameCombo;
+            document.getElementById('game-strikes-count').textContent = `${gameStrikes} / 3`;
+
+            // Hearts visual
+            const hearts = ['❤️', '❤️', '❤️'];
+            for (let i = 0; i < gameStrikes; i++) {
+                hearts[2 - i] = '🖤';
+            }
+            document.getElementById('game-hearts').textContent = hearts.join('');
+        }
+
+        function generateNewGameQuestion() {
+            const feedback = document.getElementById('game-answer-feedback');
+            feedback.classList.add('hidden');
+
+            // Select random palette (Length 3, 4, or 5)
+            const palette = COLOR_PALETTES[Math.floor(Math.random() * COLOR_PALETTES.length)];
+            const cycleLen = palette.colors.length;
+
+            // Generate target index between 11 and 99
+            // Purposefully ensure ~35% of questions have remainder = 0 to test the zero misconception!
+            let targetIndex;
+            if (Math.random() < 0.35) {
+                targetIndex = cycleLen * (Math.floor(Math.random() * 15) + 3);
+            } else {
+                targetIndex = Math.floor(Math.random() * 80) + 12;
+            }
+
+            const remainder = targetIndex % cycleLen;
+            const correctElementIndex = remainder === 0 ? cycleLen - 1 : remainder - 1;
+            const correctColor = palette.colors[correctElementIndex];
+
+            currentQuestion = {
+                palette: palette,
+                cycleLen: cycleLen,
+                targetIndex: targetIndex,
+                remainder: remainder,
+                correctColor: correctColor
+            };
+
+            // Render cycle preview in UI
+            document.getElementById('game-cycle-length').textContent = cycleLen;
+            document.getElementById('game-target-num').textContent = targetIndex;
+            
+            const previewContainer = document.getElementById('game-cycle-preview');
+            previewContainer.innerHTML = '';
+            palette.colors.forEach((c, idx) => {
+                const item = document.createElement('div');
+                item.className = 'flex items-center space-x-1 bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-700 text-sm';
+                item.innerHTML = `
+                    <span class="w-4 h-4 rounded-full inline-block border border-slate-400" style="background-color: ${c.hex}"></span>
+                    <span>${idx + 1}.${c.label}</span>
+                `;
+                previewContainer.appendChild(item);
+                if (idx < palette.colors.length - 1) {
+                    const arrow = document.createElement('span');
+                    arrow.className = 'text-slate-500 text-xs';
+                    arrow.textContent = '➔';
+                    previewContainer.appendChild(arrow);
+                }
+            });
+
+            // Render Answer Choice Buttons
+            const optContainer = document.getElementById('game-options-container');
+            optContainer.innerHTML = '';
+            palette.colors.forEach((c) => {
+                const btn = document.createElement('button');
+                btn.className = `touch-btn p-4 rounded-2xl font-black text-lg border-4 shadow-lg flex items-center justify-center space-x-2 ${c.textDark ? 'text-slate-900' : 'text-white'}`;
+                btn.style.backgroundColor = c.hex;
+                btn.style.borderColor = c.hex;
+                btn.innerHTML = `
+                    <span class="text-xl">🚩</span>
+                    <span>${c.label}色</span>
+                `;
+                btn.onclick = () => submitGameAnswer(c);
+                optContainer.appendChild(btn);
+            });
+        }
+
+        function submitGameAnswer(chosenColor) {
+            if (!gameActive || !currentQuestion) return;
+
+            const isCorrect = chosenColor.label === currentQuestion.correctColor.label;
+            const feedback = document.getElementById('game-answer-feedback');
+            feedback.classList.remove('hidden');
+
+            if (isCorrect) {
+                gameScore += 10 + gameCombo * 2;
+                gameCombo++;
+                if (gameCombo > gameMaxCombo) gameMaxCombo = gameCombo;
+                gameCorrectCount++;
+
+                feedback.className = 'p-3 rounded-2xl font-black text-base bg-emerald-500/90 text-white border border-emerald-300';
+                feedback.innerHTML = `✨ 答對了！算式：${currentQuestion.targetIndex} ÷ ${currentQuestion.cycleLen} = ${Math.floor(currentQuestion.targetIndex / currentQuestion.cycleLen)} ... 餘數 ${currentQuestion.remainder}（第 ${currentQuestion.remainder === 0 ? currentQuestion.cycleLen + ' 個[整除]' : currentQuestion.remainder + ' 個'}）`;
+
+                updateGameUIStats();
+                setTimeout(() => {
+                    if (gameActive) generateNewGameQuestion();
+                }, 600);
+
+            } else {
+                gameStrikes++;
+                gameCombo = 0;
+                updateGameUIStats();
+
+                feedback.className = 'p-3 rounded-2xl font-black text-base bg-rose-600 text-white border border-rose-400';
+                feedback.innerHTML = `💥 答錯！${currentQuestion.targetIndex} ÷ ${currentQuestion.cycleLen} 餘數是 ${currentQuestion.remainder}，應為【${currentQuestion.correctColor.label}色】！`;
+
+                if (gameStrikes >= 3) {
+                    setTimeout(() => {
+                        endGameSession('strikes');
+                    }, 800);
+                } else {
+                    setTimeout(() => {
+                        if (gameActive) generateNewGameQuestion();
+                    }, 900);
+                }
+            }
+        }
+
+        function endGameSession(reason) {
+            gameActive = false;
+            if (gameTimer) clearInterval(gameTimer);
+
+            document.getElementById('game-question-screen').classList.add('hidden');
+            document.getElementById('game-over-screen').classList.remove('hidden');
+
+            // Update Best Record
+            if (gameScore > learningState.bestGameScore) {
+                learningState.bestGameScore = gameScore;
+                document.getElementById('stat-game-record').textContent = `${gameScore} 分`;
+            }
+
+            document.getElementById('game-final-score').textContent = gameScore;
+            document.getElementById('game-final-correct').textContent = gameCorrectCount;
+            document.getElementById('game-final-maxcombo').textContent = gameMaxCombo;
+
+            const reasonElem = document.getElementById('game-over-reason');
+            const titleElem = document.getElementById('game-over-title');
+            const iconElem = document.getElementById('game-over-icon');
+
+            if (reason === 'strikes') {
+                iconElem.textContent = '💔';
+                titleElem.textContent = '挑戰提前終止！';
+                titleElem.className = 'text-2xl sm:text-3xl font-black text-rose-400';
+                reasonElem.textContent = '累計答錯達 3 次，觸發安全淘汰機制！再複習一下「餘數整除」觀念吧！';
+            } else {
+                iconElem.textContent = '⏰';
+                titleElem.textContent = '時間到！挑戰完成！';
+                titleElem.className = 'text-2xl sm:text-3xl font-black text-amber-400';
+                reasonElem.textContent = `在 60 秒內成功破譯 ${gameCorrectCount} 題，表現非常出色！`;
+            }
+        }
+
+        /* ----------------------------------------------------
+           ACTIVITY 4: 4F NOTEBOOK SUBMISSION & SHOWCASE
         ---------------------------------------------------- */
         function submitNotebook() {
             const groupName = document.getElementById('group-name-input').value.trim() || '未具名小隊';
@@ -835,7 +1173,6 @@
                 return;
             }
 
-            // Create submission record
             const submission = {
                 id: Date.now(),
                 groupName: groupName,
@@ -845,24 +1182,25 @@
                 findings: findings,
                 future: future,
                 likes: 0,
-                cipherImage: lastCreatedCipherDataUrl || null
+                cipherImage: lastCreatedCipherDataUrl || null,
+                bestScore: gameScore > 0 ? gameScore : null
             };
 
             learningState.submissions.unshift(submission);
             updateShowcaseBadge();
 
-            // Clear input fields for next entry
+            // Clear inputs
             document.getElementById('note-facts').value = '';
             document.getElementById('note-feelings').value = '';
             document.getElementById('note-findings').value = '';
             document.getElementById('note-future').value = '';
 
             showToast('🎉 偵探筆記成功發布至「成果展示牆」！');
-            switchTab(4); // Seamlessly navigate to Showcase Wall
+            switchTab(5); // Navigate to showcase
         }
 
         /* ----------------------------------------------------
-           ACTIVITY 4: STUDENT SHOWCASE WALL RENDERING
+           ACTIVITY 5: SHOWCASE WALL RENDERING & PNG IMAGE EXPORT
         ---------------------------------------------------- */
         function updateShowcaseBadge() {
             const count = learningState.submissions.length;
@@ -899,6 +1237,11 @@
                     `;
                 }
 
+                let gameBadgeHTML = '';
+                if (item.bestScore) {
+                    gameBadgeHTML = `<span class="bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-0.5 rounded-full text-xs font-black">⚡ 解密挑戰：${item.bestScore} 分</span>`;
+                }
+
                 card.innerHTML = `
                     <div class="space-y-3">
                         <div class="flex justify-between items-center border-b border-slate-100 pb-3">
@@ -906,7 +1249,10 @@
                                 <span class="bg-indigo-600 text-white w-8 h-8 rounded-xl flex items-center justify-center font-bold text-sm">#${learningState.submissions.length - index}</span>
                                 <h3 class="font-black text-slate-800 text-lg sm:text-xl">${escapeHtml(item.groupName)}</h3>
                             </div>
-                            <span class="text-xs text-slate-400 font-bold">${item.timestamp}</span>
+                            <div class="flex items-center space-x-2">
+                                ${gameBadgeHTML}
+                                <span class="text-xs text-slate-400 font-bold">${item.timestamp}</span>
+                            </div>
                         </div>
 
                         ${cipherPreviewHTML}
@@ -953,25 +1299,92 @@
             }
         }
 
-        function exportShowcaseCSV() {
+        /* ----------------------------------------------------
+           EXPORT SHOWCASE AS HIGH-RESOLUTION PNG IMAGE
+        ---------------------------------------------------- */
+        function exportShowcaseImage() {
             if (learningState.submissions.length === 0) {
-                showToast('⚠️ 目前尚無任何作品可供匯出！');
+                showToast('⚠️ 目前尚無任何作品可供匯出圖檔！');
                 return;
             }
 
-            let csvContent = '\uFEFF組別,時間,[Facts]事實,[Feelings]感受,[Findings]發現,[Future]應用,讚賞次數\n';
-            learningState.submissions.forEach(item => {
-                csvContent += `"${item.groupName}","${item.timestamp}","${item.facts.replace(/"/g, '""')}","${item.feelings.replace(/"/g, '""')}","${item.findings.replace(/"/g, '""')}","${item.future.replace(/"/g, '""')}",${item.likes}\n`;
+            showToast('⏳ 正在渲染高畫質成果圖檔，請稍候...');
+
+            const targetElement = document.getElementById('showcase-export-area');
+
+            // Using html2canvas with dual-layer fallback
+            if (typeof html2canvas !== 'undefined') {
+                html2canvas(targetElement, {
+                    scale: 2, // High resolution Retina scale
+                    useCORS: true,
+                    backgroundColor: '#f1f5f9',
+                    logging: false
+                }).then(canvas => {
+                    const imageURL = canvas.toDataURL("image/png");
+                    const downloadLink = document.createElement("a");
+                    downloadLink.href = imageURL;
+                    downloadLink.download = `旗語解密大行動_全班成果展示牆_${new Date().toISOString().slice(0,10)}.png`;
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+                    showToast('🖼️ 成果圖片已成功匯出下載！');
+                }).catch(err => {
+                    console.error("html2canvas export error:", err);
+                    fallbackCanvasExport();
+                });
+            } else {
+                fallbackCanvasExport();
+            }
+        }
+
+        function fallbackCanvasExport() {
+            // Native Canvas 2D fallback generator
+            const c = document.createElement('canvas');
+            c.width = 1200;
+            c.height = 300 + learningState.submissions.length * 280;
+            const ctx = c.getContext('2d');
+
+            ctx.fillStyle = '#f8fafc';
+            ctx.fillRect(0, 0, c.width, c.height);
+
+            // Title
+            ctx.fillStyle = '#1e1b4b';
+            ctx.font = 'bold 36px sans-serif';
+            ctx.fillText('旗語解密大行動 - 學生學習成果總覽', 40, 60);
+
+            ctx.fillStyle = '#64748b';
+            ctx.font = '20px sans-serif';
+            ctx.fillText(`匯出時間：${new Date().toLocaleString('zh-TW')} | 總件數：${learningState.submissions.length} 組`, 40, 100);
+
+            let y = 140;
+            learningState.submissions.forEach((item, i) => {
+                ctx.fillStyle = '#ffffff';
+                ctx.strokeStyle = '#cbd5e1';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.roundRect(40, y, 1120, 250, 16);
+                ctx.fill();
+                ctx.stroke();
+
+                ctx.fillStyle = '#312e81';
+                ctx.font = 'bold 24px sans-serif';
+                ctx.fillText(`組別：${item.groupName} (${item.timestamp})`, 60, y + 40);
+
+                ctx.fillStyle = '#334155';
+                ctx.font = '18px sans-serif';
+                ctx.fillText(`[F1 事實]：${item.facts.slice(0, 70)}`, 60, y + 80);
+                ctx.fillText(`[F2 感受]：${item.feelings.slice(0, 70)}`, 60, y + 120);
+                ctx.fillText(`[F3 發現]：${item.findings.slice(0, 70)}`, 60, y + 160);
+                ctx.fillText(`[F4 應用]：${item.future.slice(0, 70)}`, 60, y + 200);
+
+                y += 270;
             });
 
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
             const link = document.createElement('a');
-            link.href = URL.createObjectURL(blob);
-            link.setAttribute('download', `旗語解密大行動_全班成果紀錄_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
+            link.download = `旗語解密大行動_成果牆備援_${new Date().toISOString().slice(0,10)}.png`;
+            link.href = c.toDataURL('image/png');
             link.click();
-            document.body.removeChild(link);
-            showToast('📥 成果 CSV 已成功下載！');
+            showToast('🖼️ 備援成果圖已成功下載！');
         }
 
         function confirmClearAllShowcase() {
