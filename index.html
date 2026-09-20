@@ -1,1430 +1,1549 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>旗語解密大行動 - 數感互動學習系統</title>
-    <!-- Tailwind CSS for modern responsive styling -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- QRCode.js library for dynamic QR Code generation -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <!-- html2canvas library for high-resolution PNG image export -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-    
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@500;700;900&display=swap');
-        
-        body {
-            font-family: 'Zen Maru Gothic', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            touch-action: manipulation;
-            -webkit-tap-highlight-color: transparent;
-        }
-
-        /* iPad and touch device button feedback */
-        .touch-btn {
-            transition: transform 0.12s ease, box-shadow 0.12s ease;
-        }
-        .touch-btn:active {
-            transform: scale(0.95);
-        }
-
-        /* Smooth scrollbars */
-        ::-webkit-scrollbar {
-            width: 8px;
-            height: 8px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #f1f5f9;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #cbd5e1;
-            border-radius: 10px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>旗語解密大行動 - 數感互動學習系統</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- FontAwesome 6 CDN -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- QRCode.js CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- html2canvas CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+    .touch-btn {
+      min-height: 52px;
+      touch-action: manipulation;
+    }
+    @keyframes pulse-fast {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.85; transform: scale(1.03); }
+    }
+    .animate-pulse-fast {
+      animation: pulse-fast 0.8s infinite ease-in-out;
+    }
+  </style>
 </head>
-<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col justify-between select-none">
+<body class="bg-slate-100 text-slate-800 flex flex-col min-h-screen">
 
-    <!-- HEADER: App Logo, Version Badge & Strict Icon-Only Actions (① QR ➔ ② Fullscreen ➔ ③ Course Guide) -->
-    <header class="bg-indigo-700 text-white shadow-lg sticky top-0 z-30 px-4 py-3">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            
-            <!-- Logo & Title with Incremented Version Badge (v1.2.0) -->
-            <div class="flex items-center space-x-3">
-                <div class="bg-amber-400 p-2.5 rounded-2xl text-slate-900 shadow-md">
-                    <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9" />
-                    </svg>
-                </div>
-                <div>
-                    <div class="flex items-center space-x-2">
-                        <h1 class="text-xl sm:text-2xl font-black tracking-wide leading-tight">旗語解密大行動</h1>
-                        <!-- Version Control Badge placed right next to title -->
-                        <span id="version-badge" class="text-xs bg-amber-400 text-slate-900 font-black px-2.5 py-0.5 rounded-full shadow">v1.2.0</span>
-                    </div>
-                    <!-- Sub-badge strictly with "週期規律" -->
-                    <span class="text-xs bg-indigo-800 text-indigo-200 px-2.5 py-0.5 rounded-full font-bold mt-0.5 inline-block">週期規律</span>
-                </div>
-            </div>
-
-            <!-- Header Action Buttons (Strictly ICON-ONLY: ① QR Code ➔ ② Fullscreen ➔ ③ Course Guide) -->
-            <div class="flex items-center space-x-2 sm:space-x-3">
-                <!-- ① QR Code Scan Icon -->
-                <button onclick="openQRCodeModal()" class="touch-btn bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-800 p-3 rounded-2xl shadow border-2 border-indigo-400/40 focus:outline-none" aria-label="QR Code" title="掃描 QR Code">
-                    <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-6v-3m6 3.5a1.5 1.5 0 01-3 0 1.5 1.5 0 013 0zm-10-7a1.5 1.5 0 01-3 0 1.5 1.5 0 013 0zm0 10a1.5 1.5 0 01-3 0 1.5 1.5 0 013 0zM3 3h6v6H3V3zm12 0h6v6h-6V3zm0 12h6v6h-6v-6zM3 15h6v6H3v-6z" />
-                    </svg>
-                </button>
-
-                <!-- ② Fullscreen Toggle Icon -->
-                <button onclick="toggleFullScreen()" class="touch-btn bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-800 p-3 rounded-2xl shadow border-2 border-indigo-400/40 focus:outline-none" aria-label="全螢幕切換" title="全螢幕切換">
-                    <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
-                    </svg>
-                </button>
-
-                <!-- ③ Course Guide Icon -->
-                <button onclick="openGuideModal()" class="touch-btn bg-indigo-600 hover:bg-indigo-500 active:bg-indigo-800 p-3 rounded-2xl shadow border-2 border-indigo-400/40 focus:outline-none" aria-label="課程指引" title="課程指引">
-                    <svg class="w-6 h-6 sm:w-7 sm:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                    </svg>
-                </button>
-            </div>
+  <!-- ================= 頂部導覽列 ================= -->
+  <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-40">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      
+      <!-- 主標題與版本號 -->
+      <div class="flex items-center space-x-3">
+        <div class="w-11 h-11 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md text-white">
+          <i class="fa-solid fa-flag text-2xl"></i>
         </div>
-    </header>
-
-    <main class="max-w-7xl mx-auto w-full px-4 py-4 flex-grow flex flex-col">
-        
-        <!-- Tab Navigation Buttons (5 Stages: Act 1 ➔ Act 2 ➔ Game Challenge ➔ Act 3 ➔ Showcase) -->
-        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 sm:gap-3 mb-6">
-            <button id="tab-btn-1" onclick="switchTab(1)" class="touch-btn p-3 rounded-2xl font-black text-sm sm:text-base text-center shadow-md border-4 border-indigo-500 bg-indigo-600 text-white flex items-center justify-center space-x-1.5">
-                <span class="text-xl">🚩</span>
-                <span class="hidden md:inline">活動一：</span><span>課程導入</span>
-            </button>
-            <button id="tab-btn-2" onclick="switchTab(2)" class="touch-btn p-3 rounded-2xl font-black text-sm sm:text-base text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-1.5">
-                <span class="text-xl">🎨</span>
-                <span class="hidden md:inline">活動二：</span><span>核心發展</span>
-            </button>
-            <button id="tab-btn-3" onclick="switchTab(3)" class="touch-btn p-3 rounded-2xl font-black text-sm sm:text-base text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-1.5">
-                <span class="text-xl">⚡</span>
-                <span class="hidden md:inline">挑戰賽：</span><span>極速解密</span>
-            </button>
-            <button id="tab-btn-4" onclick="switchTab(4)" class="touch-btn p-3 rounded-2xl font-black text-sm sm:text-base text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-1.5">
-                <span class="text-xl">🕵️</span>
-                <span class="hidden md:inline">活動三：</span><span>綜合歸納</span>
-            </button>
-            <button id="tab-btn-5" onclick="switchTab(5)" class="touch-btn p-3 rounded-2xl font-black text-sm sm:text-base text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-1.5">
-                <span class="text-xl">🌟</span>
-                <span class="hidden md:inline">展示：</span><span>成果展示牆</span>
-                <span id="showcase-badge" class="ml-1 bg-amber-400 text-slate-900 text-xs px-2 py-0.5 rounded-full font-black">0</span>
-            </button>
+        <div>
+          <div class="flex items-center space-x-2">
+            <h1 class="text-2xl font-black tracking-wide">旗語解密大行動</h1>
+            <span class="bg-indigo-500/30 text-indigo-300 text-xs font-bold px-2 py-0.5 rounded-full border border-indigo-400/40">v1.4.0</span>
+          </div>
+          <p class="text-xs text-slate-400 font-medium">週期規律與餘數密碼探究</p>
         </div>
+      </div>
 
-        <!-- ACTIVITY 1: 課程導入 (Flag Signal Sequence Simulation & 100th Flag Task) -->
-        <section id="activity-1" class="space-y-6 flex-grow">
-            <!-- Scenario Card -->
-            <div class="bg-white p-5 sm:p-6 rounded-3xl shadow-lg border-2 border-slate-200">
-                <div class="flex items-center space-x-3 mb-3">
-                    <span class="bg-red-100 text-red-600 font-bold px-3 py-1 rounded-full text-sm sm:text-base">情境任務</span>
-                    <h2 class="text-xl sm:text-2xl font-black text-slate-800">解開第 100 面旗幟顏色的秘密</h2>
-                </div>
-                <p class="text-slate-600 text-base sm:text-lg leading-relaxed">
-                    觀察下方艦隊傳送的旗語信號，旗幟依照固定規律排列。請找出「循環單元」，並推算出<b>第 100 面旗幟</b>是什麼顏色！
-                </p>
-            </div>
+      <!-- 頂部純圖示功能列 (嚴格順序：QR Code ➔ 全螢幕 ➔ 課程設計說明) -->
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <button id="btn-qr" title="QR Code 掃碼分享" aria-label="QR Code 掃碼分享" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 rounded-xl flex items-center justify-center text-slate-200 hover:text-white transition shadow border border-slate-700">
+          <i class="fa-solid fa-qrcode text-xl"></i>
+        </button>
+        <button id="btn-fullscreen" title="全螢幕切換" aria-label="全螢幕切換" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 rounded-xl flex items-center justify-center text-slate-200 hover:text-white transition shadow border border-slate-700">
+          <i id="fullscreen-icon" class="fa-solid fa-expand text-xl"></i>
+        </button>
+        <button id="btn-guide" title="課程設計說明" aria-label="課程設計說明" class="w-12 h-12 bg-indigo-700 hover:bg-indigo-600 active:bg-indigo-500 rounded-xl flex items-center justify-center text-white transition shadow border border-indigo-500/50">
+          <i class="fa-solid fa-book-open text-xl"></i>
+        </button>
+      </div>
 
-            <!-- Interactive Flag Signal Canvas Component -->
-            <div class="bg-slate-900 rounded-3xl p-4 sm:p-6 shadow-xl border-4 border-slate-800 flex flex-col items-center">
-                <div class="w-full flex justify-between items-center mb-3 text-white px-2">
-                    <div class="flex items-center space-x-2">
-                        <span class="w-3 h-3 bg-emerald-400 rounded-full animate-ping"></span>
-                        <span class="font-bold text-base sm:text-lg text-emerald-400">旗語信號發送中...</span>
-                    </div>
-                    <button onclick="toggleFlagAnimation()" id="anim-toggle-btn" class="touch-btn bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2 rounded-xl text-sm sm:text-base border border-indigo-400">
-                        ⏸️ 暫停擺動
-                    </button>
-                </div>
+    </div>
 
-                <!-- Canvas for Animated Semaphore Flags -->
-                <div class="w-full bg-slate-800 rounded-2xl overflow-hidden shadow-inner flex justify-center items-center py-4">
-                    <canvas id="flagSequenceCanvas" class="w-full max-w-full h-48 sm:h-56"></canvas>
-                </div>
+    <!-- 學習階段四大分頁選單 -->
+    <nav class="bg-slate-800 border-t border-slate-700/70 px-4">
+      <div class="max-w-6xl mx-auto flex space-x-2 overflow-x-auto py-2 scrollbar-none">
+        <button onclick="switchTab('tab-intro')" id="nav-intro" class="tab-btn px-4 py-2.5 rounded-lg font-bold text-base whitespace-nowrap transition flex items-center space-x-2 bg-indigo-600 text-white shadow">
+          <i class="fa-solid fa-compass"></i>
+          <span>活動一：課程導入</span>
+        </button>
+        <button onclick="switchTab('tab-core')" id="nav-core" class="tab-btn px-4 py-2.5 rounded-lg font-bold text-base whitespace-nowrap transition flex items-center space-x-2 text-slate-300 hover:bg-slate-700 hover:text-white">
+          <i class="fa-solid fa-palette"></i>
+          <span>活動二：核心發展</span>
+        </button>
+        <button onclick="switchTab('tab-game')" id="nav-game" class="tab-btn px-4 py-2.5 rounded-lg font-bold text-base whitespace-nowrap transition flex items-center space-x-2 text-slate-300 hover:bg-slate-700 hover:text-white">
+          <i class="fa-solid fa-stopwatch text-amber-400"></i>
+          <span>極速挑戰賽 (2分)</span>
+        </button>
+        <button onclick="switchTab('tab-showcase')" id="nav-showcase" class="tab-btn px-4 py-2.5 rounded-lg font-bold text-base whitespace-nowrap transition flex items-center space-x-2 text-slate-300 hover:bg-slate-700 hover:text-white">
+          <i class="fa-solid fa-trophy text-emerald-400"></i>
+          <span>成果展示牆</span>
+          <span id="showcase-badge" class="bg-emerald-500 text-slate-900 text-xs px-2 py-0.5 rounded-full font-black ml-1">0</span>
+        </button>
+      </div>
+    </nav>
+  </header>
 
-                <!-- Pattern Breakdown Indicator -->
-                <div class="mt-4 w-full bg-slate-800/80 p-3 sm:p-4 rounded-2xl border border-slate-700 flex flex-wrap items-center justify-around gap-2 text-white">
-                    <span class="font-bold text-amber-400 text-base sm:text-lg">循環單元 (週期 3)：</span>
-                    <div class="flex items-center space-x-3 bg-slate-900 px-4 py-2 rounded-xl border border-slate-700">
-                        <span class="flex items-center font-bold text-red-400 text-sm sm:text-base"><span class="w-4 h-4 rounded-full bg-red-500 inline-block mr-1"></span>① 紅</span>
-                        <span class="text-slate-500">➔</span>
-                        <span class="flex items-center font-bold text-slate-100 text-sm sm:text-base"><span class="w-4 h-4 rounded-full bg-white border border-slate-400 inline-block mr-1"></span>② 白</span>
-                        <span class="text-slate-500">➔</span>
-                        <span class="flex items-center font-bold text-blue-400 text-sm sm:text-base"><span class="w-4 h-4 rounded-full bg-blue-500 inline-block mr-1"></span>③ 藍</span>
-                    </div>
-                </div>
-            </div>
+  <!-- ================= 主內容容器 ================= -->
+  <main class="flex-grow max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-6">
 
-            <!-- Interactive Math Worksheet & Answer Pad -->
-            <div class="bg-gradient-to-br from-indigo-50 to-amber-50 p-6 rounded-3xl shadow-lg border-2 border-indigo-100">
-                <h3 class="text-xl font-black text-indigo-900 mb-4 flex items-center">
-                    <span class="bg-indigo-600 text-white w-8 h-8 rounded-xl flex items-center justify-center mr-2 text-base">🧮</span>
-                    將規律轉換為數學算式
-                </h3>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                    <div class="space-y-4">
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-indigo-100">
-                            <label class="block font-bold text-slate-700 mb-2">1. 計算除法算式：</label>
-                            <div class="flex items-center space-x-2 text-lg sm:text-2xl font-black text-slate-800">
-                                <span class="bg-indigo-100 px-3 py-1 rounded-xl text-indigo-700">100</span>
-                                <span>÷</span>
-                                <span class="bg-indigo-100 px-3 py-1 rounded-xl text-indigo-700">3</span>
-                                <span>=</span>
-                                <span class="text-emerald-600 bg-emerald-50 px-3 py-1 rounded-xl border border-emerald-200">33 ... 餘數 1</span>
-                            </div>
-                        </div>
-
-                        <div class="bg-white p-4 rounded-2xl shadow-sm border border-indigo-100">
-                            <label class="block font-bold text-slate-700 mb-2">2. 餘數代表的意義：</label>
-                            <p class="text-slate-600 text-base">
-                                代表完整的 33 次循環後，還多出 <span class="font-bold text-red-600 text-xl">1</span> 面旗幟，因此是循環單元中的<b>第 1 個</b>顏色！
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- 100th Flag Color Selection Task -->
-                    <div class="bg-white p-6 rounded-3xl shadow-md border-2 border-amber-300 text-center space-y-4">
-                        <h4 class="text-lg font-black text-slate-800">挑戰解答：第 100 面旗幟是什麼顏色？</h4>
-                        <div class="grid grid-cols-3 gap-3">
-                            <button onclick="checkAct1Answer('red')" class="touch-btn p-4 rounded-2xl font-black text-lg border-4 border-red-500 bg-red-500 hover:bg-red-600 text-white shadow-md focus:ring-4 focus:ring-red-200">
-                                🔴 紅色
-                            </button>
-                            <button onclick="checkAct1Answer('white')" class="touch-btn p-4 rounded-2xl font-black text-lg border-4 border-slate-300 bg-white hover:bg-slate-100 text-slate-800 shadow-md focus:ring-4 focus:ring-slate-200">
-                                ⚪ 白色
-                            </button>
-                            <button onclick="checkAct1Answer('blue')" class="touch-btn p-4 rounded-2xl font-black text-lg border-4 border-blue-500 bg-blue-500 hover:bg-blue-600 text-white shadow-md focus:ring-4 focus:ring-blue-200">
-                                🔵 藍色
-                            </button>
-                        </div>
-                        <div id="act1-feedback" class="hidden p-3 rounded-2xl font-bold text-base transition-all"></div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ACTIVITY 2: 核心發展 (Geometric Canvas & Zero-Remainder Misconception Trap) -->
-        <section id="activity-2" class="hidden space-y-6 flex-grow">
-            <!-- Task Header -->
-            <div class="bg-white p-5 sm:p-6 rounded-3xl shadow-lg border-2 border-slate-200">
-                <div class="flex items-center space-x-3 mb-2">
-                    <span class="bg-purple-100 text-purple-700 font-bold px-3 py-1 rounded-full text-sm sm:text-base">繪圖與破解</span>
-                    <h2 class="text-xl sm:text-2xl font-black text-slate-800">創設數位幾何密碼與「第零個迷思」大破解</h2>
-                </div>
-                <p class="text-slate-600 text-base sm:text-lg">
-                    設計屬於你們小組的規律密碼圖案！繪製完畢後點擊生成密碼陣列，考考鄰座同學，並破解最棘手的「餘數為零」盲區！
-                </p>
-            </div>
-
-            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                <!-- Canva-style Interactive Drawing Canvas (Left 7 cols) -->
-                <div class="lg:col-span-7 bg-white p-5 rounded-3xl shadow-lg border-2 border-slate-200 flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-center mb-3">
-                            <h3 class="text-lg font-black text-slate-800 flex items-center">
-                                <span class="bg-purple-600 text-white p-1.5 rounded-xl mr-2 text-sm">✏️</span>
-                                小組數位幾何畫布
-                            </h3>
-                            <div class="flex items-center space-x-2">
-                                <button onclick="setBrushColor('#ef4444')" class="w-8 h-8 rounded-full bg-red-500 ring-2 ring-offset-2 ring-red-400 touch-btn"></button>
-                                <button onclick="setBrushColor('#3b82f6')" class="w-8 h-8 rounded-full bg-blue-500 touch-btn"></button>
-                                <button onclick="setBrushColor('#10b981')" class="w-8 h-8 rounded-full bg-emerald-500 touch-btn"></button>
-                                <button onclick="setBrushColor('#f59e0b')" class="w-8 h-8 rounded-full bg-amber-500 touch-btn"></button>
-                                <button onclick="setBrushColor('#1e293b')" class="w-8 h-8 rounded-full bg-slate-800 touch-btn"></button>
-                                <button onclick="clearDrawCanvas()" class="px-3 py-1 bg-slate-200 hover:bg-slate-300 rounded-xl font-bold text-xs text-slate-700 touch-btn">清空畫布</button>
-                            </div>
-                        </div>
-
-                        <!-- Canvas Workspace -->
-                        <div class="border-4 border-dashed border-slate-300 rounded-2xl bg-slate-50 overflow-hidden relative cursor-crosshair">
-                            <canvas id="customDrawCanvas" width="600" height="260" class="w-full h-56 sm:h-64 touch-none"></canvas>
-                        </div>
-                    </div>
-
-                    <!-- Generate Pattern Sequence from Drawing -->
-                    <div class="mt-4 pt-3 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2">
-                        <span class="text-sm font-bold text-slate-600">把你的繪圖設為週期單元並生成陣列：</span>
-                        <button onclick="generateArrayFromCanvas()" class="touch-btn bg-purple-600 hover:bg-purple-700 text-white font-black px-5 py-2.5 rounded-xl text-base shadow">
-                            🚀 生成密碼陣列
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Generated Array Display & Peer Challenge (Right 5 cols) -->
-                <div class="lg:col-span-5 bg-purple-900 text-white p-5 rounded-3xl shadow-lg border-2 border-purple-800 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-lg font-black text-amber-300 mb-3 flex items-center">
-                            <span>🔍 密碼陣列預覽 (週期 = 3)</span>
-                        </h3>
-                        <div id="patternArrayContainer" class="bg-purple-950/70 p-4 rounded-2xl min-h-[140px] flex items-center justify-center flex-wrap gap-3 border border-purple-800">
-                            <span class="text-purple-300 text-sm text-center">請先在左側畫布繪圖，<br>點擊「生成密碼陣列」！</span>
-                        </div>
-                    </div>
-
-                    <div class="mt-4 bg-purple-800/80 p-4 rounded-2xl border border-purple-700">
-                        <label class="block font-bold text-amber-200 text-sm mb-1">同儕互評挑戰出題：</label>
-                        <p class="text-xs text-purple-200 mb-2">請問第 <span id="peerQuestIndex" class="font-bold text-amber-300 text-base">15</span> 面密碼圖樣是什麼？</p>
-                        <button onclick="randomizePeerQuestion()" class="touch-btn w-full bg-amber-400 hover:bg-amber-300 text-slate-900 font-black py-2 rounded-xl text-sm shadow">
-                            🎲 隨機變更出題題號
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Zero-Remainder Misconception Trap Section (除盡題型與「第零個迷思」) -->
-            <div class="bg-white p-6 rounded-3xl shadow-lg border-2 border-red-200 space-y-4">
-                <div class="flex items-center space-x-3">
-                    <span class="bg-red-500 text-white font-black px-3 py-1 rounded-full text-sm">重點盲區</span>
-                    <h3 class="text-xl font-black text-slate-900">特訓：當算式整除（餘數為 0）時該怎麼辦？</h3>
-                </div>
-
-                <p class="text-slate-700 text-base sm:text-lg leading-relaxed">
-                    假設週期一樣是 <span class="font-bold text-indigo-600">3 個圖案</span>（①紅 ➔ ②白 ➔ ③藍）。如果問你<b>第 12 面旗幟</b>的顏色：
-                    <br><span class="inline-block bg-slate-100 font-mono font-bold px-3 py-1 rounded-lg text-indigo-700 mt-1">12 ÷ 3 = 4 ... 餘數 0</span>
-                </p>
-
-                <div class="bg-amber-50 border-2 border-amber-300 p-4 rounded-2xl space-y-3">
-                    <h4 class="font-black text-slate-800 text-base sm:text-lg flex items-center">
-                        <span class="text-2xl mr-2">💡</span> 破解「第零個迷思」選擇題：
-                    </h4>
-                    <p class="text-slate-700 font-bold text-sm sm:text-base">當除法整除、餘數為 0 時，代表什麼意思？</p>
-
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <button onclick="checkZeroTrap('A')" class="touch-btn bg-white hover:bg-amber-100 text-slate-800 p-4 rounded-2xl font-bold border-2 border-amber-200 text-left shadow-sm text-sm sm:text-base">
-                            A. 第 0 個圖案（不存在）
-                        </button>
-                        <button onclick="checkZeroTrap('B')" class="touch-btn bg-white hover:bg-amber-100 text-slate-800 p-4 rounded-2xl font-bold border-2 border-amber-200 text-left shadow-sm text-sm sm:text-base">
-                            B. 循環單元的第 1 個圖案 (🔴)
-                        </button>
-                        <button onclick="checkZeroTrap('C')" class="touch-btn bg-white hover:bg-amber-100 text-slate-800 p-4 rounded-2xl font-bold border-2 border-amber-200 text-left shadow-sm text-sm sm:text-base">
-                            C. 循環單元的【最後一個】圖案 (🔵)
-                        </button>
-                    </div>
-
-                    <div id="zero-trap-feedback" class="hidden p-4 rounded-2xl font-bold text-base transition-all"></div>
-                </div>
-            </div>
-        </section>
-
-        <!-- GAME CHALLENGE: 限時 1 分鐘極速解密挑戰賽 (Knockout after 3 strikes) -->
-        <section id="activity-3" class="hidden space-y-6 flex-grow">
-            <!-- Header & Game Rules Card -->
-            <div class="bg-white p-5 sm:p-6 rounded-3xl shadow-lg border-2 border-slate-200 flex flex-wrap justify-between items-center gap-4">
-                <div>
-                    <div class="flex items-center space-x-3 mb-2">
-                        <span class="bg-amber-500 text-white font-black px-3 py-1 rounded-full text-sm sm:text-base">限時考驗</span>
-                        <h2 class="text-xl sm:text-2xl font-black text-slate-800">旗語極速解密王 (限時 1 分鐘)</h2>
-                    </div>
-                    <p class="text-slate-600 text-base sm:text-lg">
-                        運用「週期除法與餘數規律」快速答題！<b>限時 60 秒</b>，注意：<b>答錯累計 3 次遊戲立即終止</b>！
-                    </p>
-                </div>
-
-                <!-- Live Status Indicators: Timer & Strikes/Lives -->
-                <div class="flex items-center space-x-3">
-                    <!-- Timer Badge -->
-                    <div class="bg-slate-900 text-white px-5 py-3 rounded-2xl border-2 border-slate-700 text-center">
-                        <span class="text-xs text-slate-400 font-bold block">剩餘時間</span>
-                        <span id="game-timer" class="text-2xl sm:text-3xl font-black text-amber-400 font-mono">01:00</span>
-                    </div>
-                    <!-- Hearts / Strikes Remaining -->
-                    <div class="bg-rose-50 border-2 border-rose-200 px-5 py-3 rounded-2xl text-center">
-                        <span class="text-xs text-rose-600 font-bold block">剩餘生命值</span>
-                        <span id="game-hearts" class="text-2xl sm:text-3xl font-black text-rose-600">❤️❤️❤️</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Game Arena / Question Board -->
-            <div id="game-arena" class="bg-slate-900 rounded-3xl p-6 sm:p-8 shadow-2xl border-4 border-slate-800 text-white relative">
-                
-                <!-- Countdown Progress Bar -->
-                <div class="w-full bg-slate-800 h-3 rounded-full mb-6 overflow-hidden">
-                    <div id="game-progress-bar" class="bg-gradient-to-r from-emerald-400 via-amber-400 to-rose-500 h-full w-full transition-all duration-1000 ease-linear"></div>
-                </div>
-
-                <!-- Start Screen -->
-                <div id="game-start-screen" class="text-center py-10 space-y-6">
-                    <div class="text-6xl animate-bounce">⏱️🚩</div>
-                    <h3 class="text-2xl sm:text-3xl font-black text-amber-300">準備好接受 1 分鐘極速旗語挑戰了嗎？</h3>
-                    <p class="text-slate-300 text-base sm:text-lg max-w-xl mx-auto leading-relaxed">
-                        系統將隨機產生旗語排列與目標項數，利用算式快速判斷旗幟顏色。<br>
-                        <span class="text-rose-400 font-bold">警報提醒：累積 3 次錯誤會直接出局喔！</span>
-                    </p>
-                    <button onclick="startGameSession()" class="touch-btn bg-emerald-500 hover:bg-emerald-400 text-slate-900 font-black text-xl px-10 py-4 rounded-2xl shadow-xl border-4 border-emerald-300">
-                        🚀 開始 1 分鐘挑戰！
-                    </button>
-                </div>
-
-                <!-- Active Question Screen -->
-                <div id="game-question-screen" class="hidden space-y-6">
-                    <!-- Current Score & Combo -->
-                    <div class="flex justify-between items-center bg-slate-800 px-4 py-2.5 rounded-2xl border border-slate-700 text-sm sm:text-base">
-                        <div class="flex items-center space-x-2">
-                            <span class="text-slate-400">目前得分：</span>
-                            <span id="game-score" class="font-black text-amber-400 text-xl">0</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-slate-400">連擊 Combo：</span>
-                            <span id="game-combo" class="font-black text-emerald-400 text-xl">0</span>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-slate-400">已失誤：</span>
-                            <span id="game-strikes-count" class="font-black text-rose-400 text-xl">0 / 3</span>
-                        </div>
-                    </div>
-
-                    <!-- Question Content -->
-                    <div class="bg-slate-800/90 p-5 sm:p-6 rounded-2xl border-2 border-slate-700 text-center space-y-4">
-                        <div class="inline-block bg-indigo-900/90 text-indigo-200 text-sm font-bold px-4 py-1 rounded-full border border-indigo-500">
-                            循環週期：<span id="game-cycle-length">3</span> 個圖案一組
-                        </div>
-                        <div id="game-cycle-preview" class="flex justify-center items-center gap-3 text-lg font-bold">
-                            <!-- Injected dynamically -->
-                        </div>
-                        <div class="text-2xl sm:text-3xl font-black text-amber-300">
-                            請問：第 <span id="game-target-num" class="text-4xl text-white font-mono bg-indigo-600 px-3 py-1 rounded-xl mx-1 shadow">25</span> 面旗幟是什麼顏色？
-                        </div>
-                    </div>
-
-                    <!-- Choice Options (Big touch buttons) -->
-                    <div id="game-options-container" class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-                        <!-- Options generated dynamically -->
-                    </div>
-
-                    <!-- Instant Answer Feedback Banner -->
-                    <div id="game-answer-feedback" class="hidden p-4 rounded-2xl font-bold text-center text-base sm:text-lg transition-all"></div>
-                </div>
-
-                <!-- Game Over / Result Screen -->
-                <div id="game-over-screen" class="hidden text-center py-8 space-y-5">
-                    <div id="game-over-icon" class="text-6xl">🏆</div>
-                    <h3 id="game-over-title" class="text-2xl sm:text-3xl font-black text-amber-400">挑戰結算</h3>
-                    <p id="game-over-reason" class="text-slate-300 text-base font-bold"></p>
-
-                    <!-- Score Stats Summary -->
-                    <div class="grid grid-cols-3 gap-3 max-w-lg mx-auto bg-slate-800 p-4 rounded-2xl border border-slate-700">
-                        <div>
-                            <span class="text-xs text-slate-400 block">最終得分</span>
-                            <span id="game-final-score" class="text-2xl sm:text-3xl font-black text-amber-400">0</span>
-                        </div>
-                        <div>
-                            <span class="text-xs text-slate-400 block">答對題數</span>
-                            <span id="game-final-correct" class="text-2xl sm:text-3xl font-black text-emerald-400">0</span>
-                        </div>
-                        <div>
-                            <span class="text-xs text-slate-400 block">最高連擊</span>
-                            <span id="game-final-maxcombo" class="text-2xl sm:text-3xl font-black text-sky-400">0</span>
-                        </div>
-                    </div>
-
-                    <div class="flex justify-center space-x-4 pt-2">
-                        <button onclick="startGameSession()" class="touch-btn bg-indigo-600 hover:bg-indigo-500 text-white font-black px-8 py-3 rounded-xl text-base shadow border border-indigo-400">
-                            🔄 再挑戰一次
-                        </button>
-                        <button onclick="switchTab(4)" class="touch-btn bg-emerald-600 hover:bg-emerald-500 text-white font-black px-8 py-3 rounded-xl text-base shadow border border-emerald-400">
-                            📝 前往填寫 4F 筆記
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- ACTIVITY 4: 綜合歸納 (4F Reflection Detective Notebook) -->
-        <section id="activity-4" class="hidden space-y-6 flex-grow">
-            <!-- Header -->
-            <div class="bg-white p-5 sm:p-6 rounded-3xl shadow-lg border-2 border-slate-200">
-                <div class="flex items-center space-x-3 mb-2">
-                    <span class="bg-emerald-100 text-emerald-700 font-bold px-3 py-1 rounded-full text-sm sm:text-base">偵探筆記</span>
-                    <h2 class="text-xl sm:text-2xl font-black text-slate-800">運用 4F 引導反思法進行小組討論</h2>
-                </div>
-                <p class="text-slate-600 text-base sm:text-lg">
-                    請各組討論後，將想法記錄在偵探筆記中。完成提交後作品將直接發布在「成果展示牆」與全班分享！
-                </p>
-            </div>
-
-            <!-- Group Identification Field -->
-            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-3">
-                <div class="flex items-center space-x-2">
-                    <span class="text-xl">🏷️</span>
-                    <label for="group-name-input" class="font-black text-slate-700 text-base">填寫小組名稱 / 座號：</label>
-                </div>
-                <input type="text" id="group-name-input" class="p-2.5 px-4 rounded-xl border-2 border-indigo-200 focus:border-indigo-500 focus:outline-none font-bold text-slate-800 text-base w-full sm:w-64" placeholder="例如：第 3 組 解密小隊">
-            </div>
-
-            <!-- 4F Form Grid (Inputs cleared by default) -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- 1. Facts -->
-                <div class="bg-sky-50 border-2 border-sky-200 p-5 rounded-3xl shadow-md space-y-3">
-                    <div class="flex items-center space-x-2 text-sky-800 font-black text-lg">
-                        <span class="bg-sky-500 text-white w-8 h-8 rounded-xl flex items-center justify-center text-sm">F1</span>
-                        <h3>[Facts 事實]</h3>
-                    </div>
-                    <label class="block text-slate-700 font-bold text-sm sm:text-base">旗語挑戰中，一組循環包含幾個圖案？</label>
-                    <textarea id="note-facts" rows="3" class="w-full p-4 rounded-2xl border-2 border-sky-200 focus:border-sky-500 focus:outline-none text-slate-800 text-base resize-none shadow-inner" placeholder="請在此輸入小組觀察到的事實..."></textarea>
-                </div>
-
-                <!-- 2. Feelings -->
-                <div class="bg-rose-50 border-2 border-rose-200 p-5 rounded-3xl shadow-md space-y-3">
-                    <div class="flex items-center space-x-2 text-rose-800 font-black text-lg">
-                        <span class="bg-rose-500 text-white w-8 h-8 rounded-xl flex items-center justify-center text-sm">F2</span>
-                        <h3>[Feelings 感受]</h3>
-                    </div>
-                    <label class="block text-slate-700 font-bold text-sm sm:text-base">預測出第 100 面旗幟顏色或玩 1 分鐘挑戰時，感覺如何？</label>
-                    <textarea id="note-feelings" rows="3" class="w-full p-4 rounded-2xl border-2 border-rose-200 focus:border-rose-500 focus:outline-none text-slate-800 text-base resize-none shadow-inner" placeholder="請在此輸入成功解密與闖關時的感受..."></textarea>
-                </div>
-
-                <!-- 3. Findings -->
-                <div class="bg-amber-50 border-2 border-amber-200 p-5 rounded-3xl shadow-md space-y-3">
-                    <div class="flex items-center space-x-2 text-amber-800 font-black text-lg">
-                        <span class="bg-amber-500 text-white w-8 h-8 rounded-xl flex items-center justify-center text-sm">F3</span>
-                        <h3>[Findings 發現]</h3>
-                    </div>
-                    <label class="block text-slate-700 font-bold text-sm sm:text-base">「餘數」在判斷週期規律時扮演什麼角色？（包含餘數為 0 時）</label>
-                    <textarea id="note-findings" rows="3" class="w-full p-4 rounded-2xl border-2 border-amber-200 focus:border-amber-500 focus:outline-none text-slate-800 text-base resize-none shadow-inner" placeholder="請在此輸入對餘數與週期關係的關鍵發現..."></textarea>
-                </div>
-
-                <!-- 4. Future -->
-                <div class="bg-emerald-50 border-2 border-emerald-200 p-5 rounded-3xl shadow-md space-y-3">
-                    <div class="flex items-center space-x-2 text-emerald-800 font-black text-lg">
-                        <span class="bg-emerald-500 text-white w-8 h-8 rounded-xl flex items-center justify-center text-sm">F4</span>
-                        <h3>[Future 應用]</h3>
-                    </div>
-                    <label class="block text-slate-700 font-bold text-sm sm:text-base">生活中還有哪些可以用這套方法解決的「規律問題」？</label>
-                    <textarea id="note-future" rows="3" class="w-full p-4 rounded-2xl border-2 border-emerald-200 focus:border-emerald-500 focus:outline-none text-slate-800 text-base resize-none shadow-inner" placeholder="例如：星期幾推算、紅綠燈變化、四季輪替..."></textarea>
-                </div>
-            </div>
-
-            <!-- Submit Notebook Button -->
-            <div class="flex justify-center pt-2">
-                <button onclick="submitNotebook()" class="touch-btn bg-emerald-600 hover:bg-emerald-500 text-white font-black text-lg sm:text-xl px-10 py-4 rounded-2xl shadow-xl border-4 border-emerald-400 flex items-center space-x-2">
-                    <span>🚀 儲存並發布至成果展示牆</span>
-                </button>
-            </div>
-        </section>
-
-        <!-- ACTIVITY 5: 成果展示牆 (Direct Public Student Showcase Wall with High-Res Image Export) -->
-        <section id="activity-5" class="hidden space-y-6 flex-grow">
-            <!-- Header -->
-            <div class="bg-white p-5 sm:p-6 rounded-3xl shadow-lg border-2 border-slate-200 flex flex-wrap justify-between items-center gap-4">
-                <div>
-                    <div class="flex items-center space-x-3 mb-2">
-                        <span class="bg-amber-100 text-amber-800 font-black px-3 py-1 rounded-full text-sm sm:text-base">即時作品牆</span>
-                        <h2 class="text-xl sm:text-2xl font-black text-slate-800">小組學習歷程與成果展示</h2>
-                    </div>
-                    <p class="text-slate-600 text-base sm:text-lg">
-                        學生的幾何密碼創作、挑戰賽戰績與 4F 偵探筆記將直接展示於此，支援全班觀摩與<b>一鍵匯出高畫質圖檔</b>！
-                    </p>
-                </div>
-                <div class="flex items-center space-x-3">
-                    <!-- Upgraded: Export Showcase as Image File (PNG) -->
-                    <button onclick="exportShowcaseImage()" class="touch-btn bg-indigo-600 hover:bg-indigo-500 text-white font-bold px-4 py-2.5 rounded-2xl text-sm sm:text-base shadow flex items-center space-x-1.5 border border-indigo-400">
-                        <span>🖼️ 匯出成果圖檔 (PNG)</span>
-                    </button>
-                    <button onclick="confirmClearAllShowcase()" class="touch-btn bg-rose-100 hover:bg-rose-200 text-rose-700 font-bold px-4 py-2.5 rounded-2xl text-sm sm:text-base border border-rose-300">
-                        🗑️ 清空展示
-                    </button>
-                </div>
-            </div>
-
-            <!-- Showcase Overview Stats Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="bg-indigo-50 p-4 rounded-2xl border-2 border-indigo-100 text-center">
-                    <span class="text-xs text-indigo-600 font-bold">已展示小組作品</span>
-                    <p id="stat-total-submissions" class="text-3xl font-black text-indigo-900 mt-1">0 組</p>
-                </div>
-                <div class="bg-amber-50 p-4 rounded-2xl border-2 border-amber-100 text-center">
-                    <span class="text-xs text-amber-600 font-bold">第 100 面旗挑戰狀況</span>
-                    <p id="stat-act1-status" class="text-2xl font-black text-amber-900 mt-1">未作答</p>
-                </div>
-                <div class="bg-emerald-50 p-4 rounded-2xl border-2 border-emerald-100 text-center">
-                    <span class="text-xs text-emerald-600 font-bold">1分鐘挑戰最佳戰績</span>
-                    <p id="stat-game-record" class="text-2xl font-black text-emerald-900 mt-1">-- 分</p>
-                </div>
-            </div>
-
-            <!-- Exportable Container Target for html2canvas -->
-            <div id="showcase-export-area" class="p-2 sm:p-4 rounded-3xl bg-slate-100">
-                <!-- Showcase Cards Container -->
-                <div id="showcase-cards-container" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <!-- Empty State Placeholder -->
-                    <div id="showcase-empty" class="col-span-full py-16 text-center bg-white rounded-3xl border-2 border-dashed border-slate-300 text-slate-400 space-y-3">
-                        <div class="text-5xl">🎨</div>
-                        <p class="text-lg font-bold text-slate-500">目前尚無已發布的作品</p>
-                        <p class="text-sm text-slate-400">請先在「活動二」繪圖或在「活動三」填寫 4F 偵探筆記並點擊發布！</p>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <!-- FOOTER: Centered with exact required text: 數感實驗室  | 互動學習系統 | Design：S.C. Kuo -->
-    <footer class="bg-slate-900 text-slate-400 py-4 px-4 text-center mt-8 border-t border-slate-800">
-        <p class="text-sm sm:text-base font-medium tracking-wider">
-            數感實驗室 &nbsp;|&nbsp; 互動學習系統 &nbsp;|&nbsp; Design：S.C. Kuo
+    <!-- ================= 活動一：課程導入 ================= -->
+    <section id="tab-intro" class="tab-pane space-y-6">
+      <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200">
+        <div class="flex items-center space-x-3 mb-4">
+          <span class="w-3 h-8 bg-indigo-600 rounded-full"></span>
+          <h2 class="text-2xl font-black text-slate-900">任務一：旗語信號動態觀測</h2>
+        </div>
+        <p class="text-lg text-slate-600 leading-relaxed mb-6">
+          遠方航行中的旗語艦隊正依序揮舞信號旗。仔細觀察旗幟排列，找出隱藏在色彩變化中的「循環單元」，並推算第 100 面旗幟的顏色。
         </p>
-    </footer>
 
-    <!-- MODAL 1: QR Code Dynamic Generation Modal -->
-    <div id="qrModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-5 shadow-2xl relative border-4 border-indigo-500">
-            <button onclick="closeModal('qrModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2 text-xl font-bold">✕</button>
-            <h3 class="text-xl font-black text-slate-800">掃描 QR Code 載入網頁</h3>
-            
-            <div class="flex justify-center p-4 bg-slate-50 rounded-2xl border-2 border-slate-200">
-                <div id="qrcode-target"></div>
+        <!-- 旗語信號模擬 Canvas -->
+        <div class="bg-slate-900 rounded-2xl p-4 sm:p-6 mb-6 shadow-inner text-center">
+          <div class="flex flex-wrap items-center justify-between gap-3 mb-4 text-white">
+            <span class="text-base sm:text-lg font-bold flex items-center space-x-2">
+              <i class="fa-solid fa-wave-square text-indigo-400"></i>
+              <span>即時旗語信號陣列（紅 ➔ 白 ➔ 藍）</span>
+            </span>
+            <div class="flex space-x-2">
+              <button onclick="stepSignal()" class="touch-btn px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-sm shadow active:scale-95 transition">
+                <i class="fa-solid fa-forward-step mr-1"></i> 前進揮旗
+              </button>
+              <button onclick="toggleSignalPlay()" id="btn-signal-play" class="touch-btn px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-bold text-sm shadow active:scale-95 transition">
+                <i class="fa-solid fa-play mr-1"></i> 自動播放
+              </button>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto py-2">
+            <canvas id="canvas-signals" width="900" height="150" class="max-w-full mx-auto bg-slate-950 rounded-xl border border-slate-800 shadow"></canvas>
+          </div>
+          <div class="mt-3 text-slate-400 text-sm font-medium">
+            目前觀測到第 <span id="signal-count" class="text-amber-400 font-bold text-lg">9</span> 面旗幟 ｜ 循環單元：【 紅旗(1) ➔ 白旗(2) ➔ 藍旗(3) 】
+          </div>
+        </div>
+
+        <!-- 解開第 100 面旗幟挑戰區 -->
+        <div class="bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-6">
+          <h3 class="text-xl font-black text-indigo-950 mb-3 flex items-center space-x-2">
+            <i class="fa-solid fa-lightbulb text-amber-500"></i>
+            <span>偵探推理任務：第 100 面旗幟是什麼顏色？</span>
+          </h3>
+          <p class="text-slate-700 text-base mb-4 leading-relaxed">
+            循環單元內共有 <strong>3</strong> 面旗幟（紅、白、藍）。請寫出除法算式並進行驗證：
+          </p>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+            <div class="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm">
+              <div class="text-xs font-bold text-slate-500 mb-1">目標面數 ÷ 循環長度</div>
+              <div class="text-2xl font-black text-slate-800">100 ÷ 3</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm">
+              <div class="text-xs font-bold text-slate-500 mb-1">計算結果</div>
+              <div class="text-2xl font-black text-indigo-600">33 輪 … 餘 1</div>
+            </div>
+            <div class="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm">
+              <div class="text-xs font-bold text-slate-500 mb-1">餘數代表意義</div>
+              <div class="text-2xl font-black text-emerald-600">第 34 輪的第 1 個</div>
+            </div>
+          </div>
+
+          <div class="flex flex-col sm:flex-row items-center gap-4">
+            <div class="flex-grow w-full">
+              <label class="block text-sm font-bold text-slate-700 mb-2">請選擇預測結果：</label>
+              <div class="grid grid-cols-3 gap-3">
+                <button onclick="checkIntroAnswer('紅')" class="touch-btn py-3 px-4 rounded-xl font-black text-lg bg-rose-500 text-white hover:bg-rose-600 shadow active:scale-95 transition">紅旗</button>
+                <button onclick="checkIntroAnswer('白')" class="touch-btn py-3 px-4 rounded-xl font-black text-lg bg-slate-200 text-slate-800 hover:bg-slate-300 shadow active:scale-95 transition">白旗</button>
+                <button onclick="checkIntroAnswer('藍')" class="touch-btn py-3 px-4 rounded-xl font-black text-lg bg-sky-500 text-white hover:bg-sky-600 shadow active:scale-95 transition">藍旗</button>
+              </div>
+            </div>
+          </div>
+          <div id="intro-feedback" class="mt-4 hidden p-4 rounded-xl font-bold text-base leading-relaxed border"></div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= 活動二：核心發展 ================= -->
+    <section id="tab-core" class="tab-pane hidden space-y-6">
+      <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200">
+        <div class="flex items-center space-x-3 mb-4">
+          <span class="w-3 h-8 bg-indigo-600 rounded-full"></span>
+          <h2 class="text-2xl font-black text-slate-900">任務二：數位幾何密碼創作與同儕互考</h2>
+        </div>
+        <p class="text-lg text-slate-600 leading-relaxed mb-6">
+          利用平板自由點選圖形，組合一組具備週期循環的「數位幾何密碼陣列」。完成後輸入目標項數挑戰鄰座同學，並檢驗同儕的密碼邏輯。
+        </p>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <!-- 繪圖控制面板 -->
+          <div class="lg:col-span-4 bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-5">
+            <h3 class="text-lg font-black text-slate-800 flex items-center space-x-2">
+              <i class="fa-solid fa-pen-ruler text-indigo-600"></i>
+              <span>幾何符號選擇器</span>
+            </h3>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-500 mb-2">點選圖形加入循環單元：</label>
+              <div class="grid grid-cols-4 gap-2">
+                <button onclick="addPatternSymbol('🔴')" class="touch-btn text-2xl p-2 bg-white rounded-xl border border-slate-300 hover:border-indigo-500 shadow-sm active:scale-95 transition">🔴</button>
+                <button onclick="addPatternSymbol('🔷')" class="touch-btn text-2xl p-2 bg-white rounded-xl border border-slate-300 hover:border-indigo-500 shadow-sm active:scale-95 transition">🔷</button>
+                <button onclick="addPatternSymbol('⭐')" class="touch-btn text-2xl p-2 bg-white rounded-xl border border-slate-300 hover:border-indigo-500 shadow-sm active:scale-95 transition">⭐</button>
+                <button onclick="addPatternSymbol('🔺')" class="touch-btn text-2xl p-2 bg-white rounded-xl border border-slate-300 hover:border-indigo-500 shadow-sm active:scale-95 transition">🔺</button>
+              </div>
             </div>
 
-            <p class="text-xs text-slate-500">支援 iPad / 移動設備相機直接掃描開啟</p>
+            <div class="p-3 bg-white rounded-xl border border-slate-200">
+              <div class="text-xs font-bold text-slate-500 mb-2">當前設計的「單元週期」：</div>
+              <div id="current-pattern-display" class="text-2xl font-black min-h-[44px] flex items-center space-x-2 p-2 bg-slate-100 rounded-lg text-indigo-700 tracking-wider overflow-x-auto">
+                <span class="text-slate-400 text-sm font-normal">請由上方點選圖形加入...</span>
+              </div>
+              <div class="mt-2 text-xs text-slate-500 font-bold flex justify-between items-center">
+                <span>單元長度：<strong id="pattern-length" class="text-indigo-600 text-sm">0</strong> 個元素</span>
+                <button onclick="clearCustomPattern()" class="text-rose-600 hover:underline">清空重設</button>
+              </div>
+            </div>
 
-            <button onclick="copyCurrentURL()" class="touch-btn w-full bg-indigo-600 hover:bg-indigo-700 text-white font-black py-3 rounded-2xl text-base shadow flex items-center justify-center space-x-2">
-                <span>📋 一鍵複製網址</span>
-            </button>
-        </div>
-    </div>
+            <!-- 同儕互考出題產生器 -->
+            <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-200 space-y-3">
+              <label class="block text-xs font-bold text-indigo-900">向鄰座發起提問：</label>
+              <div class="flex items-center space-x-2">
+                <span class="text-sm font-bold text-slate-700">請問第</span>
+                <input type="number" id="input-peer-target" min="1" max="999" value="" placeholder="請輸入" class="w-24 p-2 bg-white rounded-lg border border-indigo-300 text-center font-bold text-lg text-indigo-900 focus:ring-2 focus:ring-indigo-500 outline-none">
+                <span class="text-sm font-bold text-slate-700">個圖形是？</span>
+              </div>
+              <button onclick="calcPeerAnswer()" class="touch-btn w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow text-sm active:scale-95 transition">
+                驗證推算邏輯
+              </button>
+              <div id="peer-calc-result" class="text-sm font-bold text-slate-700 hidden p-3 bg-white rounded-lg border border-indigo-100 space-y-1"></div>
+            </div>
+          </div>
 
-    <!-- MODAL 2: Course Guide Modal -->
-    <div id="guideModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-2xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative border-4 border-indigo-500 max-h-[85vh] overflow-y-auto">
-            <button onclick="closeModal('guideModal')" class="absolute top-4 right-4 text-slate-400 hover:text-slate-600 p-2 text-2xl font-bold">✕</button>
-            
-            <div class="flex items-center space-x-3 border-b border-slate-200 pb-4">
-                <div class="bg-indigo-100 p-3 rounded-2xl text-indigo-700 text-2xl">📖</div>
+          <!-- 畫布展示與陣列即時預覽 -->
+          <div class="lg:col-span-8 space-y-4">
+            <div class="bg-slate-900 rounded-2xl p-5 text-white shadow-sm">
+              <div class="flex items-center justify-between mb-3">
+                <span class="font-bold text-sm text-slate-300 flex items-center space-x-2">
+                  <i class="fa-solid fa-layer-group text-indigo-400"></i>
+                  <span>無限循環延伸陣列（自動生成）</span>
+                </span>
+                <span class="text-xs text-slate-400">前 24 個週期元素</span>
+              </div>
+              <div id="infinite-pattern-array" class="p-4 bg-slate-950 rounded-xl border border-slate-800 min-h-[90px] flex flex-wrap gap-2.5 items-center">
+                <span class="text-slate-500 text-sm">請於左側添加至少 2 個符號以啟動密碼延伸...</span>
+              </div>
+            </div>
+
+            <!-- 核心認知衝突：破解「第零個」迷思 -->
+            <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-6 space-y-4">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-amber-500 text-white rounded-xl flex items-center justify-center font-black text-xl shadow">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
                 <div>
-                    <h3 class="text-2xl font-black text-slate-800">課程指引</h3>
-                    <p class="text-sm text-slate-500">單元主題：旗語解密大行動（週期規律）</p>
+                  <h3 class="text-xl font-black text-amber-950">迷思破解：當餘數消失為 0 時？</h3>
+                  <p class="text-sm text-amber-800">克服「餘數為零等於第 0 個」的思維盲區</p>
                 </div>
-            </div>
+              </div>
 
-            <div class="space-y-4 text-slate-700 text-sm sm:text-base leading-relaxed">
-                <div class="bg-indigo-50 p-4 rounded-2xl border border-indigo-100">
-                    <h4 class="font-bold text-indigo-900 mb-1">🎯 學習目標：</h4>
-                    <p>1. 能觀察並找出視覺圖樣的「循環單元」與週期數。</p>
-                    <p>2. 能運用除法算式的餘數，預測高項數（如第 100 項）的圖樣。</p>
-                    <p>3. 能跨越「整除（餘數為0）」即代表循環單元最後一個元素的認知盲區。</p>
+              <div class="bg-white p-5 rounded-xl border border-amber-200 space-y-3">
+                <p class="text-base text-slate-700 leading-relaxed font-medium">
+                  以 4 色循環【 🔴 ➔ 🔷 ➔ ⭐ ➔ 🔺 】為例，週期長度為 <strong>4</strong>。<br>
+                  推算 <strong>第 12 個</strong> 圖形時，算式為 <code class="bg-slate-100 text-indigo-700 px-2 py-1 rounded font-bold text-lg">12 ÷ 4 = 3 … 0</code>。
+                </p>
+                <div class="p-4 bg-rose-50 border-l-4 border-rose-500 rounded-r-xl">
+                  <div class="font-black text-rose-900 text-base mb-1">關鍵概念警示：</div>
+                  <div class="text-slate-700 text-sm leading-relaxed">
+                    序列中不存在「第 0 個」圖形。整除代表「剛好完成完整的 3 輪」，因此第 12 個圖形正是該循環單元的<strong>「最後一個元素（🔺）」</strong>。
+                  </div>
                 </div>
-
-                <div class="space-y-2">
-                    <h4 class="font-bold text-slate-800">📌 活動步驟：</h4>
-                    <ul class="list-disc list-inside space-y-1 text-slate-600">
-                        <li><b>活動一 (課程導入)：</b>觀察旗語擺動規律，以算式 100 ÷ 3 = 33 ... 1 推算第 100 面旗顏色。</li>
-                        <li><b>活動二 (核心發展)：</b>利用畫布創設圖樣，出題給同學，並破解餘數為 0 的迷思。</li>
-                        <li><b>挑戰賽 (極速解密)：</b>限時 1 分鐘快速答題，失誤累計 3 次即刻淘汰，考驗餘數敏銳度。</li>
-                        <li><b>活動三 (綜合歸納)：</b>小組討論並完成 4F 反思偵探筆記（Facts, Feelings, Findings, Future）。</li>
-                        <li><b>成果展示牆：</b>展示全班成果與愛心互評，支援一鍵下載高解析度 PNG 圖片檔！</li>
-                    </ul>
+                <div class="flex items-center space-x-2 pt-1">
+                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                  <span class="text-sm font-bold text-slate-800">解密核心準則：餘數是幾就數到第幾個；整除（餘數 0）代表循環單元的最後一個。</span>
                 </div>
+              </div>
             </div>
+          </div>
         </div>
-    </div>
 
-    <!-- Custom Confirm Modal (Zero native confirm usage) -->
-    <div id="confirmModal" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-white rounded-3xl max-w-sm w-full p-6 text-center space-y-5 shadow-2xl relative border-4 border-rose-500">
-            <div class="text-4xl">⚠️</div>
-            <h3 class="text-xl font-black text-slate-800">確認清空作品牆？</h3>
-            <p class="text-sm text-slate-600">清空後所有已發布的小組作品將會重置，此操作無法復原。</p>
-            <div class="grid grid-cols-2 gap-3 pt-2">
-                <button onclick="closeModal('confirmModal')" class="touch-btn py-3 bg-slate-200 hover:bg-slate-300 rounded-xl font-bold text-slate-700">取消</button>
-                <button onclick="executeClearAllShowcase()" class="touch-btn py-3 bg-rose-600 hover:bg-rose-700 rounded-xl font-bold text-white shadow">確認清空</button>
+      </div>
+    </section>
+
+    <!-- ================= 挑戰賽：2分鐘極速解密王 ================= -->
+    <section id="tab-game" class="tab-pane hidden space-y-6">
+      <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200">
+        
+        <!-- 頂部計時器、生命值與戰報條 -->
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-200">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="px-3 py-1 bg-amber-500 text-slate-900 rounded-full font-black text-xs uppercase tracking-wider">限時 2 分鐘</span>
+              <h2 class="text-2xl font-black text-slate-900">旗語極速解密王</h2>
             </div>
+            <p class="text-sm text-slate-500 mt-1">連擊答對搶高分 ｜ 答錯累計 3 次即刻終止挑戰</p>
+          </div>
+
+          <!-- 愛心生命值 (❤️❤️❤️) -->
+          <div class="flex items-center space-x-4 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-200">
+            <div class="text-sm font-bold text-slate-600">剩餘機會：</div>
+            <div id="game-lives" class="flex space-x-1.5 text-2xl text-rose-500">
+              <i class="fa-solid fa-heart"></i>
+              <i class="fa-solid fa-heart"></i>
+              <i class="fa-solid fa-heart"></i>
+            </div>
+          </div>
+
+          <!-- 大倒數時鐘 -->
+          <div class="flex items-center space-x-3 bg-slate-900 text-white px-5 py-2.5 rounded-2xl shadow">
+            <i class="fa-solid fa-clock text-amber-400 text-xl"></i>
+            <span id="game-timer" class="font-mono text-3xl font-black tracking-wider">02:00</span>
+          </div>
         </div>
+
+        <!-- 平滑倒數進度條 -->
+        <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden mt-4 border border-slate-200">
+          <div id="game-progress-bar" class="bg-gradient-to-r from-emerald-500 via-indigo-500 to-rose-500 h-full w-full transition-all duration-300"></div>
+        </div>
+
+        <!-- 挑戰賽主區域 -->
+        <div id="game-arena" class="mt-6">
+          
+          <!-- 遊戲開始前面板 -->
+          <div id="game-start-panel" class="text-center py-10 space-y-6 max-w-xl mx-auto">
+            <div class="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-3xl flex items-center justify-center mx-auto text-4xl shadow-inner">
+              <i class="fa-solid fa-bolt"></i>
+            </div>
+            <div class="space-y-2">
+              <h3 class="text-2xl font-black text-slate-900">準備好進行 2 分鐘極速解密了嗎？</h3>
+              <p class="text-base text-slate-600 leading-relaxed">
+                題庫收錄 36 道隨機循環週期與整除盲區題。<br>
+                每次挑戰隨機洗牌不重複，答錯滿 3 次即立即結算。
+              </p>
+            </div>
+            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
+              <input type="text" id="game-player-name" placeholder="請輸入小組或座號" class="w-full sm:w-64 p-3.5 bg-slate-50 rounded-xl border border-slate-300 text-center font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500">
+              <button onclick="startGameChallenge()" class="touch-btn w-full sm:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-black text-lg shadow-lg active:scale-95 transition">
+                <i class="fa-solid fa-play mr-2"></i> 開始挑戰
+              </button>
+            </div>
+          </div>
+
+          <!-- 遊戲進行中題目畫面 -->
+          <div id="game-active-panel" class="hidden max-w-2xl mx-auto space-y-6">
+            
+            <div class="flex items-center justify-between text-sm font-bold text-slate-500">
+              <span>第 <span id="current-q-index" class="text-indigo-600 text-lg">1</span> / 36 題</span>
+              <span>目前得分：<span id="current-score" class="text-emerald-600 text-lg font-black">0</span> 分</span>
+            </div>
+
+            <!-- 題目主展示卡 -->
+            <div class="bg-indigo-50/70 border-2 border-indigo-200 rounded-3xl p-6 sm:p-8 text-center space-y-4 shadow-sm">
+              <div class="inline-block px-4 py-1.5 bg-indigo-600 text-white text-xs font-black rounded-full shadow-sm">
+                週期規律題目
+              </div>
+              <div id="q-text" class="text-xl sm:text-2xl font-black text-slate-900 leading-relaxed">
+                <!-- 題目文字 -->
+              </div>
+              <div id="q-pattern-visual" class="p-3 bg-white rounded-2xl border border-indigo-100 text-2xl tracking-widest font-black text-indigo-700 shadow-inner flex items-center justify-center min-h-[60px]">
+                <!-- 視覺循環符號 -->
+              </div>
+            </div>
+
+            <!-- 四選一作答選項 -->
+            <div id="q-options" class="grid grid-cols-2 gap-4">
+              <!-- 動態生成 4 個選項按鈕 -->
+            </div>
+
+            <!-- 即時解析回饋小卡 -->
+            <div id="q-feedback" class="hidden p-4 rounded-2xl font-bold text-sm leading-relaxed border transition"></div>
+
+          </div>
+
+          <!-- 遊戲結束與 4F 智慧反思產出面板 -->
+          <div id="game-result-panel" class="hidden max-w-2xl mx-auto space-y-6">
+            
+            <div class="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl text-center space-y-4">
+              <div class="w-16 h-16 bg-amber-400 text-slate-900 rounded-2xl flex items-center justify-center mx-auto text-3xl font-black shadow">
+                <i class="fa-solid fa-award"></i>
+              </div>
+              <h3 class="text-2xl sm:text-3xl font-black" id="result-title">挑戰完成！</h3>
+              <p class="text-slate-300 text-sm" id="result-reason">達成 2 分鐘限時挑戰，獲得榮譽勳章！</p>
+              
+              <div class="grid grid-cols-4 gap-2 pt-2">
+                <div class="bg-white/10 p-3 rounded-xl">
+                  <div class="text-xs text-slate-300">總得分</div>
+                  <div id="res-score" class="text-2xl font-black text-amber-300">0</div>
+                </div>
+                <div class="bg-white/10 p-3 rounded-xl">
+                  <div class="text-xs text-slate-300">作答數</div>
+                  <div id="res-total" class="text-2xl font-black text-white">0</div>
+                </div>
+                <div class="bg-white/10 p-3 rounded-xl">
+                  <div class="text-xs text-slate-300">正確數</div>
+                  <div id="res-correct" class="text-2xl font-black text-emerald-400">0</div>
+                </div>
+                <div class="bg-white/10 p-3 rounded-xl">
+                  <div class="text-xs text-slate-300">失誤次數</div>
+                  <div id="res-strikes" class="text-2xl font-black text-rose-400">0</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 自動套用 4F 思考模式卡片 -->
+            <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-indigo-100 shadow-sm space-y-5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <span class="w-3 h-7 bg-indigo-600 rounded-full"></span>
+                  <h4 class="text-xl font-black text-slate-900">4F 焦點反思筆記（系統已依戰報智能產出）</h4>
+                </div>
+                <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200">後設認知轉換</span>
+              </div>
+
+              <div class="space-y-4">
+                <!-- Facts -->
+                <div class="p-4 bg-sky-50 rounded-2xl border border-sky-100">
+                  <div class="text-xs font-black text-sky-800 uppercase tracking-wider mb-1 flex items-center space-x-1.5">
+                    <i class="fa-solid fa-database"></i>
+                    <span>[Facts] 客觀事實數據</span>
+                  </div>
+                  <p id="4f-facts" class="text-sm font-bold text-slate-700 leading-relaxed"></p>
+                </div>
+
+                <!-- Feelings -->
+                <div class="p-4 bg-amber-50 rounded-2xl border border-amber-100">
+                  <div class="text-xs font-black text-amber-800 uppercase tracking-wider mb-2 flex items-center space-x-1.5">
+                    <i class="fa-solid fa-heart"></i>
+                    <span>[Feelings] 感受體驗（點選切換心境標籤）</span>
+                  </div>
+                  <div class="flex flex-wrap gap-2 mb-2" id="feeling-tags-container">
+                    <button onclick="selectFeelingTag(this)" class="tag-btn px-3 py-1 bg-white text-slate-700 border border-amber-300 rounded-lg text-xs font-bold active:scale-95 transition">⚡ 倒數兩分鐘心跳加速</button>
+                    <button onclick="selectFeelingTag(this)" class="tag-btn px-3 py-1 bg-white text-slate-700 border border-amber-300 rounded-lg text-xs font-bold active:scale-95 transition">🎯 秒殺餘數題目超有成就感</button>
+                    <button onclick="selectFeelingTag(this)" class="tag-btn px-3 py-1 bg-white text-slate-700 border border-amber-300 rounded-lg text-xs font-bold active:scale-95 transition">💡 避開整除陷阱恍然大悟</button>
+                    <button onclick="selectFeelingTag(this)" class="tag-btn px-3 py-1 bg-white text-slate-700 border border-amber-300 rounded-lg text-xs font-bold active:scale-95 transition">⏱️ 扣心警示手忙腳亂</button>
+                  </div>
+                  <input type="text" id="4f-feelings-custom" placeholder="亦可補充自己的心得感受..." class="w-full p-2.5 bg-white rounded-xl border border-amber-200 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-amber-400">
+                </div>
+
+                <!-- Findings -->
+                <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                  <div class="text-xs font-black text-emerald-800 uppercase tracking-wider mb-1 flex items-center space-x-1.5">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <span>[Findings] 數感規律洞察</span>
+                  </div>
+                  <p id="4f-findings" class="text-sm font-bold text-slate-700 leading-relaxed"></p>
+                </div>
+
+                <!-- Future -->
+                <div class="p-4 bg-purple-50 rounded-2xl border border-purple-100">
+                  <div class="text-xs font-black text-purple-800 uppercase tracking-wider mb-1 flex items-center space-x-1.5">
+                    <i class="fa-solid fa-rocket"></i>
+                    <span>[Future] 未來生活應用</span>
+                  </div>
+                  <p id="4f-future" class="text-sm font-bold text-slate-700 leading-relaxed"></p>
+                </div>
+              </div>
+
+              <!-- 成果發布按鍵 -->
+              <div class="flex flex-col sm:flex-row gap-3 pt-2">
+                <button onclick="publishToWall()" class="touch-btn flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-black text-base shadow-lg active:scale-95 transition flex items-center justify-center space-x-2">
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                  <span>發布 4F 成果至展示牆</span>
+                </button>
+                <button onclick="resetGame()" class="touch-btn px-6 py-3.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-base active:scale-95 transition">
+                  <i class="fa-solid fa-rotate-right mr-1"></i> 再挑戰一次
+                </button>
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ================= 成果展示牆 ================= -->
+    <section id="tab-showcase" class="tab-pane hidden space-y-6">
+      <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200">
+        
+        <div class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-200">
+          <div>
+            <div class="flex items-center space-x-2">
+              <span class="w-3 h-8 bg-emerald-500 rounded-full"></span>
+              <h2 class="text-2xl font-black text-slate-900">全班學習成果展示牆</h2>
+            </div>
+            <p class="text-sm text-slate-500 mt-1">展示同儕 4F 思考筆記與挑戰賽榮譽 ｜ 支援匯出高解析海報圖片</p>
+          </div>
+
+          <div class="flex space-x-2">
+            <button onclick="exportShowcasePNG()" class="touch-btn px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-black text-sm shadow flex items-center space-x-2 active:scale-95 transition">
+              <i class="fa-solid fa-file-image"></i>
+              <span>匯出成果圖檔 (PNG)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 成果卡片網格 -->
+        <div id="showcase-container" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 p-2 bg-slate-50 rounded-2xl border border-slate-200 min-h-[260px]">
+          <!-- 卡片動態注入 -->
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= 頁面最下方文字 (嚴格居中標記) ================= -->
+  <footer class="bg-slate-900 text-slate-400 py-4 px-4 text-center border-t border-slate-800 text-sm font-medium tracking-wide">
+    數感實驗室  | 互動學習系統 | Design：S.C. Kuo
+  </footer>
+
+  <!-- ================= QR Code 彈窗 ================= -->
+  <div id="modal-qr" class="fixed inset-0 bg-slate-950/70 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center shadow-2xl space-y-5 border border-slate-200">
+      <div class="flex justify-between items-center pb-2 border-b border-slate-100">
+        <h3 class="text-lg font-black text-slate-900 flex items-center space-x-2">
+          <i class="fa-solid fa-qrcode text-indigo-600"></i>
+          <span>iPad 掃碼載入網頁</span>
+        </h3>
+        <button onclick="closeModal('modal-qr')" class="w-8 h-8 text-slate-400 hover:text-slate-600 rounded-full flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+      <div class="p-3 bg-white border-2 border-dashed border-indigo-200 rounded-2xl flex items-center justify-center min-h-[190px]">
+        <div id="qrcode-box" class="p-1"></div>
+      </div>
+      <p class="text-xs text-slate-500 font-medium">使用 iPad 相機直接對準畫面掃描即可開啟</p>
+      <button onclick="copyCurrentUrl()" class="touch-btn w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold text-sm shadow-sm flex items-center justify-center space-x-2 active:scale-95 transition">
+        <i class="fa-solid fa-copy text-indigo-600"></i>
+        <span>一鍵複製網址</span>
+      </button>
     </div>
+  </div>
 
-    <!-- Custom Toast Notification Box -->
-    <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-slate-900 text-white font-bold px-6 py-3 rounded-2xl shadow-2xl z-50 hidden transition-all duration-300 border-2 border-slate-700 text-center text-sm sm:text-base"></div>
+  <!-- ================= 課程設計說明彈窗 ================= -->
+  <div id="modal-guide" class="fixed inset-0 bg-slate-950/70 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-3xl w-full shadow-2xl space-y-6 border border-slate-200 max-h-[88vh] overflow-y-auto">
+      
+      <div class="flex justify-between items-center pb-4 border-b border-slate-200 sticky top-0 bg-white z-10">
+        <div class="flex items-center space-x-3">
+          <div class="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center text-xl shadow">
+            <i class="fa-solid fa-book-open"></i>
+          </div>
+          <h3 class="text-2xl font-black text-slate-900">課程設計說明</h3>
+        </div>
+        <button onclick="closeModal('modal-guide')" class="w-9 h-9 text-slate-400 hover:text-slate-600 rounded-full flex items-center justify-center">
+          <i class="fa-solid fa-xmark text-xl"></i>
+        </button>
+      </div>
 
-    <script>
-        /* ----------------------------------------------------
-           GLOBAL STATE MANAGEMENT
-        ---------------------------------------------------- */
-        let learningState = {
-            act1Answered: false,
-            act1Correct: false,
-            act2TrapSolved: false,
-            bestGameScore: 0,
-            submissions: []
-        };
+      <div class="space-y-6 text-slate-700 text-base leading-relaxed">
+        
+        <!-- 一、學習目標 -->
+        <div class="bg-indigo-50/60 p-5 rounded-2xl border border-indigo-100 space-y-3">
+          <h4 class="text-lg font-black text-indigo-950 flex items-center space-x-2">
+            <span class="w-2.5 h-2.5 bg-indigo-600 rounded-full"></span>
+            <span>一、學習目標</span>
+          </h4>
+          <ul class="space-y-2 text-sm sm:text-base font-medium">
+            <li class="flex items-start space-x-2">
+              <strong class="text-indigo-700 min-w-[5rem]">【認知層面】</strong>
+              <span>能找出序列中的「循環單元」，熟練運用除法算式預測第 N 項元素，並理解「整除（餘數 0）代表該循環單元的最後一個元素」的數學本質。</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <strong class="text-indigo-700 min-w-[5rem]">【技能層面】</strong>
+              <span>能運用觸控面板自主設計幾何規律陣列，進行同儕互考，並在 2 分鐘極速競賽中展現週期心算與抗壓辨析能力。</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <strong class="text-indigo-700 min-w-[5rem]">【情意素養】</strong>
+              <span>能透過 4F 焦點思考模式檢核解題盲區，將週期規律概念遷移至交通號誌、排班輪替與節奏編排等生活情境中。</span>
+            </li>
+          </ul>
+        </div>
 
-        let isAnimatingFlags = true;
-        let flagAnimFrame = 0;
-        let drawColor = '#ef4444';
-        let isDrawing = false;
-        let lastCreatedCipherDataUrl = null;
+        <!-- 二、網頁操作說明 -->
+        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3">
+          <h4 class="text-lg font-black text-slate-900 flex items-center space-x-2">
+            <span class="w-2.5 h-2.5 bg-emerald-600 rounded-full"></span>
+            <span>二、網頁操作說明</span>
+          </h4>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+            <div class="p-3 bg-white rounded-xl border border-slate-200">
+              <div class="font-bold text-slate-900 mb-1">頂部純圖示功能列</div>
+              <p class="text-slate-600 text-xs">① QR Code 產生目前網址 ➔ ② 全螢幕切換（支援 iPadOS）➔ ③ 課程設計說明手冊。</p>
+            </div>
+            <div class="p-3 bg-white rounded-xl border border-slate-200">
+              <div class="font-bold text-slate-900 mb-1">活動一：信號觀測與預測</div>
+              <p class="text-slate-600 text-xs">觀測 Canvas 動態旗語揮舞，點選按鈕檢驗第 100 面旗幟顏色與除法算式關係。</p>
+            </div>
+            <div class="p-3 bg-white rounded-xl border border-slate-200">
+              <div class="font-bold text-slate-900 mb-1">活動二：幾何畫布與盲區破解</div>
+              <p class="text-slate-600 text-xs">自由點選符號組合密碼，自動產出無窮陣列並提供同儕推算；突破餘數為零之思維死角。</p>
+            </div>
+            <div class="p-3 bg-white rounded-xl border border-slate-200">
+              <div class="font-bold text-slate-900 mb-1">挑戰賽 ➔ 4F 展示牆</div>
+              <p class="text-slate-600 text-xs">限時 120 秒挑戰 36 題隨機題庫，錯 3 次終止。結算自動產出 4F 圖卡發布並支援匯出 PNG。</p>
+            </div>
+          </div>
+        </div>
 
-        /* ----------------------------------------------------
-           1-MINUTE GAME CHALLENGE STATE
-        ---------------------------------------------------- */
-        let gameActive = false;
-        let gameTimer = null;
-        let gameTimeRemaining = 60; // 1 minute countdown
-        let gameScore = 0;
-        let gameCombo = 0;
-        let gameMaxCombo = 0;
-        let gameStrikes = 0; // Strike count (max 3)
-        let gameCorrectCount = 0;
-        let currentQuestion = null;
+        <!-- 三、課堂提問建議 -->
+        <div class="bg-amber-50/60 p-5 rounded-2xl border border-amber-100 space-y-3">
+          <h4 class="text-lg font-black text-amber-950 flex items-center space-x-2">
+            <span class="w-2.5 h-2.5 bg-amber-600 rounded-full"></span>
+            <span>三、課堂提問建議</span>
+          </h4>
+          <ul class="space-y-2 text-sm sm:text-base font-medium">
+            <li class="flex items-start space-x-2">
+              <span class="text-amber-600 font-bold min-w-[5.5rem]">1. 導入提問：</span>
+              <span>「如果第 100 面旗幟不需要一面面畫出來，除法算式中的『商數 33』與『餘數 1』分別代表什麼意思？」</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="text-amber-600 font-bold min-w-[5.5rem]">2. 盲區提問：</span>
+              <span>「當算式算出來剛好整除（餘數是 0）的時候，陣列裡有第 0 個圖形嗎？我們該看循環單元的哪一個？」</span>
+            </li>
+            <li class="flex items-start space-x-2">
+              <span class="text-amber-600 font-bold min-w-[5.5rem]">3. 遷移提問：</span>
+              <span>「如果今天是星期三，經過 50 天之後會是星期幾？這道生活難題能不能用今天的旗語週期公式解開？」</span>
+            </li>
+          </ul>
+        </div>
 
-        // Color palettes used for game cycle problems
-        const COLOR_PALETTES = [
-            { name: '三色循環', colors: [{ label: '紅', hex: '#ef4444' }, { label: '白', hex: '#ffffff', textDark: true }, { label: '藍', hex: '#3b82f6' }] },
-            { name: '四色循環', colors: [{ label: '紅', hex: '#ef4444' }, { label: '黃', hex: '#eab308' }, { label: '綠', hex: '#10b981' }, { label: '藍', hex: '#3b82f6' }] },
-            { name: '五色循環', colors: [{ label: '紅', hex: '#ef4444' }, { label: '白', hex: '#ffffff', textDark: true }, { label: '黃', hex: '#eab308' }, { label: '綠', hex: '#10b981' }, { label: '紫', hex: '#a855f7' }] }
-        ];
+      </div>
 
-        /* ----------------------------------------------------
-           TAB NAVIGATION LOGIC (5 Tabs)
-        ---------------------------------------------------- */
-        function switchTab(tabNum) {
-            // Hide all 5 activity sections
-            for (let i = 1; i <= 5; i++) {
-                const sec = document.getElementById(`activity-${i}`);
-                if (sec) sec.classList.add('hidden');
-                
-                const btn = document.getElementById(`tab-btn-${i}`);
-                if (btn) {
-                    btn.className = "touch-btn p-3 rounded-2xl font-black text-sm sm:text-base text-center shadow-md border-4 border-transparent bg-white text-slate-700 hover:bg-slate-50 flex items-center justify-center space-x-1.5";
-                }
+      <div class="pt-2">
+        <button onclick="closeModal('modal-guide')" class="touch-btn w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow text-base active:scale-95 transition">
+          關閉說明手冊
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Toast 訊息通知元件 -->
+  <div id="toast" class="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 hidden px-5 py-3 bg-slate-900 text-white rounded-2xl shadow-2xl text-sm font-bold flex items-center space-x-2 border border-slate-700 transition-opacity duration-300">
+    <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
+    <span id="toast-msg">訊息文字</span>
+  </div>
+
+  <!-- ================= 系統主要 JavaScript 核心邏輯 ================= -->
+  <script>
+    /* ================= 全域狀態管理 ================= */
+    const STATE = {
+      activeTab: 'tab-intro',
+      signalIndex: 9,
+      signalTimer: null,
+      signalColors: ['#f43f5e', '#f8fafc', '#38bdf8'], // 紅、白、藍
+      customPattern: [],
+      game: {
+        timer: null,
+        timeLeft: 120, // 2 分鐘 (120 秒)
+        totalTime: 120,
+        strikes: 0,
+        maxStrikes: 3,
+        score: 0,
+        currentQIndex: 0,
+        answeredCount: 0,
+        correctCount: 0,
+        activeQuestion: null,
+        isAnswerLocked: false,
+        questions: []
+      },
+      showcaseWorks: []
+    };
+
+    /* ================= 36 道原創結構化題庫 (包含 3/4/5 週期、生活規律、整除盲區) ================= */
+    const QUESTION_BANK = [
+      // 3 色循環 (紅 白 藍)
+      { id: 1, cycle: ['🔴', '⚪', '🔵'], target: 10, correct: '🔴', options: ['🔴', '⚪', '🔵', '⭐'], reason: '10 ÷ 3 = 3 輪 … 餘 1，對應單元第 1 個：🔴' },
+      { id: 2, cycle: ['🔴', '⚪', '🔵'], target: 24, correct: '🔵', options: ['🔴', '⚪', '🔵', '🔷'], reason: '24 ÷ 3 = 8 輪 … 餘 0（整除），對應單元最後一個：🔵' },
+      { id: 3, cycle: ['🔴', '⚪', '🔵'], target: 35, correct: '⚪', options: ['🔴', '⚪', '🔵', '🔺'], reason: '35 ÷ 3 = 11 輪 … 餘 2，對應單元第 2 個：⚪' },
+      { id: 4, cycle: ['🔴', '⚪', '🔵'], target: 60, correct: '🔵', options: ['🔴', '⚪', '🔵', '⭐'], reason: '60 ÷ 3 = 20 輪 … 餘 0（整除），整輪結束為最後一個：🔵' },
+      { id: 5, cycle: ['🔴', '⚪', '🔵'], target: 99, correct: '🔵', options: ['🔴', '⚪', '🔵', '🟣'], reason: '99 ÷ 3 = 33 輪 … 餘 0（整除），為第 33 輪最後一個：🔵' },
+      { id: 6, cycle: ['🔴', '⚪', '🔵'], target: 100, correct: '🔴', options: ['🔴', '⚪', '🔵', '🟩'], reason: '100 ÷ 3 = 33 輪 … 餘 1，為第 34 輪第 1 個：🔴' },
+      
+      // 4 圖形循環 (🔴 🔷 ⭐ 🔺)
+      { id: 7, cycle: ['🔴', '🔷', '⭐', '🔺'], target: 12, correct: '🔺', options: ['🔴', '🔷', '⭐', '🔺'], reason: '12 ÷ 4 = 3 輪 … 餘 0（整除），整除代表循環單元最後一個：🔺' },
+      { id: 8, cycle: ['🔴', '🔷', '⭐', '🔺'], target: 17, correct: '🔴', options: ['🔴', '🔷', '⭐', '🔺'], reason: '17 ÷ 4 = 4 輪 … 餘 1，對應單元第 1 個：🔴' },
+      { id: 9, cycle: ['🔴', '🔷', '⭐', '🔺'], target: 22, correct: '🔷', options: ['🔴', '🔷', '⭐', '🔺'], reason: '22 ÷ 4 = 5 輪 … 餘 2，對應單元第 2 個：🔷' },
+      { id: 10, cycle: ['🔴', '🔷', '⭐', '🔺'], target: 27, correct: '⭐', options: ['🔴', '🔷', '⭐', '🔺'], reason: '27 ÷ 4 = 6 輪 … 餘 3，對應單元第 3 個：⭐' },
+      { id: 11, cycle: ['🔴', '🔷', '⭐', '🔺'], target: 40, correct: '🔺', options: ['🔴', '🔷', '⭐', '🔺'], reason: '40 ÷ 4 = 10 輪 … 餘 0（整除），為單元最後一個：🔺' },
+      { id: 12, cycle: ['🔴', '🔷', '⭐', '🔺'], target: 41, correct: '🔴', options: ['🔴', '🔷', '⭐', '🔺'], reason: '41 ÷ 4 = 10 輪 … 餘 1，下一輪開頭第 1 個：🔴' },
+
+      // 5 符號循環 (🚩 🏳️ 🏴 🏁 🎯)
+      { id: 13, cycle: ['🚩', '🏳️', '🏴', '🏁', '🎯'], target: 15, correct: '🎯', options: ['🚩', '🏳️', '🏁', '🎯'], reason: '15 ÷ 5 = 3 輪 … 餘 0（整除），剛好是最後一個：🎯' },
+      { id: 14, cycle: ['🚩', '🏳️', '🏴', '🏁', '🎯'], target: 21, correct: '🚩', options: ['🚩', '🏳️', '🏴', '🎯'], reason: '21 ÷ 5 = 4 輪 … 餘 1，對應單元第 1 個：🚩' },
+      { id: 15, cycle: ['🚩', '🏳️', '🏴', '🏁', '🎯'], target: 33, correct: '🏴', options: ['🚩', '🏳️', '🏴', '🏁'], reason: '33 ÷ 5 = 6 輪 … 餘 3，對應單元第 3 個：🏴' },
+      { id: 16, cycle: ['🚩', '🏳️', '🏴', '🏁', '🎯'], target: 50, correct: '🎯', options: ['🚩', '🏳️', '🏁', '🎯'], reason: '50 ÷ 5 = 10 輪 … 餘 0（整除），整除為最後一個：🎯' },
+      { id: 17, cycle: ['🚩', '🏳️', '🏴', '🏁', '🎯'], target: 74, correct: '🏁', options: ['🏳️', '🏴', '🏁', '🎯'], reason: '74 ÷ 5 = 14 輪 … 餘 4，對應單元第 4 個：🏁' },
+
+      // 生活規律與星期週期 (長度 7)
+      { id: 18, cycle: ['週一', '週二', '週三', '週四', '週五', '週六', '週日'], target: 14, correct: '週日', options: ['週一', '週五', '週六', '週日'], reason: '14 ÷ 7 = 2 輪 … 餘 0（整除），為週期最後一天：週日' },
+      { id: 19, cycle: ['週一', '週二', '週三', '週四', '週五', '週六', '週日'], target: 15, correct: '週一', options: ['週一', '週二', '週六', '週日'], reason: '15 ÷ 7 = 2 輪 … 餘 1，為新一週第 1 天：週一' },
+      { id: 20, cycle: ['週一', '週二', '週三', '週四', '週五', '週六', '週日'], target: 50, correct: '週一', options: ['週日', '週一', '週二', '週三'], reason: '50 ÷ 7 = 7 輪 … 餘 1，對應週期第 1 天：週一' },
+
+      // 四季循環 (春 夏 秋 冬)
+      { id: 21, cycle: ['🌸春', '☀️夏', '🍁秋', '❄️冬'], target: 16, correct: '❄️冬', options: ['🌸春', '☀️夏', '🍁秋', '❄️冬'], reason: '16 ÷ 4 = 4 輪 … 餘 0（整除），為單元最後一個：❄️冬' },
+      { id: 22, cycle: ['🌸春', '☀️夏', '🍁秋', '❄️冬'], target: 25, correct: '🌸春', options: ['🌸春', '☀️夏', '🍁秋', '❄️冬'], reason: '25 ÷ 4 = 6 輪 … 餘 1，為單元第 1 個：🌸春' },
+
+      // 雙色高頻推算 (黑 白) - 週期 2
+      { id: 23, cycle: ['⬛', '⬜'], target: 87, correct: '⬛', options: ['⬛', '⬜', '🟥', '🟦'], reason: '87 ÷ 2 = 43 輪 … 餘 1（奇數），對應第 1 個：⬛' },
+      { id: 24, cycle: ['⬛', '⬜'], target: 100, correct: '⬜', options: ['⬛', '⬜', '🟥', '🟨'], reason: '100 ÷ 2 = 50 輪 … 餘 0（偶數整除），對應最後一個：⬜' },
+
+      // 幾何方向循環 (⬆️ ➡️ ⬇️ ⬅️) - 週期 4
+      { id: 25, cycle: ['⬆️', '➡️', '⬇️', '⬅️'], target: 36, correct: '⬅️', options: ['⬆️', '➡️', '⬇️', '⬅️'], reason: '36 ÷ 4 = 9 輪 … 餘 0（整除），方向為最後一個：⬅️' },
+      { id: 26, cycle: ['⬆️', '➡️', '⬇️', '⬅️'], target: 39, correct: '⬇️', options: ['⬆️', '➡️', '⬇️', '⬅️'], reason: '39 ÷ 4 = 9 輪 … 餘 3，方向為第 3 個：⬇️' },
+
+      // 旗語音階 (Do Re Mi Fa Sol) - 週期 5
+      { id: 27, cycle: ['Do', 'Re', 'Mi', 'Fa', 'Sol'], target: 20, correct: 'Sol', options: ['Do', 'Mi', 'Fa', 'Sol'], reason: '20 ÷ 5 = 4 輪 … 餘 0（整除），為最後一個音：Sol' },
+      { id: 28, cycle: ['Do', 'Re', 'Mi', 'Fa', 'Sol'], target: 22, correct: 'Re', options: ['Do', 'Re', 'Mi', 'Sol'], reason: '22 ÷ 5 = 4 輪 … 餘 2，為單元第 2 個音：Re' },
+
+      // 4色燈號循環 (🟢 🟡 🔴 🔵)
+      { id: 29, cycle: ['🟢', '🟡', '🔴', '🔵'], target: 48, correct: '🔵', options: ['🟢', '🟡', '🔴', '🔵'], reason: '48 ÷ 4 = 12 輪 … 餘 0（整除），燈號為最後一個：🔵' },
+      { id: 30, cycle: ['🟢', '🟡', '🔴', '🔵'], target: 49, correct: '🟢', options: ['🟢', '🟡', '🔴', '🔵'], reason: '49 ÷ 4 = 12 輪 … 餘 1，燈號為新的一輪開頭：🟢' },
+
+      // 代號與天體循環題
+      { id: 31, cycle: ['甲', '乙', '丙'], target: 90, correct: '丙', options: ['甲', '乙', '丙', '丁'], reason: '90 ÷ 3 = 30 輪 … 餘 0（整除），對應循環最後一個：丙' },
+      { id: 32, cycle: ['甲', '乙', '丙'], target: 91, correct: '甲', options: ['甲', '乙', '丙', '丁'], reason: '91 ÷ 3 = 30 輪 … 餘 1，對應循環第 1 個：甲' },
+      { id: 33, cycle: ['A', 'B', 'C', 'D'], target: 80, correct: 'D', options: ['A', 'B', 'C', 'D'], reason: '80 ÷ 4 = 20 輪 … 餘 0（整除），整除必為單元尾端：D' },
+      { id: 34, cycle: ['A', 'B', 'C', 'D'], target: 82, correct: 'B', options: ['A', 'B', 'C', 'D'], reason: '82 ÷ 4 = 20 輪 … 餘 2，對應單元第 2 個字母：B' },
+      { id: 35, cycle: ['太陽', '月亮', '星星'], target: 300, correct: '星星', options: ['太陽', '月亮', '星星', '雲朵'], reason: '300 ÷ 3 = 100 輪 … 餘 0（整除），為最後一個：星星' },
+      { id: 36, cycle: ['太陽', '月亮', '星星'], target: 301, correct: '太陽', options: ['太陽', '月亮', '星星', '流星'], reason: '301 ÷ 3 = 100 輪 … 餘 1，新的一輪第 1 個：太陽' }
+    ];
+
+    // Fisher-Yates 無偏誤洗牌演算法
+    function shuffleArray(arr) {
+      const copy = [...arr];
+      for (let i = copy.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [copy[i], copy[j]] = [copy[j], copy[i]];
+      }
+      return copy;
+    }
+
+    /* ================= 網頁初始化 ================= */
+    window.addEventListener('DOMContentLoaded', () => {
+      initSignalsCanvas();
+      initQRModal();
+      setupFullscreenEvents();
+      setupKeydownEvents();
+      renderShowcaseWall();
+    });
+
+    /* ================= 分頁導覽切換 ================= */
+    function switchTab(tabId) {
+      STATE.activeTab = tabId;
+      document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(b => {
+        b.classList.remove('bg-indigo-600', 'text-white', 'shadow');
+        b.classList.add('text-slate-300');
+      });
+
+      const activePane = document.getElementById(tabId);
+      if (activePane) activePane.classList.remove('hidden');
+
+      const navBtnMap = {
+        'tab-intro': 'nav-intro',
+        'tab-core': 'nav-core',
+        'tab-game': 'nav-game',
+        'tab-showcase': 'nav-showcase'
+      };
+      const activeNav = document.getElementById(navBtnMap[tabId]);
+      if (activeNav) {
+        activeNav.classList.remove('text-slate-300');
+        activeNav.classList.add('bg-indigo-600', 'text-white', 'shadow');
+      }
+
+      if (tabId === 'tab-intro') {
+        renderSignals();
+      }
+    }
+
+    /* ================= 活動一：信號動態繪圖與預測 ================= */
+    function initSignalsCanvas() {
+      renderSignals();
+    }
+
+    function renderSignals() {
+      const canvas = document.getElementById('canvas-signals');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const count = STATE.signalIndex;
+      const flagWidth = 60;
+      const startX = 30;
+      const spacing = 90;
+
+      for (let i = 0; i < count; i++) {
+        const cyclePos = i % 3; // 0=紅, 1=白, 2=藍
+        const x = startX + i * spacing;
+        const y = 35;
+
+        // 旗桿
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y + 80);
+        ctx.stroke();
+
+        // 旗幟布面
+        ctx.fillStyle = STATE.signalColors[cyclePos];
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + flagWidth, y + 20);
+        ctx.lineTo(x, y + 40);
+        ctx.closePath();
+        ctx.fill();
+        ctx.strokeStyle = '#475569';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+
+        // 編號
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = 'bold 13px Noto Sans TC';
+        ctx.textAlign = 'center';
+        ctx.fillText(`第${i + 1}面`, x + 15, y + 100);
+      }
+
+      const countLabel = document.getElementById('signal-count');
+      if (countLabel) countLabel.textContent = count;
+    }
+
+    function stepSignal() {
+      STATE.signalIndex = (STATE.signalIndex % 9) + 1;
+      renderSignals();
+    }
+
+    function toggleSignalPlay() {
+      const btn = document.getElementById('btn-signal-play');
+      if (STATE.signalTimer) {
+        clearInterval(STATE.signalTimer);
+        STATE.signalTimer = null;
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-play mr-1"></i> 自動播放';
+      } else {
+        STATE.signalTimer = setInterval(() => {
+          stepSignal();
+        }, 800);
+        if (btn) btn.innerHTML = '<i class="fa-solid fa-pause mr-1"></i> 暫停播放';
+      }
+    }
+
+    function checkIntroAnswer(choice) {
+      const fb = document.getElementById('intro-feedback');
+      if (!fb) return;
+      fb.classList.remove('hidden', 'bg-rose-100', 'text-rose-900', 'border-rose-300', 'bg-emerald-100', 'text-emerald-900', 'border-emerald-300');
+
+      if (choice === '紅') {
+        fb.classList.add('bg-emerald-100', 'text-emerald-900', 'border-emerald-300');
+        fb.innerHTML = `
+          <div class="flex items-center space-x-2 text-lg font-black mb-1">
+            <i class="fa-solid fa-circle-check text-emerald-600"></i>
+            <span>太神了！完全正確！第 100 面旗幟正是「紅旗」！</span>
+          </div>
+          <div class="text-sm font-medium">
+            數學解析：100 ÷ 3 = 33 … 餘 1。商數 33 代表已經完整揮舞了 33 輪【紅 ➔ 白 ➔ 藍】，剩下的餘數 1 代表下一輪的「第 1 面」，也就是紅旗！
+          </div>
+        `;
+      } else {
+        fb.classList.add('bg-rose-100', 'text-rose-900', 'border-rose-300');
+        fb.innerHTML = `
+          <div class="flex items-center space-x-2 text-lg font-black mb-1">
+            <i class="fa-solid fa-circle-xmark text-rose-600"></i>
+            <span>再想想看喔！你選了「${choice}旗」</span>
+          </div>
+          <div class="text-sm font-medium">
+            思考引導：100 ÷ 3 = 33 … 餘 1。餘數是「1」，請對照循環單元【1:紅 ➔ 2:白 ➔ 3:藍】，餘數 1 對應哪一種顏色呢？
+          </div>
+        `;
+      }
+    }
+
+    /* ================= 活動二：幾何密碼畫布與出題 ================= */
+    function addPatternSymbol(symbol) {
+      if (STATE.customPattern.length >= 6) {
+        showToast('為維護平板操作體驗，單元週期建議不超過 6 個元素！', 'warning');
+        return;
+      }
+      STATE.customPattern.push(symbol);
+      renderCustomPattern();
+    }
+
+    function clearCustomPattern() {
+      STATE.customPattern = [];
+      renderCustomPattern();
+      const res = document.getElementById('peer-calc-result');
+      if (res) res.classList.add('hidden');
+    }
+
+    function renderCustomPattern() {
+      const display = document.getElementById('current-pattern-display');
+      const lenLabel = document.getElementById('pattern-length');
+      const arrayContainer = document.getElementById('infinite-pattern-array');
+
+      if (!display || !lenLabel || !arrayContainer) return;
+
+      lenLabel.textContent = STATE.customPattern.length;
+
+      if (STATE.customPattern.length === 0) {
+        display.innerHTML = '<span class="text-slate-400 text-sm font-normal">請由上方點選圖形加入...</span>';
+        arrayContainer.innerHTML = '<span class="text-slate-500 text-sm">請於左側添加至少 2 個符號以啟動密碼延伸...</span>';
+        return;
+      }
+
+      display.innerHTML = STATE.customPattern.map(s => `<span>${s}</span>`).join(' ➔ ');
+
+      // 渲染無限延伸前 24 個元素
+      let arrayHtml = '';
+      for (let i = 0; i < 24; i++) {
+        const item = STATE.customPattern[i % STATE.customPattern.length];
+        const isCycleEnd = (i % STATE.customPattern.length) === (STATE.customPattern.length - 1);
+        arrayHtml += `
+          <div class="flex flex-col items-center bg-slate-900 border ${isCycleEnd ? 'border-amber-400/80 bg-amber-950/30' : 'border-slate-800'} px-2.5 py-1.5 rounded-xl shadow">
+            <span class="text-xl">${item}</span>
+            <span class="text-[10px] font-mono text-slate-400">#${i + 1}</span>
+          </div>
+        `;
+      }
+      arrayContainer.innerHTML = arrayHtml;
+    }
+
+    function calcPeerAnswer() {
+      const input = document.getElementById('input-peer-target');
+      const res = document.getElementById('peer-calc-result');
+      if (!input || !res) return;
+
+      if (STATE.customPattern.length < 2) {
+        showToast('請先在左側組合出至少 2 個圖形的循環單元！', 'warning');
+        return;
+      }
+
+      const target = parseInt(input.value);
+      if (isNaN(target) || target <= 0) {
+        showToast('請輸入大於 0 的有效推算位置！', 'warning');
+        return;
+      }
+
+      const cycleLen = STATE.customPattern.length;
+      const quotient = Math.floor(target / cycleLen);
+      const remainder = target % cycleLen;
+      
+      let answerSymbol = '';
+      let desc = '';
+
+      if (remainder === 0) {
+        answerSymbol = STATE.customPattern[cycleLen - 1];
+        desc = `整除！剛好走完 ${quotient} 個完整循環，對應單元的<strong>最後一個元素</strong>。`;
+      } else {
+        answerSymbol = STATE.customPattern[remainder - 1];
+        desc = `餘數為 ${remainder}，對應第 ${quotient + 1} 個循環中的<strong>第 ${remainder} 個元素</strong>。`;
+      }
+
+      res.classList.remove('hidden');
+      res.innerHTML = `
+        <div class="text-indigo-900 font-bold">推算算式：${target} ÷ ${cycleLen} = ${quotient} … 餘 ${remainder}</div>
+        <div class="text-base font-black text-emerald-600 flex items-center space-x-2">
+          <span>解密答案：${answerSymbol}</span>
+        </div>
+        <div class="text-xs text-slate-600 leading-relaxed">${desc}</div>
+      `;
+    }
+
+    /* ================= 挑戰賽：2 分鐘旗語極速解密王 ================= */
+    function startGameChallenge() {
+      const nameInput = document.getElementById('game-player-name');
+      const playerName = nameInput ? nameInput.value.trim() : '';
+
+      STATE.game.timeLeft = 120;
+      STATE.game.totalTime = 120;
+      STATE.game.strikes = 0;
+      STATE.game.score = 0;
+      STATE.game.currentQIndex = 0;
+      STATE.game.answeredCount = 0;
+      STATE.game.correctCount = 0;
+      STATE.game.isAnswerLocked = false;
+      STATE.game.questions = shuffleArray(QUESTION_BANK);
+
+      document.getElementById('game-start-panel').classList.add('hidden');
+      document.getElementById('game-result-panel').classList.add('hidden');
+      document.getElementById('game-active-panel').classList.remove('hidden');
+
+      updateGameHearts();
+      updateScoreUI();
+      renderCurrentQuestion();
+
+      if (STATE.game.timer) clearInterval(STATE.game.timer);
+      STATE.game.timer = setInterval(() => {
+        STATE.game.timeLeft--;
+        updateGameTimerUI();
+
+        if (STATE.game.timeLeft <= 0) {
+          terminateGame('時限抵達！完成 2 分鐘極速解密挑戰！');
+        }
+      }, 1000);
+      updateGameTimerUI();
+    }
+
+    function updateGameTimerUI() {
+      const timerEl = document.getElementById('game-timer');
+      const progressEl = document.getElementById('game-progress-bar');
+      if (!timerEl || !progressEl) return;
+
+      const mins = Math.floor(STATE.game.timeLeft / 60);
+      const secs = STATE.game.timeLeft % 60;
+      timerEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+
+      const percent = (STATE.game.timeLeft / STATE.game.totalTime) * 100;
+      progressEl.style.width = `${percent}%`;
+
+      if (STATE.game.timeLeft <= 20) {
+        timerEl.classList.add('text-rose-400', 'animate-pulse');
+      } else {
+        timerEl.classList.remove('text-rose-400', 'animate-pulse');
+      }
+    }
+
+    function updateGameHearts() {
+      const container = document.getElementById('game-lives');
+      if (!container) return;
+      const remainingLives = STATE.game.maxStrikes - STATE.game.strikes;
+      let html = '';
+      for (let i = 0; i < STATE.game.maxStrikes; i++) {
+        if (i < remainingLives) {
+          html += '<i class="fa-solid fa-heart text-rose-500"></i>';
+        } else {
+          html += '<i class="fa-solid fa-heart text-slate-300"></i>';
+        }
+      }
+      container.innerHTML = html;
+    }
+
+    function updateScoreUI() {
+      const scoreEl = document.getElementById('current-score');
+      const qIndexEl = document.getElementById('current-q-index');
+      if (scoreEl) scoreEl.textContent = STATE.game.score;
+      if (qIndexEl) qIndexEl.textContent = STATE.game.currentQIndex + 1;
+    }
+
+    function renderCurrentQuestion() {
+      STATE.game.isAnswerLocked = false;
+      const fb = document.getElementById('q-feedback');
+      if (fb) fb.classList.add('hidden');
+
+      if (STATE.game.currentQIndex >= STATE.game.questions.length) {
+        terminateGame('題目全數作答完畢！你是最強旗語大師！');
+        return;
+      }
+
+      const q = STATE.game.questions[STATE.game.currentQIndex];
+      STATE.game.activeQuestion = q;
+
+      const qText = document.getElementById('q-text');
+      const qVisual = document.getElementById('q-pattern-visual');
+      const optionsContainer = document.getElementById('q-options');
+
+      if (qText) qText.textContent = `按照以下規律，第 ${q.target} 個元素是什麼？`;
+      if (qVisual) qVisual.textContent = q.cycle.join(' ➔ ');
+
+      const shuffledOptions = shuffleArray(q.options);
+      let btnHtml = '';
+      shuffledOptions.forEach(opt => {
+        btnHtml += `
+          <button onclick="handleAnswerChoice('${opt}', this)" class="opt-btn touch-btn py-4 px-4 bg-white hover:bg-indigo-50 border-2 border-slate-200 hover:border-indigo-400 rounded-2xl text-2xl sm:text-3xl font-black text-slate-800 shadow-sm active:scale-95 transition flex items-center justify-center">
+            ${opt}
+          </button>
+        `;
+      });
+      if (optionsContainer) optionsContainer.innerHTML = btnHtml;
+    }
+
+    function handleAnswerChoice(selected, btnEl) {
+      if (STATE.game.isAnswerLocked) return;
+      STATE.game.isAnswerLocked = true;
+      STATE.game.answeredCount++;
+
+      const q = STATE.game.activeQuestion;
+      const fb = document.getElementById('q-feedback');
+      const isCorrect = (selected === q.correct);
+
+      // 選項按鈕即時高亮反饋
+      if (btnEl) {
+        if (isCorrect) {
+          btnEl.classList.remove('bg-white', 'border-slate-200');
+          btnEl.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600');
+        } else {
+          btnEl.classList.remove('bg-white', 'border-slate-200');
+          btnEl.classList.add('bg-rose-500', 'text-white', 'border-rose-600');
+        }
+      }
+
+      if (isCorrect) {
+        STATE.game.correctCount++;
+        STATE.game.score += 10;
+        showToast('答對了！+10分', 'success');
+        if (fb) {
+          fb.className = 'p-4 rounded-2xl font-bold text-sm bg-emerald-100 text-emerald-900 border border-emerald-300 block';
+          fb.innerHTML = `⭕ <strong>完全正確！</strong> ${q.reason}`;
+        }
+      } else {
+        STATE.game.strikes++;
+        updateGameHearts();
+        showToast('答錯了！失去 1 點生命值', 'error');
+        if (fb) {
+          fb.className = 'p-4 rounded-2xl font-bold text-sm bg-rose-100 text-rose-900 border border-rose-300 block';
+          fb.innerHTML = `❌ <strong>答錯囉！</strong> 正解為【${q.correct}】。<br>${q.reason}`;
+        }
+
+        if (STATE.game.strikes >= STATE.game.maxStrikes) {
+          setTimeout(() => {
+            terminateGame('累積失誤達 3 次，挑戰提前結束！');
+          }, 600);
+          return;
+        }
+      }
+
+      updateScoreUI();
+
+      setTimeout(() => {
+        STATE.game.currentQIndex++;
+        renderCurrentQuestion();
+      }, 550);
+    }
+
+    function terminateGame(reason) {
+      if (STATE.game.timer) {
+        clearInterval(STATE.game.timer);
+        STATE.game.timer = null;
+      }
+
+      document.getElementById('game-active-panel').classList.add('hidden');
+      document.getElementById('game-result-panel').classList.remove('hidden');
+
+      const reasonEl = document.getElementById('result-reason');
+      if (reasonEl) reasonEl.textContent = reason;
+
+      document.getElementById('res-score').textContent = STATE.game.score;
+      document.getElementById('res-total').textContent = STATE.game.answeredCount;
+      document.getElementById('res-correct').textContent = STATE.game.correctCount;
+      document.getElementById('res-strikes').textContent = STATE.game.strikes;
+
+      generateAuto4FReflection();
+    }
+
+    function resetGame() {
+      document.getElementById('game-result-panel').classList.add('hidden');
+      document.getElementById('game-start-panel').classList.remove('hidden');
+      const nameInput = document.getElementById('game-player-name');
+      if (nameInput) nameInput.value = '';
+    }
+
+    /* ================= 4F 智慧反思產出引擎 ================= */
+    function generateAuto4FReflection() {
+      const total = STATE.game.answeredCount;
+      const correct = STATE.game.correctCount;
+      const strikes = STATE.game.strikes;
+      const score = STATE.game.score;
+      const rate = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+      const factsEl = document.getElementById('4f-facts');
+      if (factsEl) {
+        factsEl.textContent = `在 2 分鐘（120 秒）極速解密中，共完成 ${total} 道週期規律推算題，精準答對 ${correct} 題，失誤扣心 ${strikes} 次，最終結算成績為 ${score} 分，正解命中率為 ${rate}%。`;
+      }
+
+      const findingsEl = document.getElementById('4f-findings');
+      if (findingsEl) {
+        findingsEl.textContent = `週期規律推算中，算式的「商數」代表循環了幾輪完整單元，「餘數」代表該輪內的第幾個位置。最關鍵的突破是破解了「餘數為 0」的盲區：整除並不是第 0 個，而是代表剛好走完一整輪的「最後一個元素」！`;
+      }
+
+      const futureEl = document.getElementById('4f-future');
+      if (futureEl) {
+        futureEl.textContent = `這套「週期除法與餘數定位法」能廣泛應用在日常生活中：例如計算「50 天後是星期幾」、「每 4 年一次的閏年循環」、工廠輪班或交通號誌秒數推算，只要先找出循環長度，就能用除法快速預測未來任何時刻的狀態！`;
+      }
+    }
+
+    function selectFeelingTag(btn) {
+      const container = document.getElementById('feeling-tags-container');
+      container.querySelectorAll('.tag-btn').forEach(b => {
+        b.classList.remove('bg-amber-500', 'text-white', 'border-amber-600');
+        b.classList.add('bg-white', 'text-slate-700');
+      });
+      btn.classList.remove('bg-white', 'text-slate-700');
+      btn.classList.add('bg-amber-500', 'text-white', 'border-amber-600');
+
+      const customInput = document.getElementById('4f-feelings-custom');
+      if (customInput) customInput.value = btn.textContent.trim();
+    }
+
+    /* ================= 成果發布至展示牆 ================= */
+    function publishToWall() {
+      const nameInput = document.getElementById('game-player-name');
+      const author = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : '數感小偵探';
+
+      const facts = document.getElementById('4f-facts').textContent;
+      const feelingInput = document.getElementById('4f-feelings-custom');
+      const feelings = (feelingInput && feelingInput.value.trim()) ? feelingInput.value.trim() : '⚡ 挑戰過程專注且充滿成就感！';
+      const findings = document.getElementById('4f-findings').textContent;
+      const future = document.getElementById('4f-future').textContent;
+
+      const newWork = {
+        id: Date.now(),
+        author: author,
+        score: STATE.game.score,
+        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        likes: 0,
+        facts: facts,
+        feelings: feelings,
+        findings: findings,
+        future: future
+      };
+
+      STATE.showcaseWorks.unshift(newWork);
+      renderShowcaseWall();
+      showToast('成果已成功發布至展示牆！', 'success');
+      switchTab('tab-showcase');
+    }
+
+    function renderShowcaseWall() {
+      const container = document.getElementById('showcase-container');
+      const badge = document.getElementById('showcase-badge');
+      if (!container || !badge) return;
+
+      badge.textContent = STATE.showcaseWorks.length;
+
+      if (STATE.showcaseWorks.length === 0) {
+        container.innerHTML = `
+          <div class="col-span-full py-16 text-center text-slate-400">
+            <i class="fa-solid fa-cloud-moon text-5xl mb-3 text-slate-300"></i>
+            <p class="text-base font-bold">目前展示牆尚無成果記錄</p>
+            <p class="text-xs text-slate-400 mt-1">請先前往「極速挑戰賽」進行 2 分鐘闖關並發布 4F 反思！</p>
+          </div>
+        `;
+        return;
+      }
+
+      let html = '';
+      STATE.showcaseWorks.forEach(work => {
+        html += `
+          <div class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4 relative overflow-hidden">
+            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 bg-indigo-100 text-indigo-700 rounded-xl flex items-center justify-center font-black text-lg">
+                  <i class="fa-solid fa-user-astronaut"></i>
+                </div>
+                <div>
+                  <h4 class="font-black text-slate-900 text-lg">${escapeHtml(work.author)}</h4>
+                  <span class="text-xs text-slate-400">${work.time} ｜ 榮譽得分：${work.score}分</span>
+                </div>
+              </div>
+              <button onclick="likeWork(${work.id})" class="touch-btn px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl font-bold text-xs flex items-center space-x-1.5 transition active:scale-95">
+                <i class="fa-solid fa-heart"></i>
+                <span>${work.likes}</span>
+              </button>
+            </div>
+
+            <!-- 4F 圖卡 -->
+            <div class="space-y-2.5 text-xs sm:text-sm">
+              <div class="p-2.5 bg-sky-50 rounded-xl border border-sky-100">
+                <strong class="text-sky-800">[Facts 客觀事實]</strong>
+                <p class="text-slate-700 mt-0.5">${escapeHtml(work.facts)}</p>
+              </div>
+              <div class="p-2.5 bg-amber-50 rounded-xl border border-amber-100">
+                <strong class="text-amber-800">[Feelings 感受體驗]</strong>
+                <p class="text-slate-700 mt-0.5">${escapeHtml(work.feelings)}</p>
+              </div>
+              <div class="p-2.5 bg-emerald-50 rounded-xl border border-emerald-100">
+                <strong class="text-emerald-800">[Findings 規律洞察]</strong>
+                <p class="text-slate-700 mt-0.5">${escapeHtml(work.findings)}</p>
+              </div>
+              <div class="p-2.5 bg-purple-50 rounded-xl border border-purple-100">
+                <strong class="text-purple-800">[Future 生活遷移]</strong>
+                <p class="text-slate-700 mt-0.5">${escapeHtml(work.future)}</p>
+              </div>
+            </div>
+          </div>
+        `;
+      });
+      container.innerHTML = html;
+    }
+
+    function likeWork(workId) {
+      const work = STATE.showcaseWorks.find(w => w.id === workId);
+      if (work) {
+        work.likes++;
+        renderShowcaseWall();
+        showToast('為同儕的數感成果送出愛心！', 'success');
+      }
+    }
+
+    /* ================= 匯出展示牆為高解析 PNG 圖檔 (雙軌備援引擎) ================= */
+    async function exportShowcasePNG() {
+      if (STATE.showcaseWorks.length === 0) {
+        showToast('展示牆目前沒有作品可供匯出！', 'warning');
+        return;
+      }
+
+      showToast('正在合成高解析海報圖片，請稍候...', 'info');
+      const target = document.getElementById('showcase-container');
+
+      try {
+        if (typeof html2canvas !== 'undefined') {
+          const canvas = await html2canvas(target, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: '#f8fafc'
+          });
+          downloadCanvas(canvas);
+        } else {
+          fallbackExportPNG();
+        }
+      } catch (err) {
+        console.warn('html2canvas 遭遇環境阻斷，啟動原生 Canvas 備援引擎：', err);
+        fallbackExportPNG();
+      }
+    }
+
+    function downloadCanvas(canvas) {
+      const link = document.createElement('a');
+      link.download = `旗語解密大行動_全班成果展示牆_${new Date().toISOString().slice(0, 10)}.png`;
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+      showToast('成果海報已成功下載！', 'success');
+    }
+
+    // 原生 Canvas 2D 離線備援渲染引擎
+    function fallbackExportPNG() {
+      const canvas = document.createElement('canvas');
+      canvas.width = 1000;
+      const cardHeight = 280;
+      canvas.height = 140 + STATE.showcaseWorks.length * cardHeight;
+      const ctx = canvas.getContext('2d');
+
+      // 背景
+      ctx.fillStyle = '#0f172a';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 抬頭標題
+      ctx.fillStyle = '#ffffff';
+      ctx.font = 'bold 30px Noto Sans TC';
+      ctx.textAlign = 'center';
+      ctx.fillText('旗語解密大行動 - 全班學習成果報告', canvas.width / 2, 55);
+
+      ctx.fillStyle = '#94a3b8';
+      ctx.font = '16px Noto Sans TC';
+      ctx.fillText(`匯出日期：${new Date().toLocaleDateString()} ｜ 數感實驗室 | Design：S.C. Kuo`, canvas.width / 2, 90);
+
+      // 繪製卡片
+      STATE.showcaseWorks.forEach((work, index) => {
+        const y = 130 + index * cardHeight;
+        ctx.fillStyle = '#1e293b';
+        ctx.fillRect(40, y, 920, 250);
+
+        ctx.fillStyle = '#38bdf8';
+        ctx.font = 'bold 20px Noto Sans TC';
+        ctx.textAlign = 'left';
+        ctx.fillText(`【${work.author}】 得分：${work.score} 分 ｜ 時間：${work.time}`, 60, y + 40);
+
+        ctx.fillStyle = '#cbd5e1';
+        ctx.font = '14px Noto Sans TC';
+        drawWrappedText(ctx, `[Facts] ${work.facts}`, 60, y + 75, 880, 22);
+        drawWrappedText(ctx, `[Findings] ${work.findings}`, 60, y + 135, 880, 22);
+        drawWrappedText(ctx, `[Future] ${work.future}`, 60, y + 195, 880, 22);
+      });
+
+      downloadCanvas(canvas);
+    }
+
+    function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+      let line = '';
+      for (let n = 0; n < text.length; n++) {
+        const testLine = line + text[n];
+        const metrics = ctx.measureText(testLine);
+        if (metrics.width > maxWidth && n > 0) {
+          ctx.fillText(line, x, y);
+          line = text[n];
+          y += lineHeight;
+        } else {
+          line = testLine;
+        }
+      }
+      ctx.fillText(line, x, y);
+    }
+
+    /* ================= 頂部三大純圖示功能 (QR Code / 全螢幕 / 課程設計說明) ================= */
+    function initQRModal() {
+      const btnQr = document.getElementById('btn-qr');
+      if (btnQr) {
+        btnQr.addEventListener('click', () => {
+          openQRModal();
+        });
+      }
+
+      const btnGuide = document.getElementById('btn-guide');
+      if (btnGuide) {
+        btnGuide.addEventListener('click', () => {
+          openModal('modal-guide');
+        });
+      }
+    }
+
+    function openQRModal() {
+      const container = document.getElementById('qrcode-box');
+      if (container) {
+        container.innerHTML = '';
+        try {
+          new QRCode(container, {
+            text: window.location.href,
+            width: 180,
+            height: 180,
+            colorDark: '#0f172a',
+            colorLight: '#ffffff',
+            correctLevel: QRCode.CorrectLevel.H
+          });
+        } catch (e) {
+          container.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(window.location.href)}" alt="QR Code" class="mx-auto">`;
+        }
+      }
+      openModal('modal-qr');
+    }
+
+    function copyCurrentUrl() {
+      const url = window.location.href;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(() => {
+          showToast('網址已成功複製至剪貼簿！', 'success');
+        }).catch(() => {
+          fallbackCopyText(url);
+        });
+      } else {
+        fallbackCopyText(url);
+      }
+    }
+
+    function fallbackCopyText(text) {
+      const textArea = document.createElement('textarea');
+      textArea.value = text;
+      document.body.appendChild(textArea);
+      textArea.select();
+      try {
+        document.execCommand('copy');
+        showToast('網址已成功複製！', 'success');
+      } catch (err) {
+        showToast('無法自動複製網址，請手動複製', 'error');
+      }
+      document.body.removeChild(textArea);
+    }
+
+    function setupFullscreenEvents() {
+      const btnFs = document.getElementById('btn-fullscreen');
+      if (!btnFs) return;
+
+      btnFs.addEventListener('click', () => {
+        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+          const docEl = document.documentElement;
+          if (docEl.requestFullscreen) {
+            docEl.requestFullscreen().catch(err => console.log(err));
+          } else if (docEl.webkitRequestFullscreen) {
+            docEl.webkitRequestFullscreen();
+          }
+        } else {
+          if (document.exitFullscreen) {
+            document.exitFullscreen().catch(err => console.log(err));
+          } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+          }
+        }
+      });
+
+      const updateFsIcon = () => {
+        const icon = document.getElementById('fullscreen-icon');
+        if (!icon) return;
+        if (document.fullscreenElement || document.webkitFullscreenElement) {
+          icon.classList.remove('fa-expand');
+          icon.classList.add('fa-compress');
+        } else {
+          icon.classList.remove('fa-compress');
+          icon.classList.add('fa-expand');
+        }
+      };
+
+      document.addEventListener('fullscreenchange', updateFsIcon);
+      document.addEventListener('webkitfullscreenchange', updateFsIcon);
+    }
+
+    function setupKeydownEvents() {
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+          closeModal('modal-qr');
+          closeModal('modal-guide');
+        }
+      });
+
+      ['modal-qr', 'modal-guide'].forEach(id => {
+        const modal = document.getElementById(id);
+        if (modal) {
+          modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+              closeModal(id);
             }
-
-            // Show active tab
-            const activeSec = document.getElementById(`activity-${tabNum}`);
-            if (activeSec) activeSec.classList.remove('hidden');
-
-            const activeBtn = document.getElementById(`tab-btn-${tabNum}`);
-            if (activeBtn) {
-                activeBtn.className = "touch-btn p-3 rounded-2xl font-black text-sm sm:text-base text-center shadow-md border-4 border-indigo-500 bg-indigo-600 text-white flex items-center justify-center space-x-1.5";
-            }
-
-            if (tabNum === 2) {
-                initCustomDrawCanvas();
-            } else if (tabNum === 5) {
-                renderShowcaseCards();
-            }
+          });
         }
-
-        /* ----------------------------------------------------
-           HEADER ACTIONS (QR Code, Fullscreen, Guide)
-        ---------------------------------------------------- */
-        function openQRCodeModal() {
-            const qrContainer = document.getElementById('qrcode-target');
-            qrContainer.innerHTML = '';
-            
-            const currentURL = window.location.href;
-            try {
-                new QRCode(qrContainer, {
-                    text: currentURL,
-                    width: 180,
-                    height: 180,
-                    colorDark: "#1e1b4b",
-                    colorLight: "#ffffff",
-                    correctLevel: QRCode.CorrectLevel.H
-                });
-            } catch (err) {
-                console.error("QR Code Error:", err);
-            }
-
-            document.getElementById('qrModal').classList.remove('hidden');
-        }
-
-        function copyCurrentURL() {
-            const url = window.location.href;
-            if (navigator.clipboard && navigator.clipboard.writeText) {
-                navigator.clipboard.writeText(url).then(() => {
-                    showToast('✅ 網址已成功複製到剪貼簿！');
-                }).catch(() => fallbackCopyURL(url));
-            } else {
-                fallbackCopyURL(url);
-            }
-        }
-
-        function fallbackCopyURL(url) {
-            const tempInput = document.createElement('input');
-            tempInput.value = url;
-            document.body.appendChild(tempInput);
-            tempInput.select();
-            document.execCommand('copy');
-            document.body.removeChild(tempInput);
-            showToast('✅ 網址已成功複製到剪貼簿！');
-        }
-
-        function toggleFullScreen() {
-            const doc = document.documentElement;
-            if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-                if (doc.requestFullscreen) {
-                    doc.requestFullscreen().catch(() => showToast('⚠️ 您的裝置限制全螢幕操作'));
-                } else if (doc.webkitRequestFullscreen) {
-                    doc.webkitRequestFullscreen();
-                }
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                }
-            }
-        }
-
-        function openGuideModal() {
-            document.getElementById('guideModal').classList.remove('hidden');
-        }
-
-        function closeModal(modalId) {
-            const m = document.getElementById(modalId);
-            if (m) m.classList.add('hidden');
-        }
-
-        /* ----------------------------------------------------
-           ACTIVITY 1: ANIMATED FLAG CANVAS & QUESTION
-        ---------------------------------------------------- */
-        const flagCanvas = document.getElementById('flagSequenceCanvas');
-        const flagCtx = flagCanvas ? flagCanvas.getContext('2d') : null;
-
-        function resizeFlagCanvas() {
-            if (!flagCanvas || !flagCanvas.parentElement) return;
-            flagCanvas.width = flagCanvas.parentElement.clientWidth;
-            flagCanvas.height = flagCanvas.parentElement.clientHeight;
-        }
-
-        function drawAnimatedFlags() {
-            if (!flagCtx) return;
-            flagCtx.clearRect(0, 0, flagCanvas.width, flagCanvas.height);
-
-            const flagColors = ['#ef4444', '#ffffff', '#3b82f6'];
-            const totalFlags = 7;
-            const startX = 40;
-            const spacing = (flagCanvas.width - 80) / (totalFlags - 1 || 1);
-            const centerY = flagCanvas.height / 2 + 10;
-
-            flagAnimFrame += 0.05;
-
-            for (let i = 0; i < totalFlags; i++) {
-                const color = flagColors[i % 3];
-                const x = startX + i * spacing;
-                const waveOffset = Math.sin(flagAnimFrame + i) * 8;
-
-                flagCtx.beginPath();
-                flagCtx.strokeStyle = '#94a3b8';
-                flagCtx.lineWidth = 4;
-                flagCtx.moveTo(x, centerY - 30);
-                flagCtx.lineTo(x, centerY + 30);
-                flagCtx.stroke();
-
-                flagCtx.beginPath();
-                flagCtx.fillStyle = color;
-                flagCtx.strokeStyle = '#475569';
-                flagCtx.lineWidth = 2;
-                flagCtx.moveTo(x, centerY - 28);
-                flagCtx.quadraticCurveTo(x + 15, centerY - 20 + waveOffset, x + 30, centerY - 25);
-                flagCtx.lineTo(x + 30, centerY - 5 + waveOffset);
-                flagCtx.quadraticCurveTo(x + 15, centerY + waveOffset, x, centerY - 8);
-                flagCtx.closePath();
-                flagCtx.fill();
-                flagCtx.stroke();
-
-                flagCtx.fillStyle = '#cbd5e1';
-                flagCtx.font = 'bold 12px sans-serif';
-                flagCtx.textAlign = 'center';
-                flagCtx.fillText(`第${i + 1}面`, x, centerY + 48);
-            }
-
-            if (isAnimatingFlags) {
-                requestAnimationFrame(drawAnimatedFlags);
-            }
-        }
-
-        function toggleFlagAnimation() {
-            isAnimatingFlags = !isAnimatingFlags;
-            const btn = document.getElementById('anim-toggle-btn');
-            if (isAnimatingFlags) {
-                btn.textContent = '⏸️ 暫停擺動';
-                drawAnimatedFlags();
-            } else {
-                btn.textContent = '▶️ 開始擺動';
-            }
-        }
-
-        function checkAct1Answer(selectedColor) {
-            learningState.act1Answered = true;
-            const feedback = document.getElementById('act1-feedback');
-            feedback.classList.remove('hidden');
-
-            const statAct1 = document.getElementById('stat-act1-status');
-
-            if (selectedColor === 'red') {
-                learningState.act1Correct = true;
-                if (statAct1) statAct1.textContent = '✅ 答對(🔴紅色)';
-                feedback.className = 'p-4 rounded-2xl font-bold text-base bg-emerald-100 text-emerald-800 border-2 border-emerald-300';
-                feedback.innerHTML = '🎉 太棒了！答對了！<br>因為 100 ÷ 3 = 33 ... 餘數 1，第 1 個顏色就是【🔴 紅色】！';
-            } else {
-                learningState.act1Correct = false;
-                if (statAct1) statAct1.textContent = '❌ 答錯再思考';
-                feedback.className = 'p-4 rounded-2xl font-bold text-base bg-rose-100 text-rose-800 border-2 border-rose-300';
-                feedback.innerHTML = '💭 再思考看看喔！<br>100 ÷ 3 = 33 餘數是 1，代表多出 1 面旗幟，應該對應循環單元的第 1 個顏色！';
-            }
-        }
-
-        /* ----------------------------------------------------
-           ACTIVITY 2: DRAWING CANVAS & ZERO-TRAP LOGIC
-        ---------------------------------------------------- */
-        const customCanvas = document.getElementById('customDrawCanvas');
-        let customCtx = customCanvas ? customCanvas.getContext('2d') : null;
-
-        function initCustomDrawCanvas() {
-            if (!customCanvas) return;
-            customCtx = customCanvas.getContext('2d');
-            
-            customCanvas.onmousedown = startDrawing;
-            customCanvas.onmousemove = draw;
-            customCanvas.onmouseup = stopDrawing;
-
-            customCanvas.ontouchstart = (e) => { e.preventDefault(); startDrawing(e.touches[0]); };
-            customCanvas.ontouchmove = (e) => { e.preventDefault(); draw(e.touches[0]); };
-            customCanvas.ontouchend = stopDrawing;
-        }
-
-        function startDrawing(e) {
-            isDrawing = true;
-            const rect = customCanvas.getBoundingClientRect();
-            const scaleX = customCanvas.width / rect.width;
-            const scaleY = customCanvas.height / rect.height;
-            customCtx.beginPath();
-            customCtx.moveTo((e.clientX - rect.left) * scaleX, (e.clientY - rect.top) * scaleY);
-        }
-
-        function draw(e) {
-            if (!isDrawing) return;
-            const rect = customCanvas.getBoundingClientRect();
-            const scaleX = customCanvas.width / rect.width;
-            const scaleY = customCanvas.height / rect.height;
-            customCtx.lineTo((e.clientX - rect.left) * scaleX, (e.clientY - rect.top) * scaleY);
-            customCtx.strokeStyle = drawColor;
-            customCtx.lineWidth = 6;
-            customCtx.lineCap = 'round';
-            customCtx.stroke();
-        }
-
-        function stopDrawing() {
-            isDrawing = false;
-        }
-
-        function setBrushColor(color) {
-            drawColor = color;
-        }
-
-        function clearDrawCanvas() {
-            if (customCtx) {
-                customCtx.clearRect(0, 0, customCanvas.width, customCanvas.height);
-            }
-            lastCreatedCipherDataUrl = null;
-        }
-
-        function generateArrayFromCanvas() {
-            const container = document.getElementById('patternArrayContainer');
-            lastCreatedCipherDataUrl = customCanvas.toDataURL();
-            
-            container.innerHTML = '';
-            for (let i = 1; i <= 6; i++) {
-                const box = document.createElement('div');
-                box.className = 'flex flex-col items-center bg-purple-900/90 p-2 rounded-xl border border-purple-700 shadow';
-                box.innerHTML = `
-                    <img src="${lastCreatedCipherDataUrl}" class="w-12 h-12 object-contain bg-white rounded-lg p-0.5">
-                    <span class="text-[10px] text-amber-200 mt-1 font-bold">第${i}項</span>
-                `;
-                container.appendChild(box);
-            }
-            showToast('✨ 已成功生成 6 面連續密碼陣列！');
-        }
-
-        function randomizePeerQuestion() {
-            const randomIndex = Math.floor(Math.random() * 30) + 10;
-            document.getElementById('peerQuestIndex').textContent = randomIndex;
-        }
-
-        function checkZeroTrap(choice) {
-            const feedback = document.getElementById('zero-trap-feedback');
-            feedback.classList.remove('hidden');
-
-            if (choice === 'C') {
-                learningState.act2TrapSolved = true;
-                feedback.className = 'p-4 rounded-2xl font-bold text-base bg-emerald-100 text-emerald-800 border-2 border-emerald-300';
-                feedback.innerHTML = '🎯 答對了！恭喜突破「第零個迷思」！<br>當餘數為 0 時，代表剛好完整排滿整組循環，因此對應的是循環單元的【最後一個】元素（第 3 個圖案）！';
-            } else {
-                learningState.act2TrapSolved = false;
-                feedback.className = 'p-4 rounded-2xl font-bold text-base bg-rose-100 text-rose-800 border-2 border-rose-300';
-                feedback.innerHTML = '💡 差一點點！提示：<br>12 ÷ 3 = 4 代表剛好完美排滿 4 個完整循環，最後一個正是第 3 個圖案喔！';
-            }
-        }
-
-        /* ----------------------------------------------------
-           1-MINUTE SPEED GAME CHALLENGE (錯三次終止機制)
-        ---------------------------------------------------- */
-        function startGameSession() {
-            gameActive = true;
-            gameTimeRemaining = 60; // 60 seconds
-            gameScore = 0;
-            gameCombo = 0;
-            gameMaxCombo = 0;
-            gameStrikes = 0;
-            gameCorrectCount = 0;
-
-            document.getElementById('game-start-screen').classList.add('hidden');
-            document.getElementById('game-over-screen').classList.add('hidden');
-            document.getElementById('game-question-screen').classList.remove('hidden');
-
-            updateGameUIStats();
-            generateNewGameQuestion();
-
-            // Clear previous interval if any
-            if (gameTimer) clearInterval(gameTimer);
-
-            gameTimer = setInterval(() => {
-                gameTimeRemaining--;
-                const minutes = String(Math.floor(gameTimeRemaining / 60)).padStart(2, '0');
-                const seconds = String(gameTimeRemaining % 60).padStart(2, '0');
-                document.getElementById('game-timer').textContent = `${minutes}:${seconds}`;
-
-                // Update progress bar width
-                const pct = (gameTimeRemaining / 60) * 100;
-                document.getElementById('game-progress-bar').style.width = `${pct}%`;
-
-                if (gameTimeRemaining <= 0) {
-                    endGameSession('timeout');
-                }
-            }, 1000);
-        }
-
-        function updateGameUIStats() {
-            document.getElementById('game-score').textContent = gameScore;
-            document.getElementById('game-combo').textContent = gameCombo;
-            document.getElementById('game-strikes-count').textContent = `${gameStrikes} / 3`;
-
-            // Hearts visual
-            const hearts = ['❤️', '❤️', '❤️'];
-            for (let i = 0; i < gameStrikes; i++) {
-                hearts[2 - i] = '🖤';
-            }
-            document.getElementById('game-hearts').textContent = hearts.join('');
-        }
-
-        function generateNewGameQuestion() {
-            const feedback = document.getElementById('game-answer-feedback');
-            feedback.classList.add('hidden');
-
-            // Select random palette (Length 3, 4, or 5)
-            const palette = COLOR_PALETTES[Math.floor(Math.random() * COLOR_PALETTES.length)];
-            const cycleLen = palette.colors.length;
-
-            // Generate target index between 11 and 99
-            // Purposefully ensure ~35% of questions have remainder = 0 to test the zero misconception!
-            let targetIndex;
-            if (Math.random() < 0.35) {
-                targetIndex = cycleLen * (Math.floor(Math.random() * 15) + 3);
-            } else {
-                targetIndex = Math.floor(Math.random() * 80) + 12;
-            }
-
-            const remainder = targetIndex % cycleLen;
-            const correctElementIndex = remainder === 0 ? cycleLen - 1 : remainder - 1;
-            const correctColor = palette.colors[correctElementIndex];
-
-            currentQuestion = {
-                palette: palette,
-                cycleLen: cycleLen,
-                targetIndex: targetIndex,
-                remainder: remainder,
-                correctColor: correctColor
-            };
-
-            // Render cycle preview in UI
-            document.getElementById('game-cycle-length').textContent = cycleLen;
-            document.getElementById('game-target-num').textContent = targetIndex;
-            
-            const previewContainer = document.getElementById('game-cycle-preview');
-            previewContainer.innerHTML = '';
-            palette.colors.forEach((c, idx) => {
-                const item = document.createElement('div');
-                item.className = 'flex items-center space-x-1 bg-slate-900 px-3 py-1.5 rounded-xl border border-slate-700 text-sm';
-                item.innerHTML = `
-                    <span class="w-4 h-4 rounded-full inline-block border border-slate-400" style="background-color: ${c.hex}"></span>
-                    <span>${idx + 1}.${c.label}</span>
-                `;
-                previewContainer.appendChild(item);
-                if (idx < palette.colors.length - 1) {
-                    const arrow = document.createElement('span');
-                    arrow.className = 'text-slate-500 text-xs';
-                    arrow.textContent = '➔';
-                    previewContainer.appendChild(arrow);
-                }
-            });
-
-            // Render Answer Choice Buttons
-            const optContainer = document.getElementById('game-options-container');
-            optContainer.innerHTML = '';
-            palette.colors.forEach((c) => {
-                const btn = document.createElement('button');
-                btn.className = `touch-btn p-4 rounded-2xl font-black text-lg border-4 shadow-lg flex items-center justify-center space-x-2 ${c.textDark ? 'text-slate-900' : 'text-white'}`;
-                btn.style.backgroundColor = c.hex;
-                btn.style.borderColor = c.hex;
-                btn.innerHTML = `
-                    <span class="text-xl">🚩</span>
-                    <span>${c.label}色</span>
-                `;
-                btn.onclick = () => submitGameAnswer(c);
-                optContainer.appendChild(btn);
-            });
-        }
-
-        function submitGameAnswer(chosenColor) {
-            if (!gameActive || !currentQuestion) return;
-
-            const isCorrect = chosenColor.label === currentQuestion.correctColor.label;
-            const feedback = document.getElementById('game-answer-feedback');
-            feedback.classList.remove('hidden');
-
-            if (isCorrect) {
-                gameScore += 10 + gameCombo * 2;
-                gameCombo++;
-                if (gameCombo > gameMaxCombo) gameMaxCombo = gameCombo;
-                gameCorrectCount++;
-
-                feedback.className = 'p-3 rounded-2xl font-black text-base bg-emerald-500/90 text-white border border-emerald-300';
-                feedback.innerHTML = `✨ 答對了！算式：${currentQuestion.targetIndex} ÷ ${currentQuestion.cycleLen} = ${Math.floor(currentQuestion.targetIndex / currentQuestion.cycleLen)} ... 餘數 ${currentQuestion.remainder}（第 ${currentQuestion.remainder === 0 ? currentQuestion.cycleLen + ' 個[整除]' : currentQuestion.remainder + ' 個'}）`;
-
-                updateGameUIStats();
-                setTimeout(() => {
-                    if (gameActive) generateNewGameQuestion();
-                }, 600);
-
-            } else {
-                gameStrikes++;
-                gameCombo = 0;
-                updateGameUIStats();
-
-                feedback.className = 'p-3 rounded-2xl font-black text-base bg-rose-600 text-white border border-rose-400';
-                feedback.innerHTML = `💥 答錯！${currentQuestion.targetIndex} ÷ ${currentQuestion.cycleLen} 餘數是 ${currentQuestion.remainder}，應為【${currentQuestion.correctColor.label}色】！`;
-
-                if (gameStrikes >= 3) {
-                    setTimeout(() => {
-                        endGameSession('strikes');
-                    }, 800);
-                } else {
-                    setTimeout(() => {
-                        if (gameActive) generateNewGameQuestion();
-                    }, 900);
-                }
-            }
-        }
-
-        function endGameSession(reason) {
-            gameActive = false;
-            if (gameTimer) clearInterval(gameTimer);
-
-            document.getElementById('game-question-screen').classList.add('hidden');
-            document.getElementById('game-over-screen').classList.remove('hidden');
-
-            // Update Best Record
-            if (gameScore > learningState.bestGameScore) {
-                learningState.bestGameScore = gameScore;
-                document.getElementById('stat-game-record').textContent = `${gameScore} 分`;
-            }
-
-            document.getElementById('game-final-score').textContent = gameScore;
-            document.getElementById('game-final-correct').textContent = gameCorrectCount;
-            document.getElementById('game-final-maxcombo').textContent = gameMaxCombo;
-
-            const reasonElem = document.getElementById('game-over-reason');
-            const titleElem = document.getElementById('game-over-title');
-            const iconElem = document.getElementById('game-over-icon');
-
-            if (reason === 'strikes') {
-                iconElem.textContent = '💔';
-                titleElem.textContent = '挑戰提前終止！';
-                titleElem.className = 'text-2xl sm:text-3xl font-black text-rose-400';
-                reasonElem.textContent = '累計答錯達 3 次，觸發安全淘汰機制！再複習一下「餘數整除」觀念吧！';
-            } else {
-                iconElem.textContent = '⏰';
-                titleElem.textContent = '時間到！挑戰完成！';
-                titleElem.className = 'text-2xl sm:text-3xl font-black text-amber-400';
-                reasonElem.textContent = `在 60 秒內成功破譯 ${gameCorrectCount} 題，表現非常出色！`;
-            }
-        }
-
-        /* ----------------------------------------------------
-           ACTIVITY 4: 4F NOTEBOOK SUBMISSION & SHOWCASE
-        ---------------------------------------------------- */
-        function submitNotebook() {
-            const groupName = document.getElementById('group-name-input').value.trim() || '未具名小隊';
-            const facts = document.getElementById('note-facts').value.trim();
-            const feelings = document.getElementById('note-feelings').value.trim();
-            const findings = document.getElementById('note-findings').value.trim();
-            const future = document.getElementById('note-future').value.trim();
-
-            if (!facts || !feelings || !findings || !future) {
-                showToast('⚠️ 請完整填寫 4 個反思欄位後再提交喔！');
-                return;
-            }
-
-            const submission = {
-                id: Date.now(),
-                groupName: groupName,
-                timestamp: new Date().toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' }),
-                facts: facts,
-                feelings: feelings,
-                findings: findings,
-                future: future,
-                likes: 0,
-                cipherImage: lastCreatedCipherDataUrl || null,
-                bestScore: gameScore > 0 ? gameScore : null
-            };
-
-            learningState.submissions.unshift(submission);
-            updateShowcaseBadge();
-
-            // Clear inputs
-            document.getElementById('note-facts').value = '';
-            document.getElementById('note-feelings').value = '';
-            document.getElementById('note-findings').value = '';
-            document.getElementById('note-future').value = '';
-
-            showToast('🎉 偵探筆記成功發布至「成果展示牆」！');
-            switchTab(5); // Navigate to showcase
-        }
-
-        /* ----------------------------------------------------
-           ACTIVITY 5: SHOWCASE WALL RENDERING & PNG IMAGE EXPORT
-        ---------------------------------------------------- */
-        function updateShowcaseBadge() {
-            const count = learningState.submissions.length;
-            const badge = document.getElementById('showcase-badge');
-            if (badge) badge.textContent = count;
-            const statTotal = document.getElementById('stat-total-submissions');
-            if (statTotal) statTotal.textContent = `${count} 組`;
-        }
-
-        function renderShowcaseCards() {
-            const container = document.getElementById('showcase-cards-container');
-            const emptyNotice = document.getElementById('showcase-empty');
-            
-            if (learningState.submissions.length === 0) {
-                if (emptyNotice) emptyNotice.classList.remove('hidden');
-                container.innerHTML = '';
-                container.appendChild(emptyNotice);
-                return;
-            }
-
-            container.innerHTML = '';
-            learningState.submissions.forEach((item, index) => {
-                const card = document.createElement('div');
-                card.className = "bg-white p-6 rounded-3xl shadow-lg border-2 border-slate-200 flex flex-col justify-between space-y-4";
-                
-                let cipherPreviewHTML = '';
-                if (item.cipherImage) {
-                    cipherPreviewHTML = `
-                        <div class="bg-purple-950 p-3 rounded-2xl flex items-center space-x-2 overflow-x-auto">
-                            <span class="text-xs font-bold text-amber-300 shrink-0">密碼圖樣：</span>
-                            <img src="${item.cipherImage}" class="w-10 h-10 object-contain bg-white rounded-lg p-0.5 shrink-0">
-                            <span class="text-xs text-purple-200">➔ 週期重複陣列</span>
-                        </div>
-                    `;
-                }
-
-                let gameBadgeHTML = '';
-                if (item.bestScore) {
-                    gameBadgeHTML = `<span class="bg-amber-100 text-amber-900 border border-amber-300 px-2.5 py-0.5 rounded-full text-xs font-black">⚡ 解密挑戰：${item.bestScore} 分</span>`;
-                }
-
-                card.innerHTML = `
-                    <div class="space-y-3">
-                        <div class="flex justify-between items-center border-b border-slate-100 pb-3">
-                            <div class="flex items-center space-x-2">
-                                <span class="bg-indigo-600 text-white w-8 h-8 rounded-xl flex items-center justify-center font-bold text-sm">#${learningState.submissions.length - index}</span>
-                                <h3 class="font-black text-slate-800 text-lg sm:text-xl">${escapeHtml(item.groupName)}</h3>
-                            </div>
-                            <div class="flex items-center space-x-2">
-                                ${gameBadgeHTML}
-                                <span class="text-xs text-slate-400 font-bold">${item.timestamp}</span>
-                            </div>
-                        </div>
-
-                        ${cipherPreviewHTML}
-
-                        <div class="space-y-2 text-sm sm:text-base">
-                            <div class="p-2.5 rounded-xl bg-sky-50 border border-sky-100">
-                                <span class="font-black text-sky-800">[Facts 事實]：</span>
-                                <span class="text-slate-700">${escapeHtml(item.facts)}</span>
-                            </div>
-                            <div class="p-2.5 rounded-xl bg-rose-50 border border-rose-100">
-                                <span class="font-black text-rose-800">[Feelings 感受]：</span>
-                                <span class="text-slate-700">${escapeHtml(item.feelings)}</span>
-                            </div>
-                            <div class="p-2.5 rounded-xl bg-amber-50 border border-amber-100">
-                                <span class="font-black text-amber-800">[Findings 發現]：</span>
-                                <span class="text-slate-700">${escapeHtml(item.findings)}</span>
-                            </div>
-                            <div class="p-2.5 rounded-xl bg-emerald-50 border border-emerald-100">
-                                <span class="font-black text-emerald-800">[Future 應用]：</span>
-                                <span class="text-slate-700">${escapeHtml(item.future)}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="pt-3 border-t border-slate-100 flex justify-between items-center">
-                        <button onclick="likeSubmission(${item.id})" class="touch-btn bg-pink-50 hover:bg-pink-100 text-pink-600 font-bold px-4 py-2 rounded-xl text-sm flex items-center space-x-1.5 border border-pink-200">
-                            <span>❤️ 讚賞作品</span>
-                            <span id="like-count-${item.id}" class="bg-pink-200 text-pink-800 text-xs px-2 py-0.5 rounded-full font-black">${item.likes}</span>
-                        </button>
-                        <span class="text-xs text-emerald-600 font-bold bg-emerald-50 px-2.5 py-1 rounded-lg">4F 完成審核</span>
-                    </div>
-                `;
-                container.appendChild(card);
-            });
-        }
-
-        function likeSubmission(id) {
-            const item = learningState.submissions.find(s => s.id === id);
-            if (item) {
-                item.likes++;
-                const countElem = document.getElementById(`like-count-${id}`);
-                if (countElem) countElem.textContent = item.likes;
-                showToast('💖 已為該組送出鼓勵！');
-            }
-        }
-
-        /* ----------------------------------------------------
-           EXPORT SHOWCASE AS HIGH-RESOLUTION PNG IMAGE
-        ---------------------------------------------------- */
-        function exportShowcaseImage() {
-            if (learningState.submissions.length === 0) {
-                showToast('⚠️ 目前尚無任何作品可供匯出圖檔！');
-                return;
-            }
-
-            showToast('⏳ 正在渲染高畫質成果圖檔，請稍候...');
-
-            const targetElement = document.getElementById('showcase-export-area');
-
-            // Using html2canvas with dual-layer fallback
-            if (typeof html2canvas !== 'undefined') {
-                html2canvas(targetElement, {
-                    scale: 2, // High resolution Retina scale
-                    useCORS: true,
-                    backgroundColor: '#f1f5f9',
-                    logging: false
-                }).then(canvas => {
-                    const imageURL = canvas.toDataURL("image/png");
-                    const downloadLink = document.createElement("a");
-                    downloadLink.href = imageURL;
-                    downloadLink.download = `旗語解密大行動_全班成果展示牆_${new Date().toISOString().slice(0,10)}.png`;
-                    document.body.appendChild(downloadLink);
-                    downloadLink.click();
-                    document.body.removeChild(downloadLink);
-                    showToast('🖼️ 成果圖片已成功匯出下載！');
-                }).catch(err => {
-                    console.error("html2canvas export error:", err);
-                    fallbackCanvasExport();
-                });
-            } else {
-                fallbackCanvasExport();
-            }
-        }
-
-        function fallbackCanvasExport() {
-            // Native Canvas 2D fallback generator
-            const c = document.createElement('canvas');
-            c.width = 1200;
-            c.height = 300 + learningState.submissions.length * 280;
-            const ctx = c.getContext('2d');
-
-            ctx.fillStyle = '#f8fafc';
-            ctx.fillRect(0, 0, c.width, c.height);
-
-            // Title
-            ctx.fillStyle = '#1e1b4b';
-            ctx.font = 'bold 36px sans-serif';
-            ctx.fillText('旗語解密大行動 - 學生學習成果總覽', 40, 60);
-
-            ctx.fillStyle = '#64748b';
-            ctx.font = '20px sans-serif';
-            ctx.fillText(`匯出時間：${new Date().toLocaleString('zh-TW')} | 總件數：${learningState.submissions.length} 組`, 40, 100);
-
-            let y = 140;
-            learningState.submissions.forEach((item, i) => {
-                ctx.fillStyle = '#ffffff';
-                ctx.strokeStyle = '#cbd5e1';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                ctx.roundRect(40, y, 1120, 250, 16);
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.fillStyle = '#312e81';
-                ctx.font = 'bold 24px sans-serif';
-                ctx.fillText(`組別：${item.groupName} (${item.timestamp})`, 60, y + 40);
-
-                ctx.fillStyle = '#334155';
-                ctx.font = '18px sans-serif';
-                ctx.fillText(`[F1 事實]：${item.facts.slice(0, 70)}`, 60, y + 80);
-                ctx.fillText(`[F2 感受]：${item.feelings.slice(0, 70)}`, 60, y + 120);
-                ctx.fillText(`[F3 發現]：${item.findings.slice(0, 70)}`, 60, y + 160);
-                ctx.fillText(`[F4 應用]：${item.future.slice(0, 70)}`, 60, y + 200);
-
-                y += 270;
-            });
-
-            const link = document.createElement('a');
-            link.download = `旗語解密大行動_成果牆備援_${new Date().toISOString().slice(0,10)}.png`;
-            link.href = c.toDataURL('image/png');
-            link.click();
-            showToast('🖼️ 備援成果圖已成功下載！');
-        }
-
-        function confirmClearAllShowcase() {
-            document.getElementById('confirmModal').classList.remove('hidden');
-        }
-
-        function executeClearAllShowcase() {
-            learningState.submissions = [];
-            closeModal('confirmModal');
-            updateShowcaseBadge();
-            renderShowcaseCards();
-            showToast('🧹 已成功清空所有作品展示！');
-        }
-
-        /* ----------------------------------------------------
-           UTILITY FUNCTIONS
-        ---------------------------------------------------- */
-        function showToast(message) {
-            const toast = document.getElementById('toast');
-            toast.textContent = message;
-            toast.classList.remove('hidden');
-            setTimeout(() => {
-                toast.classList.add('hidden');
-            }, 3000);
-        }
-
-        function escapeHtml(text) {
-            if (!text) return '';
-            return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
-        }
-
-        /* ----------------------------------------------------
-           WINDOW LOAD INITIALIZATION
-        ---------------------------------------------------- */
-        window.onload = function() {
-            resizeFlagCanvas();
-            window.addEventListener('resize', resizeFlagCanvas);
-            drawAnimatedFlags();
-            updateShowcaseBadge();
-        };
-    </script>
+      });
+    }
+
+    function openModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.remove('hidden');
+    }
+
+    function closeModal(id) {
+      const el = document.getElementById(id);
+      if (el) el.classList.add('hidden');
+    }
+
+    /* ================= 自訂 Toast 訊息提示元件 ================= */
+    let toastTimeout = null;
+    function showToast(msg, type = 'info') {
+      const toast = document.getElementById('toast');
+      const toastMsg = document.getElementById('toast-msg');
+      const toastIcon = document.getElementById('toast-icon');
+      if (!toast || !toastMsg || !toastIcon) return;
+
+      toastMsg.textContent = msg;
+
+      if (type === 'success') {
+        toastIcon.className = 'fa-solid fa-circle-check text-emerald-400';
+      } else if (type === 'warning') {
+        toastIcon.className = 'fa-solid fa-triangle-exclamation text-amber-400';
+      } else if (type === 'error') {
+        toastIcon.className = 'fa-solid fa-circle-xmark text-rose-400';
+      } else {
+        toastIcon.className = 'fa-solid fa-circle-info text-indigo-400';
+      }
+
+      toast.classList.remove('hidden');
+
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        toast.classList.add('hidden');
+      }, 2400);
+    }
+
+    function escapeHtml(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
+  </script>
 </body>
 </html>
