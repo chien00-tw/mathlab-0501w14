@@ -3,1546 +3,1575 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>旗語解密大行動 - 數感互動學習系統</title>
+  <title>數感實驗室：旗語解密大行動</title>
+  
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- FontAwesome 6 CDN -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <!-- QRCode.js CDN -->
+  <!-- QRCode.js Library -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-  <!-- html2canvas CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              500: '#0284c7',
+              600: '#0369a1',
+              700: '#075985',
+              800: '#0c4a6e',
+            },
+            math: {
+              red: '#ef4444',
+              blue: '#2563eb',
+              amber: '#f59e0b',
+              emerald: '#10b981',
+              purple: '#8b5cf6'
+            }
+          },
+          fontFamily: {
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap');
-    body {
-      font-family: 'Noto Sans TC', sans-serif;
+    /* iPad 觸控目標與字體可讀性增強 */
+    * {
       -webkit-tap-highlight-color: transparent;
       user-select: none;
+      box-sizing: border-box;
     }
-    .touch-btn {
-      min-height: 52px;
-      touch-action: manipulation;
+    input, textarea, select {
+      user-select: auto;
     }
-    @keyframes pulse-fast {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.85; transform: scale(1.03); }
+    .custom-scrollbar::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
     }
-    .animate-pulse-fast {
-      animation: pulse-fast 0.8s infinite ease-in-out;
+    .custom-scrollbar::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+      background: #94a3b8;
+    }
+
+    /* Tooltip 視覺效果 */
+    .tooltip-container {
+      position: relative;
+    }
+    .tooltip-container:hover .tooltip-box,
+    .tooltip-container:focus-within .tooltip-box {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .tooltip-box {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-6px);
+      transition: all 0.2s ease-in-out;
+      pointer-events: none;
+    }
+
+    /* 愛心跳動動畫 */
+    @keyframes pulse-heart {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.18); }
+    }
+    .heart-lost {
+      filter: grayscale(100%) opacity(0.35);
+      transform: scale(0.9);
+      transition: all 0.3s;
+    }
+    .heart-active {
+      animation: pulse-heart 1.8s infinite ease-in-out;
+    }
+
+    /* 模擬全螢幕模式（支援 iOS Safari 降級） */
+    .pseudo-fullscreen {
+      position: fixed !important;
+      inset: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 99999 !important;
+      background-color: #f1f5f9 !important;
+      overflow-y: auto !important;
     }
   </style>
 </head>
-<body class="bg-slate-100 text-slate-800 flex flex-col min-h-screen">
+<body id="app-root" class="bg-slate-100 text-slate-800 font-sans min-h-screen flex flex-col justify-between overflow-x-hidden">
 
-  <!-- ================= 頂部導覽列 ================= -->
-  <header class="bg-slate-900 text-white shadow-lg sticky top-0 z-40">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+  <!-- 頂部固定列 (Sticky Header - 不隨捲動移出) -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-sm px-4 lg:px-8 py-3">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
       
-      <!-- 主標題與版本號 -->
-      <div class="flex items-center space-x-3">
-        <div class="w-11 h-11 bg-indigo-600 rounded-xl flex items-center justify-center shadow-md text-white">
-          <i class="fa-solid fa-flag text-2xl"></i>
-        </div>
-        <div>
-          <div class="flex items-center space-x-2">
-            <h1 class="text-2xl font-black tracking-wide">旗語解密大行動</h1>
-            <span class="bg-indigo-500/30 text-indigo-300 text-xs font-bold px-2 py-0.5 rounded-full border border-indigo-400/40">v1.4.0</span>
+      <!-- 主標題與版本號與分頁鍵固定組合 -->
+      <div class="flex items-center gap-3 md:gap-5 flex-wrap">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 md:w-12 md:h-12 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-2xl flex items-center justify-center text-white shadow-md shadow-blue-500/30">
+            <!-- 旗幟幾何圖標 -->
+            <svg class="w-6 h-6 md:w-7 md:h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21v-4m0 0V5a2 2 0 012-2h6.5l1 1H21l-3 6 3 6h-8.5l-1-1H5a2 2 0 00-2 2zm9-13.5V9"/>
+            </svg>
           </div>
-          <p class="text-xs text-slate-400 font-medium">週期規律與餘數密碼探究</p>
+          <div>
+            <div class="flex items-center gap-2">
+              <h1 class="text-xl md:text-2xl font-black tracking-tight text-slate-900">旗語解密大行動</h1>
+              <span id="version-badge" class="bg-indigo-100 text-indigo-800 text-xs px-2.5 py-0.5 rounded-full font-mono font-extrabold border border-indigo-200 shadow-xs">v1.1.0</span>
+            </div>
+            <p class="text-xs text-slate-500 hidden sm:block">數感思維：週期規律 × 餘數的神秘座標</p>
+          </div>
+        </div>
+
+        <!-- 各分頁切換鍵固定在主標題右側 -->
+        <nav class="flex items-center gap-1.5 bg-slate-100/90 p-1.5 rounded-2xl border border-slate-200" aria-label="學習模組導覽">
+          <button id="tab-btn-explore" onclick="switchTab('explore')" class="tab-btn px-3.5 py-2 rounded-xl text-sm md:text-base font-bold transition-all duration-200 bg-white text-blue-600 shadow-sm">
+            🔍 規律試驗室
+          </button>
+          <button id="tab-btn-game" onclick="switchTab('game')" class="tab-btn px-3.5 py-2 rounded-xl text-sm md:text-base font-bold text-slate-600 hover:text-slate-900 transition-all duration-200">
+            ⚡ 2分鐘解密挑戰
+          </button>
+          <button id="tab-btn-reflect" onclick="switchTab('reflect')" class="tab-btn px-3.5 py-2 rounded-xl text-sm md:text-base font-bold text-slate-600 hover:text-slate-900 transition-all duration-200">
+            📜 4F成果筆記
+          </button>
+        </nav>
+      </div>
+
+      <!-- 右側純圖示按鈕組：① QR Code ➔ ② 全螢幕 ➔ ③ 課程指引 -->
+      <div class="flex items-center gap-2">
+        <!-- 1. QR Code 掃碼按鈕 -->
+        <div class="tooltip-container">
+          <button id="btn-qrcode" onclick="openQrModal()" class="w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 active:scale-95 transition border border-slate-200" aria-label="QR Code 掃碼連結">
+            <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z" />
+            </svg>
+          </button>
+          <div class="tooltip-box absolute top-full right-0 mt-2 px-3 py-1.5 bg-slate-900 text-white text-xs rounded-xl shadow-xl whitespace-nowrap z-50">
+            QR Code 掃碼連結
+          </div>
+        </div>
+
+        <!-- 2. 全螢幕切換按鈕 -->
+        <div class="tooltip-container">
+          <button id="btn-fullscreen" onclick="toggleFullScreen()" class="w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 active:scale-95 transition border border-slate-200" aria-label="全螢幕切換">
+            <svg id="fullscreen-icon" class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0 0l-5-5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            </svg>
+          </button>
+          <div class="tooltip-box absolute top-full right-0 mt-2 px-3 py-1.5 bg-slate-900 text-white text-xs rounded-xl shadow-xl whitespace-nowrap z-50">
+            全螢幕切換
+          </div>
+        </div>
+
+        <!-- 3. 課程指引按鈕 -->
+        <div class="tooltip-container">
+          <button id="btn-guide" onclick="openGuideModal()" class="w-11 h-11 md:w-12 md:h-12 flex items-center justify-center rounded-2xl bg-blue-50 hover:bg-blue-100 text-blue-700 active:scale-95 transition border border-blue-200" aria-label="課程指引說明">
+            <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+            </svg>
+          </button>
+          <div class="tooltip-box absolute top-full right-0 mt-2 px-3 py-1.5 bg-slate-900 text-white text-xs rounded-xl shadow-xl whitespace-nowrap z-50">
+            課程設計說明
+          </div>
         </div>
       </div>
-
-      <!-- 頂部純圖示功能列 (嚴格順序：QR Code ➔ 全螢幕 ➔ 課程設計說明) -->
-      <div class="flex items-center space-x-2 sm:space-x-3">
-        <button id="btn-qr" title="QR Code 掃碼分享" aria-label="QR Code 掃碼分享" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 rounded-xl flex items-center justify-center text-slate-200 hover:text-white transition shadow border border-slate-700">
-          <i class="fa-solid fa-qrcode text-xl"></i>
-        </button>
-        <button id="btn-fullscreen" title="全螢幕切換" aria-label="全螢幕切換" class="w-12 h-12 bg-slate-800 hover:bg-slate-700 active:bg-slate-600 rounded-xl flex items-center justify-center text-slate-200 hover:text-white transition shadow border border-slate-700">
-          <i id="fullscreen-icon" class="fa-solid fa-expand text-xl"></i>
-        </button>
-        <button id="btn-guide" title="課程設計說明" aria-label="課程設計說明" class="w-12 h-12 bg-indigo-700 hover:bg-indigo-600 active:bg-indigo-500 rounded-xl flex items-center justify-center text-white transition shadow border border-indigo-500/50">
-          <i class="fa-solid fa-book-open text-xl"></i>
-        </button>
-      </div>
-
     </div>
-
-    <!-- 學習階段四大分頁選單 -->
-    <nav class="bg-slate-800 border-t border-slate-700/70 px-4">
-      <div class="max-w-6xl mx-auto flex space-x-2 overflow-x-auto py-2 scrollbar-none">
-        <button onclick="switchTab('tab-intro')" id="nav-intro" class="tab-btn px-4 py-2.5 rounded-lg font-bold text-base whitespace-nowrap transition flex items-center space-x-2 bg-indigo-600 text-white shadow">
-          <i class="fa-solid fa-compass"></i>
-          <span>活動一：課程導入</span>
-        </button>
-        <button onclick="switchTab('tab-core')" id="nav-core" class="tab-btn px-4 py-2.5 rounded-lg font-bold text-base whitespace-nowrap transition flex items-center space-x-2 text-slate-300 hover:bg-slate-700 hover:text-white">
-          <i class="fa-solid fa-palette"></i>
-          <span>活動二：核心發展</span>
-        </button>
-        <button onclick="switchTab('tab-game')" id="nav-game" class="tab-btn px-4 py-2.5 rounded-lg font-bold text-base whitespace-nowrap transition flex items-center space-x-2 text-slate-300 hover:bg-slate-700 hover:text-white">
-          <i class="fa-solid fa-stopwatch text-amber-400"></i>
-          <span>極速挑戰賽 (2分)</span>
-        </button>
-        <button onclick="switchTab('tab-showcase')" id="nav-showcase" class="tab-btn px-4 py-2.5 rounded-lg font-bold text-base whitespace-nowrap transition flex items-center space-x-2 text-slate-300 hover:bg-slate-700 hover:text-white">
-          <i class="fa-solid fa-trophy text-emerald-400"></i>
-          <span>成果展示牆</span>
-          <span id="showcase-badge" class="bg-emerald-500 text-slate-900 text-xs px-2 py-0.5 rounded-full font-black ml-1">0</span>
-        </button>
-      </div>
-    </nav>
   </header>
 
-  <!-- ================= 主內容容器 ================= -->
-  <main class="flex-grow max-w-6xl w-full mx-auto p-4 sm:p-6 space-y-6">
+  <!-- 主體區域 -->
+  <main class="max-w-7xl mx-auto w-full px-4 lg:px-8 py-5 flex-1 flex flex-col">
+    
+    <!-- 學生身分選單列 (iPad 大按鍵觸控優化) -->
+    <section class="bg-white rounded-3xl p-4 md:p-5 shadow-sm border border-slate-200 mb-6 flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <span class="w-3.5 h-7 bg-blue-600 rounded-full"></span>
+        <span class="font-extrabold text-base md:text-lg text-slate-800">偵探小隊身分登錄</span>
+      </div>
 
-    <!-- ================= 活動一：課程導入 ================= -->
-    <section id="tab-intro" class="tab-pane space-y-6">
-      <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200">
-        <div class="flex items-center space-x-3 mb-4">
-          <span class="w-3 h-8 bg-indigo-600 rounded-full"></span>
-          <h2 class="text-2xl font-black text-slate-900">任務一：旗語信號動態觀測</h2>
-        </div>
-        <p class="text-lg text-slate-600 leading-relaxed mb-6">
-          遠方航行中的旗語艦隊正依序揮舞信號旗。仔細觀察旗幟排列，找出隱藏在色彩變化中的「循環單元」，並推算第 100 面旗幟的顏色。
-        </p>
-
-        <!-- 旗語信號模擬 Canvas -->
-        <div class="bg-slate-900 rounded-2xl p-4 sm:p-6 mb-6 shadow-inner text-center">
-          <div class="flex flex-wrap items-center justify-between gap-3 mb-4 text-white">
-            <span class="text-base sm:text-lg font-bold flex items-center space-x-2">
-              <i class="fa-solid fa-wave-square text-indigo-400"></i>
-              <span>即時旗語信號陣列（紅 ➔ 白 ➔ 藍）</span>
-            </span>
-            <div class="flex space-x-2">
-              <button onclick="stepSignal()" class="touch-btn px-4 py-2 bg-indigo-600 hover:bg-indigo-500 rounded-xl font-bold text-sm shadow active:scale-95 transition">
-                <i class="fa-solid fa-forward-step mr-1"></i> 前進揮旗
-              </button>
-              <button onclick="toggleSignalPlay()" id="btn-signal-play" class="touch-btn px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-xl font-bold text-sm shadow active:scale-95 transition">
-                <i class="fa-solid fa-play mr-1"></i> 自動播放
-              </button>
-            </div>
-          </div>
-
-          <div class="overflow-x-auto py-2">
-            <canvas id="canvas-signals" width="900" height="150" class="max-w-full mx-auto bg-slate-950 rounded-xl border border-slate-800 shadow"></canvas>
-          </div>
-          <div class="mt-3 text-slate-400 text-sm font-medium">
-            目前觀測到第 <span id="signal-count" class="text-amber-400 font-bold text-lg">9</span> 面旗幟 ｜ 循環單元：【 紅旗(1) ➔ 白旗(2) ➔ 藍旗(3) 】
-          </div>
+      <div class="flex flex-wrap items-center gap-3 w-full sm:w-auto">
+        <!-- 班級選單 (五年一班 ~ 五年十四班) -->
+        <div class="flex items-center gap-2">
+          <label for="class-select" class="text-sm font-bold text-slate-600 whitespace-nowrap">班級</label>
+          <select id="class-select" class="bg-slate-50 border-2 border-slate-300 hover:border-blue-500 rounded-2xl px-4 py-2.5 text-base md:text-lg font-bold text-slate-800 focus:outline-none focus:ring-4 focus:ring-blue-100 transition" onchange="syncStudentInfo()">
+            <!-- 自動由 JavaScript 填充 -->
+          </select>
         </div>
 
-        <!-- 解開第 100 面旗幟挑戰區 -->
-        <div class="bg-indigo-50 border-2 border-indigo-200 rounded-2xl p-6">
-          <h3 class="text-xl font-black text-indigo-950 mb-3 flex items-center space-x-2">
-            <i class="fa-solid fa-lightbulb text-amber-500"></i>
-            <span>偵探推理任務：第 100 面旗幟是什麼顏色？</span>
-          </h3>
-          <p class="text-slate-700 text-base mb-4 leading-relaxed">
-            循環單元內共有 <strong>3</strong> 面旗幟（紅、白、藍）。請寫出除法算式並進行驗證：
-          </p>
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-            <div class="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm">
-              <div class="text-xs font-bold text-slate-500 mb-1">目標面數 ÷ 循環長度</div>
-              <div class="text-2xl font-black text-slate-800">100 ÷ 3</div>
-            </div>
-            <div class="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm">
-              <div class="text-xs font-bold text-slate-500 mb-1">計算結果</div>
-              <div class="text-2xl font-black text-indigo-600">33 輪 … 餘 1</div>
-            </div>
-            <div class="bg-white p-4 rounded-xl border border-indigo-100 shadow-sm">
-              <div class="text-xs font-bold text-slate-500 mb-1">餘數代表意義</div>
-              <div class="text-2xl font-black text-emerald-600">第 34 輪的第 1 個</div>
-            </div>
-          </div>
-
-          <div class="flex flex-col sm:flex-row items-center gap-4">
-            <div class="flex-grow w-full">
-              <label class="block text-sm font-bold text-slate-700 mb-2">請選擇預測結果：</label>
-              <div class="grid grid-cols-3 gap-3">
-                <button onclick="checkIntroAnswer('紅')" class="touch-btn py-3 px-4 rounded-xl font-black text-lg bg-rose-500 text-white hover:bg-rose-600 shadow active:scale-95 transition">紅旗</button>
-                <button onclick="checkIntroAnswer('白')" class="touch-btn py-3 px-4 rounded-xl font-black text-lg bg-slate-200 text-slate-800 hover:bg-slate-300 shadow active:scale-95 transition">白旗</button>
-                <button onclick="checkIntroAnswer('藍')" class="touch-btn py-3 px-4 rounded-xl font-black text-lg bg-sky-500 text-white hover:bg-sky-600 shadow active:scale-95 transition">藍旗</button>
-              </div>
-            </div>
-          </div>
-          <div id="intro-feedback" class="mt-4 hidden p-4 rounded-xl font-bold text-base leading-relaxed border"></div>
+        <!-- 座號選單 (1 號 ~ 28 號) -->
+        <div class="flex items-center gap-2">
+          <label for="seat-select" class="text-sm font-bold text-slate-600 whitespace-nowrap">座號</label>
+          <select id="seat-select" class="bg-slate-50 border-2 border-slate-300 hover:border-blue-500 rounded-2xl px-4 py-2.5 text-base md:text-lg font-bold text-slate-800 focus:outline-none focus:ring-4 focus:ring-blue-100 transition" onchange="syncStudentInfo()">
+            <!-- 自動由 JavaScript 填充 -->
+          </select>
         </div>
 
+        <!-- 姓名輸入 -->
+        <div class="flex items-center gap-2 flex-1 sm:flex-initial min-w-[150px]">
+          <label for="student-name" class="text-sm font-bold text-slate-600 whitespace-nowrap">姓名</label>
+          <input type="text" id="student-name" value="野比大雄" class="w-full bg-slate-50 border-2 border-slate-300 hover:border-blue-500 rounded-2xl px-4 py-2 text-base md:text-lg font-bold text-slate-800 focus:outline-none focus:ring-4 focus:ring-blue-100 transition" oninput="syncStudentInfo()" placeholder="請輸入姓名">
+        </div>
       </div>
     </section>
 
-    <!-- ================= 活動二：核心發展 ================= -->
-    <section id="tab-core" class="tab-pane hidden space-y-6">
-      <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200">
-        <div class="flex items-center space-x-3 mb-4">
-          <span class="w-3 h-8 bg-indigo-600 rounded-full"></span>
-          <h2 class="text-2xl font-black text-slate-900">任務二：數位幾何密碼創作與同儕互考</h2>
-        </div>
-        <p class="text-lg text-slate-600 leading-relaxed mb-6">
-          利用平板自由點選圖形，組合一組具備週期循環的「數位幾何密碼陣列」。完成後輸入目標項數挑戰鄰座同學，並檢驗同儕的密碼邏輯。
-        </p>
+    <!-- TAB 1: 規律試驗室 -->
+    <div id="tab-content-explore" class="tab-pane flex-1 flex flex-col gap-6">
+      
+      <!-- 活動一與二導引卡片 -->
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        
+        <!-- 左側：視覺旗語控制器 -->
+        <div class="lg:col-span-2 bg-white rounded-3xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-4">
+              <h2 class="text-xl md:text-2xl font-black text-slate-900 flex items-center gap-2">
+                🚩 週期性信號產生器
+              </h2>
+              <span class="text-sm font-bold px-3 py-1 bg-blue-50 text-blue-700 rounded-full border border-blue-200">
+                可自訂循環單元
+              </span>
+            </div>
+            <p class="text-slate-600 text-sm md:text-base mb-5 leading-relaxed">
+              觀察底下的旗語陣列，一個循環週期共有幾面旗幟？當我們想知道「第 100 面」是什麼顏色時，不需要逐一排列，利用數學除法就能瞬間預測！
+            </p>
 
-        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-          <!-- 繪圖控制面板 -->
-          <div class="lg:col-span-4 bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-5">
-            <h3 class="text-lg font-black text-slate-800 flex items-center space-x-2">
-              <i class="fa-solid fa-pen-ruler text-indigo-600"></i>
-              <span>幾何符號選擇器</span>
-            </h3>
+            <!-- 預設週期切換 -->
+            <div class="mb-4">
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">切換偵探任務信號模式：</span>
+              <div class="flex flex-wrap gap-2">
+                <button id="pattern-btn-0" onclick="setPattern(['🚩 紅旗', '⚪ 白旗', '🔵 藍旗'], 0)" class="pattern-switch-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-sm hover:bg-blue-700 transition active:scale-95">
+                  三色基本信號 (紅-白-藍)
+                </button>
+                <button id="pattern-btn-1" onclick="setPattern(['🚩 紅旗', '🔵 藍旗', '🟡 黃旗', '🟢 綠旗'], 1)" class="pattern-switch-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 transition active:scale-95">
+                  四色警戒陣列 (紅-藍-黃-綠)
+                </button>
+                <button id="pattern-btn-2" onclick="setPattern(['⭐ 星形', '🔷 菱形', '🔺 三角', '🟣 圓形', '🟧 正方'], 2)" class="pattern-switch-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 transition active:scale-95">
+                  五段幾何密碼
+                </button>
+              </div>
+            </div>
 
+            <!-- 循環單元視覺化高亮展示 -->
+            <div class="bg-slate-50 border-2 border-dashed border-blue-200 rounded-2xl p-4 mb-5">
+              <div class="flex items-center justify-between mb-2">
+                <span class="text-xs font-bold text-blue-700 uppercase">當前最小循環單元 (1 週期 = <span id="cycle-length-badge" class="font-extrabold text-blue-900">3</span> 個元素)</span>
+                <span class="text-xs text-slate-500">注意最後一個位置！</span>
+              </div>
+              <div id="cycle-elements-display" class="flex flex-wrap gap-3 items-center">
+                <!-- 動態注入 -->
+              </div>
+            </div>
+
+            <!-- 模擬信號長數列（前 15 個） -->
             <div>
-              <label class="block text-xs font-bold text-slate-500 mb-2">點選圖形加入循環單元：</label>
-              <div class="grid grid-cols-4 gap-2">
-                <button onclick="addPatternSymbol('🔴')" class="touch-btn text-2xl p-2 bg-white rounded-xl border border-slate-300 hover:border-indigo-500 shadow-sm active:scale-95 transition">🔴</button>
-                <button onclick="addPatternSymbol('🔷')" class="touch-btn text-2xl p-2 bg-white rounded-xl border border-slate-300 hover:border-indigo-500 shadow-sm active:scale-95 transition">🔷</button>
-                <button onclick="addPatternSymbol('⭐')" class="touch-btn text-2xl p-2 bg-white rounded-xl border border-slate-300 hover:border-indigo-500 shadow-sm active:scale-95 transition">⭐</button>
-                <button onclick="addPatternSymbol('🔺')" class="touch-btn text-2xl p-2 bg-white rounded-xl border border-slate-300 hover:border-indigo-500 shadow-sm active:scale-95 transition">🔺</button>
-              </div>
-            </div>
-
-            <div class="p-3 bg-white rounded-xl border border-slate-200">
-              <div class="text-xs font-bold text-slate-500 mb-2">當前設計的「單元週期」：</div>
-              <div id="current-pattern-display" class="text-2xl font-black min-h-[44px] flex items-center space-x-2 p-2 bg-slate-100 rounded-lg text-indigo-700 tracking-wider overflow-x-auto">
-                <span class="text-slate-400 text-sm font-normal">請由上方點選圖形加入...</span>
-              </div>
-              <div class="mt-2 text-xs text-slate-500 font-bold flex justify-between items-center">
-                <span>單元長度：<strong id="pattern-length" class="text-indigo-600 text-sm">0</strong> 個元素</span>
-                <button onclick="clearCustomPattern()" class="text-rose-600 hover:underline">清空重設</button>
-              </div>
-            </div>
-
-            <!-- 同儕互考出題產生器 -->
-            <div class="p-4 bg-indigo-50 rounded-xl border border-indigo-200 space-y-3">
-              <label class="block text-xs font-bold text-indigo-900">向鄰座發起提問：</label>
-              <div class="flex items-center space-x-2">
-                <span class="text-sm font-bold text-slate-700">請問第</span>
-                <input type="number" id="input-peer-target" min="1" max="999" value="" placeholder="請輸入" class="w-24 p-2 bg-white rounded-lg border border-indigo-300 text-center font-bold text-lg text-indigo-900 focus:ring-2 focus:ring-indigo-500 outline-none">
-                <span class="text-sm font-bold text-slate-700">個圖形是？</span>
-              </div>
-              <button onclick="calcPeerAnswer()" class="touch-btn w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow text-sm active:scale-95 transition">
-                驗證推算邏輯
-              </button>
-              <div id="peer-calc-result" class="text-sm font-bold text-slate-700 hidden p-3 bg-white rounded-lg border border-indigo-100 space-y-1"></div>
-            </div>
-          </div>
-
-          <!-- 畫布展示與陣列即時預覽 -->
-          <div class="lg:col-span-8 space-y-4">
-            <div class="bg-slate-900 rounded-2xl p-5 text-white shadow-sm">
-              <div class="flex items-center justify-between mb-3">
-                <span class="font-bold text-sm text-slate-300 flex items-center space-x-2">
-                  <i class="fa-solid fa-layer-group text-indigo-400"></i>
-                  <span>無限循環延伸陣列（自動生成）</span>
-                </span>
-                <span class="text-xs text-slate-400">前 24 個週期元素</span>
-              </div>
-              <div id="infinite-pattern-array" class="p-4 bg-slate-950 rounded-xl border border-slate-800 min-h-[90px] flex flex-wrap gap-2.5 items-center">
-                <span class="text-slate-500 text-sm">請於左側添加至少 2 個符號以啟動密碼延伸...</span>
-              </div>
-            </div>
-
-            <!-- 核心認知衝突：破解「第零個」迷思 -->
-            <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-6 space-y-4">
-              <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-amber-500 text-white rounded-xl flex items-center justify-center font-black text-xl shadow">
-                  <i class="fa-solid fa-triangle-exclamation"></i>
-                </div>
-                <div>
-                  <h3 class="text-xl font-black text-amber-950">迷思破解：當餘數消失為 0 時？</h3>
-                  <p class="text-sm text-amber-800">克服「餘數為零等於第 0 個」的思維盲區</p>
-                </div>
-              </div>
-
-              <div class="bg-white p-5 rounded-xl border border-amber-200 space-y-3">
-                <p class="text-base text-slate-700 leading-relaxed font-medium">
-                  以 4 色循環【 🔴 ➔ 🔷 ➔ ⭐ ➔ 🔺 】為例，週期長度為 <strong>4</strong>。<br>
-                  推算 <strong>第 12 個</strong> 圖形時，算式為 <code class="bg-slate-100 text-indigo-700 px-2 py-1 rounded font-bold text-lg">12 ÷ 4 = 3 … 0</code>。
-                </p>
-                <div class="p-4 bg-rose-50 border-l-4 border-rose-500 rounded-r-xl">
-                  <div class="font-black text-rose-900 text-base mb-1">關鍵概念警示：</div>
-                  <div class="text-slate-700 text-sm leading-relaxed">
-                    序列中不存在「第 0 個」圖形。整除代表「剛好完成完整的 3 輪」，因此第 12 個圖形正是該循環單元的<strong>「最後一個元素（🔺）」</strong>。
-                  </div>
-                </div>
-                <div class="flex items-center space-x-2 pt-1">
-                  <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
-                  <span class="text-sm font-bold text-slate-800">解密核心準則：餘數是幾就數到第幾個；整除（餘數 0）代表循環單元的最後一個。</span>
-                </div>
+              <span class="text-xs font-bold text-slate-500 uppercase tracking-wider block mb-2">信號發報陣列（前 15 面旗幟軌跡）：</span>
+              <div id="pattern-stream" class="grid grid-cols-5 sm:grid-cols-8 md:grid-cols-15 gap-2 overflow-x-auto pb-2 custom-scrollbar">
+                <!-- 動態展示長條序列 -->
               </div>
             </div>
           </div>
-        </div>
 
-      </div>
-    </section>
-
-    <!-- ================= 挑戰賽：2分鐘極速解密王 ================= -->
-    <section id="tab-game" class="tab-pane hidden space-y-6">
-      <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200">
-        
-        <!-- 頂部計時器、生命值與戰報條 -->
-        <div class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-200">
-          <div>
-            <div class="flex items-center space-x-2">
-              <span class="px-3 py-1 bg-amber-500 text-slate-900 rounded-full font-black text-xs uppercase tracking-wider">限時 2 分鐘</span>
-              <h2 class="text-2xl font-black text-slate-900">旗語極速解密王</h2>
-            </div>
-            <p class="text-sm text-slate-500 mt-1">連擊答對搶高分 ｜ 答錯累計 3 次即刻終止挑戰</p>
-          </div>
-
-          <!-- 愛心生命值 (❤️❤️❤️) -->
-          <div class="flex items-center space-x-4 bg-slate-50 px-4 py-2 rounded-2xl border border-slate-200">
-            <div class="text-sm font-bold text-slate-600">剩餘機會：</div>
-            <div id="game-lives" class="flex space-x-1.5 text-2xl text-rose-500">
-              <i class="fa-solid fa-heart"></i>
-              <i class="fa-solid fa-heart"></i>
-              <i class="fa-solid fa-heart"></i>
-            </div>
-          </div>
-
-          <!-- 大倒數時鐘 -->
-          <div class="flex items-center space-x-3 bg-slate-900 text-white px-5 py-2.5 rounded-2xl shadow">
-            <i class="fa-solid fa-clock text-amber-400 text-xl"></i>
-            <span id="game-timer" class="font-mono text-3xl font-black tracking-wider">02:00</span>
-          </div>
-        </div>
-
-        <!-- 平滑倒數進度條 -->
-        <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden mt-4 border border-slate-200">
-          <div id="game-progress-bar" class="bg-gradient-to-r from-emerald-500 via-indigo-500 to-rose-500 h-full w-full transition-all duration-300"></div>
-        </div>
-
-        <!-- 挑戰賽主區域 -->
-        <div id="game-arena" class="mt-6">
-          
-          <!-- 遊戲開始前面板 -->
-          <div id="game-start-panel" class="text-center py-10 space-y-6 max-w-xl mx-auto">
-            <div class="w-20 h-20 bg-indigo-100 text-indigo-600 rounded-3xl flex items-center justify-center mx-auto text-4xl shadow-inner">
-              <i class="fa-solid fa-bolt"></i>
-            </div>
-            <div class="space-y-2">
-              <h3 class="text-2xl font-black text-slate-900">準備好進行 2 分鐘極速解密了嗎？</h3>
-              <p class="text-base text-slate-600 leading-relaxed">
-                題庫收錄 36 道隨機循環週期與整除盲區題。<br>
-                每次挑戰隨機洗牌不重複，答錯滿 3 次即立即結算。
-              </p>
-            </div>
-            <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
-              <input type="text" id="game-player-name" placeholder="請輸入小組或座號" class="w-full sm:w-64 p-3.5 bg-slate-50 rounded-xl border border-slate-300 text-center font-bold text-slate-800 outline-none focus:ring-2 focus:ring-indigo-500">
-              <button onclick="startGameChallenge()" class="touch-btn w-full sm:w-auto px-8 py-3.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-black text-lg shadow-lg active:scale-95 transition">
-                <i class="fa-solid fa-play mr-2"></i> 開始挑戰
+          <!-- 推算任意序數互動器 -->
+          <div class="mt-6 pt-5 border-t border-slate-100 bg-blue-50/60 -mx-6 -mb-6 p-6 rounded-b-3xl">
+            <h3 class="text-base md:text-lg font-bold text-slate-900 mb-3 flex items-center gap-2">
+              🎯 快速定位任意位置信號
+            </h3>
+            <div class="flex flex-wrap items-center gap-3">
+              <div class="flex items-center gap-2">
+                <span class="font-bold text-slate-700 text-sm md:text-base">推算第</span>
+                <input type="number" id="predict-n-input" value="100" min="1" max="9999" class="w-28 bg-white border-2 border-blue-300 rounded-xl px-3 py-2 text-center text-lg font-black text-blue-800 focus:outline-none focus:ring-4 focus:ring-blue-200" onkeydown="if(event.key==='Enter') calculatePatternStep()">
+                <span class="font-bold text-slate-700 text-sm md:text-base">面旗幟</span>
+              </div>
+              <button onclick="calculatePatternStep()" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white font-extrabold rounded-xl shadow-md transition">
+                ⚡ 立即解析
               </button>
             </div>
+
+            <!-- 運算過程解析卡片 -->
+            <div id="calculation-result-box" class="mt-4 p-4 bg-white rounded-2xl border border-blue-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+              <!-- 動態解析算式 -->
+            </div>
           </div>
-
-          <!-- 遊戲進行中題目畫面 -->
-          <div id="game-active-panel" class="hidden max-w-2xl mx-auto space-y-6">
-            
-            <div class="flex items-center justify-between text-sm font-bold text-slate-500">
-              <span>第 <span id="current-q-index" class="text-indigo-600 text-lg">1</span> / 36 題</span>
-              <span>目前得分：<span id="current-score" class="text-emerald-600 text-lg font-black">0</span> 分</span>
-            </div>
-
-            <!-- 題目主展示卡 -->
-            <div class="bg-indigo-50/70 border-2 border-indigo-200 rounded-3xl p-6 sm:p-8 text-center space-y-4 shadow-sm">
-              <div class="inline-block px-4 py-1.5 bg-indigo-600 text-white text-xs font-black rounded-full shadow-sm">
-                週期規律題目
-              </div>
-              <div id="q-text" class="text-xl sm:text-2xl font-black text-slate-900 leading-relaxed">
-                <!-- 題目文字 -->
-              </div>
-              <div id="q-pattern-visual" class="p-3 bg-white rounded-2xl border border-indigo-100 text-2xl tracking-widest font-black text-indigo-700 shadow-inner flex items-center justify-center min-h-[60px]">
-                <!-- 視覺循環符號 -->
-              </div>
-            </div>
-
-            <!-- 四選一作答選項 -->
-            <div id="q-options" class="grid grid-cols-2 gap-4">
-              <!-- 動態生成 4 個選項按鈕 -->
-            </div>
-
-            <!-- 即時解析回饋小卡 -->
-            <div id="q-feedback" class="hidden p-4 rounded-2xl font-bold text-sm leading-relaxed border transition"></div>
-
-          </div>
-
-          <!-- 遊戲結束與 4F 智慧反思產出面板 -->
-          <div id="game-result-panel" class="hidden max-w-2xl mx-auto space-y-6">
-            
-            <div class="bg-gradient-to-br from-indigo-900 to-slate-900 text-white rounded-3xl p-6 sm:p-8 shadow-xl text-center space-y-4">
-              <div class="w-16 h-16 bg-amber-400 text-slate-900 rounded-2xl flex items-center justify-center mx-auto text-3xl font-black shadow">
-                <i class="fa-solid fa-award"></i>
-              </div>
-              <h3 class="text-2xl sm:text-3xl font-black" id="result-title">挑戰完成！</h3>
-              <p class="text-slate-300 text-sm" id="result-reason">達成 2 分鐘限時挑戰，獲得榮譽勳章！</p>
-              
-              <div class="grid grid-cols-4 gap-2 pt-2">
-                <div class="bg-white/10 p-3 rounded-xl">
-                  <div class="text-xs text-slate-300">總得分</div>
-                  <div id="res-score" class="text-2xl font-black text-amber-300">0</div>
-                </div>
-                <div class="bg-white/10 p-3 rounded-xl">
-                  <div class="text-xs text-slate-300">作答數</div>
-                  <div id="res-total" class="text-2xl font-black text-white">0</div>
-                </div>
-                <div class="bg-white/10 p-3 rounded-xl">
-                  <div class="text-xs text-slate-300">正確數</div>
-                  <div id="res-correct" class="text-2xl font-black text-emerald-400">0</div>
-                </div>
-                <div class="bg-white/10 p-3 rounded-xl">
-                  <div class="text-xs text-slate-300">失誤次數</div>
-                  <div id="res-strikes" class="text-2xl font-black text-rose-400">0</div>
-                </div>
-              </div>
-            </div>
-
-            <!-- 自動套用 4F 思考模式卡片 -->
-            <div class="bg-white rounded-3xl p-6 sm:p-8 border-2 border-indigo-100 shadow-sm space-y-5">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-2">
-                  <span class="w-3 h-7 bg-indigo-600 rounded-full"></span>
-                  <h4 class="text-xl font-black text-slate-900">4F 焦點反思筆記（系統已依戰報智能產出）</h4>
-                </div>
-                <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2.5 py-1 rounded-full border border-indigo-200">後設認知轉換</span>
-              </div>
-
-              <div class="space-y-4">
-                <!-- Facts -->
-                <div class="p-4 bg-sky-50 rounded-2xl border border-sky-100">
-                  <div class="text-xs font-black text-sky-800 uppercase tracking-wider mb-1 flex items-center space-x-1.5">
-                    <i class="fa-solid fa-database"></i>
-                    <span>[Facts] 客觀事實數據</span>
-                  </div>
-                  <p id="4f-facts" class="text-sm font-bold text-slate-700 leading-relaxed"></p>
-                </div>
-
-                <!-- Feelings -->
-                <div class="p-4 bg-amber-50 rounded-2xl border border-amber-100">
-                  <div class="text-xs font-black text-amber-800 uppercase tracking-wider mb-2 flex items-center space-x-1.5">
-                    <i class="fa-solid fa-heart"></i>
-                    <span>[Feelings] 感受體驗（點選切換心境標籤）</span>
-                  </div>
-                  <div class="flex flex-wrap gap-2 mb-2" id="feeling-tags-container">
-                    <button onclick="selectFeelingTag(this)" class="tag-btn px-3 py-1 bg-white text-slate-700 border border-amber-300 rounded-lg text-xs font-bold active:scale-95 transition">⚡ 倒數兩分鐘心跳加速</button>
-                    <button onclick="selectFeelingTag(this)" class="tag-btn px-3 py-1 bg-white text-slate-700 border border-amber-300 rounded-lg text-xs font-bold active:scale-95 transition">🎯 秒殺餘數題目超有成就感</button>
-                    <button onclick="selectFeelingTag(this)" class="tag-btn px-3 py-1 bg-white text-slate-700 border border-amber-300 rounded-lg text-xs font-bold active:scale-95 transition">💡 避開整除陷阱恍然大悟</button>
-                    <button onclick="selectFeelingTag(this)" class="tag-btn px-3 py-1 bg-white text-slate-700 border border-amber-300 rounded-lg text-xs font-bold active:scale-95 transition">⏱️ 扣心警示手忙腳亂</button>
-                  </div>
-                  <input type="text" id="4f-feelings-custom" placeholder="亦可補充自己的心得感受..." class="w-full p-2.5 bg-white rounded-xl border border-amber-200 text-sm text-slate-800 outline-none focus:ring-2 focus:ring-amber-400">
-                </div>
-
-                <!-- Findings -->
-                <div class="p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
-                  <div class="text-xs font-black text-emerald-800 uppercase tracking-wider mb-1 flex items-center space-x-1.5">
-                    <i class="fa-solid fa-magnifying-glass"></i>
-                    <span>[Findings] 數感規律洞察</span>
-                  </div>
-                  <p id="4f-findings" class="text-sm font-bold text-slate-700 leading-relaxed"></p>
-                </div>
-
-                <!-- Future -->
-                <div class="p-4 bg-purple-50 rounded-2xl border border-purple-100">
-                  <div class="text-xs font-black text-purple-800 uppercase tracking-wider mb-1 flex items-center space-x-1.5">
-                    <i class="fa-solid fa-rocket"></i>
-                    <span>[Future] 未來生活應用</span>
-                  </div>
-                  <p id="4f-future" class="text-sm font-bold text-slate-700 leading-relaxed"></p>
-                </div>
-              </div>
-
-              <!-- 成果發布按鍵 -->
-              <div class="flex flex-col sm:flex-row gap-3 pt-2">
-                <button onclick="publishToWall()" class="touch-btn flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl font-black text-base shadow-lg active:scale-95 transition flex items-center justify-center space-x-2">
-                  <i class="fa-solid fa-cloud-arrow-up"></i>
-                  <span>發布 4F 成果至展示牆</span>
-                </button>
-                <button onclick="resetGame()" class="touch-btn px-6 py-3.5 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl font-bold text-base active:scale-95 transition">
-                  <i class="fa-solid fa-rotate-right mr-1"></i> 再挑戰一次
-                </button>
-              </div>
-            </div>
-
-          </div>
-
         </div>
 
-      </div>
-    </section>
-
-    <!-- ================= 成果展示牆 ================= -->
-    <section id="tab-showcase" class="tab-pane hidden space-y-6">
-      <div class="bg-white rounded-2xl p-6 sm:p-8 shadow-sm border border-slate-200">
-        
-        <div class="flex flex-wrap items-center justify-between gap-4 pb-6 border-b border-slate-200">
+        <!-- 右側：破除「第零個迷思」思維支架 -->
+        <div class="bg-gradient-to-br from-amber-500/10 via-amber-500/5 to-white rounded-3xl p-6 shadow-sm border border-amber-200 flex flex-col justify-between">
           <div>
-            <div class="flex items-center space-x-2">
-              <span class="w-3 h-8 bg-emerald-500 rounded-full"></span>
-              <h2 class="text-2xl font-black text-slate-900">全班學習成果展示牆</h2>
+            <div class="flex items-center gap-2.5 mb-3">
+              <span class="w-9 h-9 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black text-lg">💡</span>
+              <h3 class="text-lg md:text-xl font-black text-slate-900">偵探思維：第零個迷思</h3>
             </div>
-            <p class="text-sm text-slate-500 mt-1">展示同儕 4F 思考筆記與挑戰賽榮譽 ｜ 支援匯出高解析海報圖片</p>
+            <div class="space-y-4 text-sm md:text-base text-slate-700 leading-relaxed">
+              <div class="bg-white p-4 rounded-2xl border border-amber-200 shadow-xs">
+                <p class="font-extrabold text-amber-900 mb-1">🚨 容易掉入的盲區：</p>
+                <p>當算式「剛好除盡，餘數為 0」時，有些同學會愣住：「第 0 面旗子到底是什麼顏色？」</p>
+              </div>
+
+              <div class="bg-white p-4 rounded-2xl border border-blue-200 shadow-xs">
+                <p class="font-extrabold text-blue-900 mb-1">🔑 破解密碼鑰匙：</p>
+                <p>除盡代表「剛好完成了一整輪循環」！</p>
+                <p class="mt-1 font-bold text-blue-700">👉 因此：餘數為 0 代表該循環的「最後一個元素」！</p>
+              </div>
+
+              <div class="p-3 bg-slate-100 rounded-xl text-xs text-slate-600">
+                例：週期為 3 (紅、白、藍)。<br>
+                第 9 面：9 ÷ 3 = 3 餘 0 ➔ 第 3 輪完整結束，正是<b class="text-blue-600">藍旗</b>！
+              </div>
+            </div>
           </div>
 
-          <div class="flex space-x-2">
-            <button onclick="exportShowcasePNG()" class="touch-btn px-5 py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-black text-sm shadow flex items-center space-x-2 active:scale-95 transition">
-              <i class="fa-solid fa-file-image"></i>
-              <span>匯出成果圖檔 (PNG)</span>
+          <div class="mt-6">
+            <button onclick="switchTab('game')" class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-extrabold text-lg rounded-2xl shadow-lg shadow-blue-500/25 active:scale-95 transition flex items-center justify-center gap-2">
+              <span>前往 2 分鐘極速解密挑戰</span>
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6"/></svg>
             </button>
           </div>
         </div>
 
-        <!-- 成果卡片網格 -->
-        <div id="showcase-container" class="mt-6 grid grid-cols-1 md:grid-cols-2 gap-6 p-2 bg-slate-50 rounded-2xl border border-slate-200 min-h-[260px]">
-          <!-- 卡片動態注入 -->
+      </div>
+    </div>
+
+    <!-- TAB 2: 2 分鐘解密挑戰遊戲 -->
+    <div id="tab-content-game" class="tab-pane hidden flex-1 flex flex-col justify-center max-w-4xl mx-auto w-full">
+      
+      <!-- 遊戲待機封面 -->
+      <div id="game-start-screen" class="bg-white rounded-3xl p-6 md:p-10 shadow-sm border border-slate-200 text-center flex flex-col items-center">
+        <div class="w-20 h-20 bg-blue-100 text-blue-600 rounded-3xl flex items-center justify-center text-4xl mb-5 shadow-inner">
+          ⏱️
+        </div>
+        <h2 class="text-2xl md:text-3xl font-black text-slate-900 mb-3">旗語特工：2分鐘限時破譯</h2>
+        <p class="text-slate-600 max-w-lg mb-6 text-base md:text-lg leading-relaxed">
+          題庫超過 35 道嚴選任務題！考驗你對「週期」與「餘數」的掌握度。<br>
+          <strong class="text-rose-600">⚠️ 答錯 3 次或 120 秒結束即終止測驗</strong>，特別小心「餘數為 0」的整除題喔！
+        </p>
+
+        <!-- 挑戰規則三大亮點 -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-xl mb-8 text-left">
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <span class="text-2xl block mb-1">⏳</span>
+            <h4 class="font-extrabold text-slate-800 text-sm">限時 120 秒</h4>
+            <p class="text-xs text-slate-500 mt-0.5">時間流逝，考驗專注快狠準</p>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <span class="text-2xl block mb-1">❤️</span>
+            <h4 class="font-extrabold text-slate-800 text-sm">3 點偵探防護</h4>
+            <p class="text-xs text-slate-500 mt-0.5">失誤 3 次將觸發警報終止</p>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <span class="text-2xl block mb-1">🎯</span>
+            <h4 class="font-extrabold text-slate-800 text-sm">35+ 題洗牌不重複</h4>
+            <p class="text-xs text-slate-500 mt-0.5">洗牌佇列，避免重複出題</p>
+          </div>
+        </div>
+
+        <button onclick="startGame()" class="w-full max-w-sm py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-blue-700 hover:from-blue-700 hover:to-indigo-800 text-white font-black text-xl rounded-2xl shadow-xl shadow-blue-500/30 active:scale-95 transition tracking-wide flex items-center justify-center gap-2">
+          <span>啟動特工任務</span>
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+        </button>
+      </div>
+
+      <!-- 遊戲進行中介面 -->
+      <div id="game-play-screen" class="hidden bg-white rounded-3xl p-5 md:p-8 shadow-sm border border-slate-200 flex flex-col gap-6">
+        
+        <!-- 狀態看板：倒數計時、生命值、連擊得分 -->
+        <div class="flex items-center justify-between gap-3 bg-slate-50 p-4 rounded-2xl border border-slate-200 flex-wrap">
+          <!-- 剩餘時間 -->
+          <div class="flex items-center gap-2.5">
+            <span class="text-2xl">⏳</span>
+            <div>
+              <span class="text-xs font-bold text-slate-500 block">剩餘時間</span>
+              <span id="game-timer" class="font-mono text-2xl font-black text-blue-700">02:00</span>
+            </div>
+          </div>
+
+          <!-- 愛心生命值 (3 顆) -->
+          <div class="flex items-center gap-2 bg-white px-4 py-2 rounded-xl border border-slate-200 shadow-2xs">
+            <span class="text-xs font-bold text-slate-500 mr-1">防護力</span>
+            <div id="heart-container" class="flex items-center gap-1.5 text-2xl">
+              <span id="heart-1" class="heart-active">❤️</span>
+              <span id="heart-2" class="heart-active">❤️</span>
+              <span id="heart-3" class="heart-active">❤️</span>
+            </div>
+          </div>
+
+          <!-- 分數與題數 -->
+          <div class="flex items-center gap-4">
+            <div class="text-right">
+              <span class="text-xs font-bold text-slate-500 block">破譯得分</span>
+              <span id="game-score" class="font-mono text-2xl font-black text-emerald-600">0</span>
+            </div>
+            <div class="bg-blue-600 text-white px-3 py-1.5 rounded-xl font-bold text-xs" id="game-streak-badge">
+              COMBO 0
+            </div>
+          </div>
+        </div>
+
+        <!-- 題目展示卡 -->
+        <div class="bg-blue-50/50 border-2 border-blue-200 rounded-3xl p-6 text-center">
+          <div class="inline-block bg-white px-3 py-1 rounded-full text-xs font-black text-blue-700 border border-blue-200 mb-3" id="question-index-tag">
+            任務 1 / 35+
+          </div>
+
+          <h3 id="question-text" class="text-xl md:text-2xl font-black text-slate-900 mb-4 leading-snug">
+            題目載入中...
+          </h3>
+
+          <!-- 視覺化循環展示預覽 -->
+          <div id="question-pattern-preview" class="flex flex-wrap items-center justify-center gap-2 p-3 bg-white/80 rounded-2xl max-w-lg mx-auto border border-blue-100 shadow-2xs mb-2">
+            <!-- 動態展示循環圖形 -->
+          </div>
+          <span class="text-xs text-slate-400 font-medium">依照上述循環規律重複排列...</span>
+        </div>
+
+        <!-- 選項按鈕區 (超大觸控按鈕，專為 iPad 打造) -->
+        <div id="options-container" class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <!-- 選項按鈕動態注入 -->
+        </div>
+
+        <!-- 即時反饋訊息欄 -->
+        <div id="feedback-bar" class="hidden p-3.5 rounded-2xl text-center font-bold text-base transition-all duration-300">
+          <!-- 答對/答錯反饋 -->
         </div>
 
       </div>
-    </section>
+
+      <!-- 遊戲結算頁面 (銜接 4F 反思) -->
+      <div id="game-end-screen" class="hidden bg-white rounded-3xl p-6 md:p-10 shadow-sm border border-slate-200 text-center flex flex-col items-center">
+        <div id="end-status-icon" class="w-20 h-20 rounded-3xl flex items-center justify-center text-4xl mb-4 shadow-inner bg-emerald-100 text-emerald-600">
+          🏆
+        </div>
+        <h2 id="end-status-title" class="text-2xl md:text-3xl font-black text-slate-900 mb-2">挑戰完成！</h2>
+        <p id="end-status-desc" class="text-slate-600 mb-6 text-base">你展現了高超的週期數感推理技巧！</p>
+
+        <!-- 數據統計清單 -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 w-full max-w-2xl mb-8">
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <span class="text-xs font-bold text-slate-500 block">總得分</span>
+            <span id="stat-final-score" class="text-2xl font-black text-blue-600">0</span>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <span class="text-xs font-bold text-slate-500 block">答對題數</span>
+            <span id="stat-correct-count" class="text-2xl font-black text-emerald-600">0</span>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <span class="text-xs font-bold text-slate-500 block">整除陷阱破譯</span>
+            <span id="stat-zero-count" class="text-2xl font-black text-amber-600">0 次</span>
+          </div>
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+            <span class="text-xs font-bold text-slate-500 block">準確率</span>
+            <span id="stat-accuracy" class="text-2xl font-black text-indigo-600">100%</span>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap gap-4 justify-center w-full max-w-md">
+          <button onclick="startGame()" class="flex-1 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-2xl transition active:scale-95">
+            🔄 再挑戰一次
+          </button>
+          <button onclick="goToReflectionTab()" class="flex-1 py-3.5 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-2xl shadow-lg shadow-blue-500/25 transition active:scale-95 flex items-center justify-center gap-1.5">
+            <span>填寫 4F 成果反思</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- TAB 3: 4F 成果筆記與證書匯出 -->
+    <div id="tab-content-reflect" class="tab-pane hidden flex-1 flex flex-col gap-6">
+      
+      <!-- 頂部指引與匯出按鈕列 -->
+      <div class="bg-white rounded-3xl p-5 shadow-sm border border-slate-200 flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 class="text-xl md:text-2xl font-black text-slate-900 flex items-center gap-2">
+            📜 偵探筆記：4F 思考模式反思單
+          </h2>
+          <p class="text-slate-500 text-xs md:text-sm mt-1">
+            系統已根據你剛才的破譯數據為你自動分析，請依你的真實體驗調整筆記，並匯出證書存檔！
+          </p>
+        </div>
+
+        <div class="flex items-center gap-3">
+          <button onclick="autoFillReflectFromGame()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-sm transition active:scale-95 flex items-center gap-1.5">
+            <span>✨ 智慧重置反思</span>
+          </button>
+          <button onclick="exportCertificateImage()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-black text-sm shadow-md shadow-emerald-600/20 transition active:scale-95 flex items-center gap-1.5">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+            <span>匯出成果證書圖片 (PNG)</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- 4F 核心卡片網格 -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- [Facts] 事實 -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-black rounded-full uppercase">Facts · 事實客觀觀察</span>
+              <span class="text-xs text-slate-400">客觀數據</span>
+            </div>
+            <h4 class="font-extrabold text-slate-900 text-base md:text-lg mb-2">
+              旗語挑戰中，一組循環包含幾個圖案？你一共解開了幾題？
+            </h4>
+            <p class="text-xs text-slate-500 mb-3 leading-relaxed">
+              請紀錄今天測試與挑戰中觀察到的循環單元大小，以及你的破譯表現。
+            </p>
+          </div>
+          <textarea id="reflect-facts" rows="4" class="w-full bg-slate-50 border-2 border-slate-200 focus:border-blue-500 rounded-2xl p-3.5 text-slate-800 font-medium text-sm md:text-base focus:outline-none focus:ring-4 focus:ring-blue-100 transition leading-relaxed"></textarea>
+        </div>
+
+        <!-- [Feelings] 感受 -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-3 py-1 bg-amber-100 text-amber-800 text-xs font-black rounded-full uppercase">Feelings · 感受與情緒體驗</span>
+              <span class="text-xs text-slate-400">心路歷程</span>
+            </div>
+            <h4 class="font-extrabold text-slate-900 text-base md:text-lg mb-2">
+              在限時 2 分鐘倒數中預測第 100 面旗幟顏色時，感覺如何？
+            </h4>
+            <p class="text-xs text-slate-500 mb-3 leading-relaxed">
+              當遇到整除（餘數為0）或是時間一秒秒過去時，心理狀態有什麼起伏？
+            </p>
+          </div>
+          <textarea id="reflect-feelings" rows="4" class="w-full bg-slate-50 border-2 border-slate-200 focus:border-amber-500 rounded-2xl p-3.5 text-slate-800 font-medium text-sm md:text-base focus:outline-none focus:ring-4 focus:ring-amber-100 transition leading-relaxed"></textarea>
+        </div>
+
+        <!-- [Findings] 洞察發現 -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-3 py-1 bg-purple-100 text-purple-800 text-xs font-black rounded-full uppercase">Findings · 核心觀點與迷思破譯</span>
+              <span class="text-xs text-slate-400">概念建構</span>
+            </div>
+            <h4 class="font-extrabold text-slate-900 text-base md:text-lg mb-2">
+              「餘數」在判斷週期規律時扮演什麼角色？餘數為 0 代表什麼？
+            </h4>
+            <p class="text-xs text-slate-500 mb-3 leading-relaxed">
+              商代表什麼？餘數對應到循環裡的第幾個？整除到底該找哪一面旗？
+            </p>
+          </div>
+          <textarea id="reflect-findings" rows="4" class="w-full bg-slate-50 border-2 border-slate-200 focus:border-purple-500 rounded-2xl p-3.5 text-slate-800 font-medium text-sm md:text-base focus:outline-none focus:ring-4 focus:ring-purple-100 transition leading-relaxed"></textarea>
+        </div>
+
+        <!-- [Future] 未來應用 -->
+        <div class="bg-white rounded-3xl p-6 shadow-sm border border-slate-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <span class="px-3 py-1 bg-emerald-100 text-emerald-800 text-xs font-black rounded-full uppercase">Future · 生活實踐與遷移</span>
+              <span class="text-xs text-slate-400">生活遷移</span>
+            </div>
+            <h4 class="font-extrabold text-slate-900 text-base md:text-lg mb-2">
+              生活中還有哪些可以用「除法與餘數」解決的規律問題？
+            </h4>
+            <p class="text-xs text-slate-500 mb-3 leading-relaxed">
+              例如星期七天、生肖十二年、紅綠燈變換、時鐘指針旋轉...
+            </p>
+          </div>
+          <textarea id="reflect-future" rows="4" class="w-full bg-slate-50 border-2 border-slate-200 focus:border-emerald-500 rounded-2xl p-3.5 text-slate-800 font-medium text-sm md:text-base focus:outline-none focus:ring-4 focus:ring-emerald-100 transition leading-relaxed"></textarea>
+        </div>
+
+      </div>
+
+      <!-- 證書即時預覽小卡 -->
+      <div class="bg-slate-50 border-2 border-dashed border-slate-300 rounded-3xl p-6 text-center">
+        <p class="text-xs font-extrabold text-slate-500 uppercase tracking-widest mb-1">CERTIFICATE PREVIEW</p>
+        <p class="text-base font-bold text-slate-700">證書將整合【學員資訊】、【挑戰戰績】與【4F 反思摘要】，點擊右上角「匯出成果證書圖片」即可儲存高畫質 PNG！</p>
+      </div>
+
+    </div>
 
   </main>
 
-  <!-- ================= 頁面最下方文字 (嚴格居中標記) ================= -->
-  <footer class="bg-slate-900 text-slate-400 py-4 px-4 text-center border-t border-slate-800 text-sm font-medium tracking-wide">
-    數感實驗室  | 互動學習系統 | Design：S.C. Kuo
+  <!-- 頁尾：嚴格遵照規格文字 -->
+  <footer class="w-full py-4 text-center border-t border-slate-200 bg-white">
+    <p class="text-xs md:text-sm font-medium text-slate-600">
+      數感實驗室  | 互動學習系統 | Design：S.C. Kuo
+    </p>
   </footer>
 
-  <!-- ================= QR Code 彈窗 ================= -->
-  <div id="modal-qr" class="fixed inset-0 bg-slate-950/70 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-sm w-full text-center shadow-2xl space-y-5 border border-slate-200">
-      <div class="flex justify-between items-center pb-2 border-b border-slate-100">
-        <h3 class="text-lg font-black text-slate-900 flex items-center space-x-2">
-          <i class="fa-solid fa-qrcode text-indigo-600"></i>
-          <span>iPad 掃碼載入網頁</span>
-        </h3>
-        <button onclick="closeModal('modal-qr')" class="w-8 h-8 text-slate-400 hover:text-slate-600 rounded-full flex items-center justify-center">
-          <i class="fa-solid fa-xmark text-lg"></i>
-        </button>
-      </div>
-      <div class="p-3 bg-white border-2 border-dashed border-indigo-200 rounded-2xl flex items-center justify-center min-h-[190px]">
-        <div id="qrcode-box" class="p-1"></div>
-      </div>
-      <p class="text-xs text-slate-500 font-medium">使用 iPad 相機直接對準畫面掃描即可開啟</p>
-      <button onclick="copyCurrentUrl()" class="touch-btn w-full py-3 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl font-bold text-sm shadow-sm flex items-center justify-center space-x-2 active:scale-95 transition">
-        <i class="fa-solid fa-copy text-indigo-600"></i>
-        <span>一鍵複製網址</span>
+  <!-- 1. QR Code 彈跳視窗 -->
+  <div id="modal-qrcode" onclick="if(event.target===this) closeQrModal()" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-100 text-center relative animate-in fade-in zoom-in duration-200">
+      <button onclick="closeQrModal()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-lg font-bold" aria-label="關閉視窗">
+        ✕
       </button>
-    </div>
-  </div>
-
-  <!-- ================= 課程設計說明彈窗 ================= -->
-  <div id="modal-guide" class="fixed inset-0 bg-slate-950/70 z-50 hidden flex items-center justify-center p-4 backdrop-blur-sm">
-    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-3xl w-full shadow-2xl space-y-6 border border-slate-200 max-h-[88vh] overflow-y-auto">
       
-      <div class="flex justify-between items-center pb-4 border-b border-slate-200 sticky top-0 bg-white z-10">
-        <div class="flex items-center space-x-3">
-          <div class="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center text-xl shadow">
-            <i class="fa-solid fa-book-open"></i>
+      <div class="w-12 h-12 rounded-2xl bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-3">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+      </div>
+
+      <h3 class="text-xl font-black text-slate-900 mb-1">課堂載具即時掃描</h3>
+      <p class="text-xs text-slate-500 mb-4">支援 iPad 相機直接掃描開啟當前網頁</p>
+
+      <!-- 動態 QR Code 容器 -->
+      <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200 inline-block mb-4">
+        <div id="qrcode-box" class="flex justify-center items-center min-w-[180px] min-h-[180px]"></div>
+      </div>
+
+      <div class="space-y-2">
+        <button onclick="copyCurrentUrl()" class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-extrabold rounded-xl shadow-md transition active:scale-95 flex items-center justify-center gap-2 text-sm">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+          <span id="copy-btn-text">一鍵複製目前網址</span>
+        </button>
+        <p id="url-status-note" class="text-[11px] text-slate-400">已自動解析當前載入網址</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. 課程設計說明彈跳視窗 -->
+  <div id="modal-guide" onclick="if(event.target===this) closeGuideModal()" class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-3xl rounded-3xl shadow-2xl border border-slate-100 max-h-[90vh] flex flex-col relative animate-in fade-in zoom-in duration-200">
+      
+      <!-- 彈窗頂部 -->
+      <div class="p-6 border-b border-slate-100 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-700 flex items-center justify-center">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
           </div>
-          <h3 class="text-2xl font-black text-slate-900">課程設計說明</h3>
+          <div>
+            <h3 class="text-xl font-black text-slate-900">課程設計說明</h3>
+            <p class="text-xs text-slate-500">十二年國教素養導向教學 · 旗語解密大行動</p>
+          </div>
         </div>
-        <button onclick="closeModal('modal-guide')" class="w-9 h-9 text-slate-400 hover:text-slate-600 rounded-full flex items-center justify-center">
-          <i class="fa-solid fa-xmark text-xl"></i>
+        <button onclick="closeGuideModal()" class="w-9 h-9 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-lg font-bold" aria-label="關閉視窗">
+          ✕
         </button>
       </div>
 
-      <div class="space-y-6 text-slate-700 text-base leading-relaxed">
+      <!-- 彈窗內容：三大項 -->
+      <div class="p-6 overflow-y-auto custom-scrollbar space-y-6 text-slate-700 text-sm md:text-base leading-relaxed">
         
-        <!-- 一、學習目標 -->
-        <div class="bg-indigo-50/60 p-5 rounded-2xl border border-indigo-100 space-y-3">
-          <h4 class="text-lg font-black text-indigo-950 flex items-center space-x-2">
-            <span class="w-2.5 h-2.5 bg-indigo-600 rounded-full"></span>
-            <span>一、學習目標</span>
-          </h4>
-          <ul class="space-y-2 text-sm sm:text-base font-medium">
-            <li class="flex items-start space-x-2">
-              <strong class="text-indigo-700 min-w-[5rem]">【認知層面】</strong>
-              <span>能找出序列中的「循環單元」，熟練運用除法算式預測第 N 項元素，並理解「整除（餘數 0）代表該循環單元的最後一個元素」的數學本質。</span>
-            </li>
-            <li class="flex items-start space-x-2">
-              <strong class="text-indigo-700 min-w-[5rem]">【技能層面】</strong>
-              <span>能運用觸控面板自主設計幾何規律陣列，進行同儕互考，並在 2 分鐘極速競賽中展現週期心算與抗壓辨析能力。</span>
-            </li>
-            <li class="flex items-start space-x-2">
-              <strong class="text-indigo-700 min-w-[5rem]">【情意素養】</strong>
-              <span>能透過 4F 焦點思考模式檢核解題盲區，將週期規律概念遷移至交通號誌、排班輪替與節奏編排等生活情境中。</span>
-            </li>
+        <!-- 第一項：學習目標 -->
+        <section class="bg-blue-50/60 p-5 rounded-2xl border border-blue-200">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-2 h-6 bg-blue-600 rounded-full"></span>
+            <h4 class="text-base md:text-lg font-black text-blue-900">一、核心學習目標 (Learning Objectives)</h4>
+          </div>
+          <ul class="space-y-2 list-disc list-inside text-slate-700 text-sm md:text-base">
+            <li><strong>數學本質理解：</strong>學生能察覺視覺陣列與旗語信號中的「循環單元」，並能將具體規律轉化為除法算式（$N \div \text{週期} = \text{商} \dots \text{餘數}$）。</li>
+            <li><strong>迷思概念突破：</strong>能清楚闡釋除法中「商」代表循環次數，「餘數」為當前循環第幾個；並能突破「餘數為0代表第零個」的認知盲區，理解整除即為該循環單元的最後一個元素。</li>
+            <li><strong>高層次思考與反思：</strong>透過 4F 引導反思模型（Facts、Feelings、Findings、Future），整理並發表問題解決歷程，建立生活情境的規律遷移能力。</li>
           </ul>
-        </div>
+        </section>
 
-        <!-- 二、網頁操作說明 -->
-        <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200 space-y-3">
-          <h4 class="text-lg font-black text-slate-900 flex items-center space-x-2">
-            <span class="w-2.5 h-2.5 bg-emerald-600 rounded-full"></span>
-            <span>二、網頁操作說明</span>
-          </h4>
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-            <div class="p-3 bg-white rounded-xl border border-slate-200">
-              <div class="font-bold text-slate-900 mb-1">頂部純圖示功能列</div>
-              <p class="text-slate-600 text-xs">① QR Code 產生目前網址 ➔ ② 全螢幕切換（支援 iPadOS）➔ ③ 課程設計說明手冊。</p>
+        <!-- 第二項：網頁操作說明 -->
+        <section class="bg-indigo-50/60 p-5 rounded-2xl border border-indigo-200">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-2 h-6 bg-indigo-600 rounded-full"></span>
+            <h4 class="text-base md:text-lg font-black text-indigo-900">二、網頁操作說明 (Operation Guide)</h4>
+          </div>
+          <div class="space-y-2 text-sm md:text-base">
+            <p>1. <strong>學生身分選單：</strong>登入列預設為「五年一班 28號 野比大雄」，可直接於選單下拉切換 1~14 班與 1~28 號，支援 iPad 直覺點選。</p>
+            <p>2. <strong>規律試驗室：</strong>可切換 3 色、4 色、5 色密碼陣列，並在「快速定位任意位置信號」輸入如 100 面，即時觀看圖解除法算式與餘數對應動態演練。</p>
+            <p>3. <strong>2 分鐘限時挑戰：</strong>點擊開始後進入 120 秒計時，內建 36 題隨機題庫與 3 顆愛心生命值。具備整除題型加權，失誤 3 次將觸發警報結算。</p>
+            <p>4. <strong>4F 筆記與成果匯出：</strong>完成挑戰後自動產生專屬 4F 反思內容，可點擊「匯出成果證書圖片」將反思、戰績與防偽印記合成為高畫質 PNG 儲存。</p>
+          </div>
+        </section>
+
+        <!-- 第三項：課堂提問建議 -->
+        <section class="bg-emerald-50/60 p-5 rounded-2xl border border-emerald-200">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="w-2 h-6 bg-emerald-600 rounded-full"></span>
+            <h4 class="text-base md:text-lg font-black text-emerald-900">三、課堂提問建議 (Classroom Inquiry Prompts)</h4>
+          </div>
+          <div class="space-y-3 text-sm md:text-base">
+            <div class="p-3 bg-white rounded-xl border border-emerald-100">
+              <p class="font-bold text-emerald-900">【導入階段·引起動機】</p>
+              <p class="text-slate-600">「如果大海上的航海員每秒揮一面旗，揮了 100 次，我們不畫 100 面旗，能不能在 5 秒內精準喊出第 100 次的顏色？關鍵是什麼？」</p>
             </div>
-            <div class="p-3 bg-white rounded-xl border border-slate-200">
-              <div class="font-bold text-slate-900 mb-1">活動一：信號觀測與預測</div>
-              <p class="text-slate-600 text-xs">觀測 Canvas 動態旗語揮舞，點選按鈕檢驗第 100 面旗幟顏色與除法算式關係。</p>
+            <div class="p-3 bg-white rounded-xl border border-emerald-100">
+              <p class="font-bold text-emerald-900">【發展階段·迷思破解】</p>
+              <p class="text-slate-600">「當我們計算 $12 \div 3 = 4 \dots 0$ 時，餘數是 0！難道世界上有第 0 面旗幟嗎？這時候的 0 代表什麼狀態？」</p>
             </div>
-            <div class="p-3 bg-white rounded-xl border border-slate-200">
-              <div class="font-bold text-slate-900 mb-1">活動二：幾何畫布與盲區破解</div>
-              <p class="text-slate-600 text-xs">自由點選符號組合密碼，自動產出無窮陣列並提供同儕推算；突破餘數為零之思維死角。</p>
-            </div>
-            <div class="p-3 bg-white rounded-xl border border-slate-200">
-              <div class="font-bold text-slate-900 mb-1">挑戰賽 ➔ 4F 展示牆</div>
-              <p class="text-slate-600 text-xs">限時 120 秒挑戰 36 題隨機題庫，錯 3 次終止。結算自動產出 4F 圖卡發布並支援匯出 PNG。</p>
+            <div class="p-3 bg-white rounded-xl border border-emerald-100">
+              <p class="font-bold text-emerald-900">【歸納階段·生活連結】</p>
+              <p class="text-slate-600">「如果今天是星期三，再過 100 天是星期幾？這道問題跟今天的紅紅白藍旗幟有什麼共通的數學秘密？」</p>
             </div>
           </div>
-        </div>
-
-        <!-- 三、課堂提問建議 -->
-        <div class="bg-amber-50/60 p-5 rounded-2xl border border-amber-100 space-y-3">
-          <h4 class="text-lg font-black text-amber-950 flex items-center space-x-2">
-            <span class="w-2.5 h-2.5 bg-amber-600 rounded-full"></span>
-            <span>三、課堂提問建議</span>
-          </h4>
-          <ul class="space-y-2 text-sm sm:text-base font-medium">
-            <li class="flex items-start space-x-2">
-              <span class="text-amber-600 font-bold min-w-[5.5rem]">1. 導入提問：</span>
-              <span>「如果第 100 面旗幟不需要一面面畫出來，除法算式中的『商數 33』與『餘數 1』分別代表什麼意思？」</span>
-            </li>
-            <li class="flex items-start space-x-2">
-              <span class="text-amber-600 font-bold min-w-[5.5rem]">2. 盲區提問：</span>
-              <span>「當算式算出來剛好整除（餘數是 0）的時候，陣列裡有第 0 個圖形嗎？我們該看循環單元的哪一個？」</span>
-            </li>
-            <li class="flex items-start space-x-2">
-              <span class="text-amber-600 font-bold min-w-[5.5rem]">3. 遷移提問：</span>
-              <span>「如果今天是星期三，經過 50 天之後會是星期幾？這道生活難題能不能用今天的旗語週期公式解開？」</span>
-            </li>
-          </ul>
-        </div>
+        </section>
 
       </div>
 
-      <div class="pt-2">
-        <button onclick="closeModal('modal-guide')" class="touch-btn w-full py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl font-bold shadow text-base active:scale-95 transition">
-          關閉說明手冊
+      <!-- 彈窗底部 -->
+      <div class="p-4 bg-slate-50 border-t border-slate-100 text-right rounded-b-3xl">
+        <button onclick="closeGuideModal()" class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition">
+          我知道了，開始探索
         </button>
       </div>
 
     </div>
   </div>
 
-  <!-- Toast 訊息通知元件 -->
-  <div id="toast" class="fixed bottom-16 left-1/2 -translate-x-1/2 z-50 hidden px-5 py-3 bg-slate-900 text-white rounded-2xl shadow-2xl text-sm font-bold flex items-center space-x-2 border border-slate-700 transition-opacity duration-300">
-    <i id="toast-icon" class="fa-solid fa-circle-check text-emerald-400"></i>
-    <span id="toast-msg">訊息文字</span>
+  <!-- 3. 證書預覽彈窗 (針對 iPad 友善儲存照片) -->
+  <div id="modal-cert-preview" onclick="if(event.target===this) closeCertPreviewModal()" class="fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="bg-white w-full max-w-4xl rounded-3xl p-5 md:p-6 shadow-2xl border border-slate-100 flex flex-col items-center gap-4 relative animate-in fade-in zoom-in duration-200 max-h-[92vh]">
+      <button onclick="closeCertPreviewModal()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100 text-slate-500 hover:bg-slate-200 flex items-center justify-center text-lg font-bold" aria-label="關閉視窗">
+        ✕
+      </button>
+
+      <div class="text-center">
+        <h3 class="text-xl font-black text-slate-900">榮譽結業證書已生成</h3>
+        <p class="text-xs text-slate-500">iPad 使用者可「長按圖片」選擇「加入照片」儲存至相簿，或點擊下方按鈕直接下載。</p>
+      </div>
+
+      <div class="w-full flex-1 overflow-auto rounded-2xl border border-slate-200 flex justify-center bg-slate-50 p-2">
+        <img id="cert-preview-img" src="" alt="結業證書預覽" class="max-w-full h-auto object-contain rounded-xl shadow-md">
+      </div>
+
+      <div class="flex items-center gap-3 w-full max-w-md">
+        <a id="cert-download-link" href="#" download="旗語解密大行動成果證書.png" class="flex-1 py-3 bg-emerald-600 hover:bg-emerald-700 text-white font-extrabold rounded-xl shadow-md text-center transition active:scale-95 text-sm">
+          💾 直接下載 PNG
+        </a>
+        <button onclick="closeCertPreviewModal()" class="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition active:scale-95 text-sm">
+          返回筆記
+        </button>
+      </div>
+    </div>
   </div>
 
-  <!-- ================= 系統主要 JavaScript 核心邏輯 ================= -->
+  <!-- 隱藏畫布 (用於匯出高畫質證書) -->
+  <canvas id="exportCanvas" class="hidden"></canvas>
+
   <script>
-    /* ================= 全域狀態管理 ================= */
-    const STATE = {
-      activeTab: 'tab-intro',
-      signalIndex: 9,
-      signalTimer: null,
-      signalColors: ['#f43f5e', '#f8fafc', '#38bdf8'], // 紅、白、藍
-      customPattern: [],
-      game: {
-        timer: null,
-        timeLeft: 120, // 2 分鐘 (120 秒)
-        totalTime: 120,
-        strikes: 0,
-        maxStrikes: 3,
-        score: 0,
-        currentQIndex: 0,
-        answeredCount: 0,
-        correctCount: 0,
-        activeQuestion: null,
-        isAnswerLocked: false,
-        questions: []
-      },
-      showcaseWorks: []
+    // 系統狀態
+    let activeTab = 'explore';
+    let currentPattern = ['🚩 紅旗', '⚪ 白旗', '🔵 藍旗'];
+    let studentProfile = {
+      className: '五年一班',
+      seatNumber: '28 號',
+      name: '野比大雄'
+    };
+    
+    // 遊戲狀態變數
+    let gameTimer = null;
+    let timeLeft = 120; // 2 分鐘
+    let hearts = 3;
+    let score = 0;
+    let streak = 0;
+    let currentQuestionIndex = 0;
+    let currentQuestion = null;
+    let shuffledQueue = []; // 洗牌去重佇列
+    let isProcessingAnswer = false; // 防止重複連點
+
+    let gameHistory = {
+      totalAnswered: 0,
+      correctCount: 0,
+      zeroRemainderCount: 0, // 整除題次數
+      historyLogs: []
     };
 
-    /* ================= 36 道原創結構化題庫 (包含 3/4/5 週期、生活規律、整除盲區) ================= */
+    // Web Audio API 提示音合成器 (離線無依賴，iPad 安全調用)
+    const AudioEngine = {
+      ctx: null,
+      init() {
+        if (!this.ctx) {
+          const AudioContext = window.AudioContext || window.webkitAudioContext;
+          if (AudioContext) {
+            this.ctx = new AudioContext();
+          }
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+          this.ctx.resume();
+        }
+      },
+      playCorrect() {
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(587.33, this.ctx.currentTime); // D5
+          osc.frequency.exponentialRampToValueAtTime(880, this.ctx.currentTime + 0.15); // A5
+          gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.3);
+        } catch(e) {}
+      },
+      playWrong() {
+        try {
+          this.init();
+          if (!this.ctx) return;
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(220, this.ctx.currentTime); // A3
+          osc.frequency.setValueAtTime(164.81, this.ctx.currentTime + 0.15); // E3
+          gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+          gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.35);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start();
+          osc.stop(this.ctx.currentTime + 0.35);
+        } catch(e) {}
+      },
+      playSuccess() {
+        try {
+          this.init();
+          if (!this.ctx) return;
+          [523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+            osc.frequency.value = freq;
+            gain.gain.setValueAtTime(0.15, this.ctx.currentTime + idx * 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + idx * 0.1 + 0.25);
+            osc.connect(gain);
+            gain.connect(this.ctx.destination);
+            osc.start(this.ctx.currentTime + idx * 0.1);
+            osc.stop(this.ctx.currentTime + idx * 0.1 + 0.25);
+          });
+        } catch(e) {}
+      }
+    };
+
+    // 嚴選 36 道週期與餘數題庫 (包含大量整除陷阱題，深化除盡思維)
     const QUESTION_BANK = [
-      // 3 色循環 (紅 白 藍)
-      { id: 1, cycle: ['🔴', '⚪', '🔵'], target: 10, correct: '🔴', options: ['🔴', '⚪', '🔵', '⭐'], reason: '10 ÷ 3 = 3 輪 … 餘 1，對應單元第 1 個：🔴' },
-      { id: 2, cycle: ['🔴', '⚪', '🔵'], target: 24, correct: '🔵', options: ['🔴', '⚪', '🔵', '🔷'], reason: '24 ÷ 3 = 8 輪 … 餘 0（整除），對應單元最後一個：🔵' },
-      { id: 3, cycle: ['🔴', '⚪', '🔵'], target: 35, correct: '⚪', options: ['🔴', '⚪', '🔵', '🔺'], reason: '35 ÷ 3 = 11 輪 … 餘 2，對應單元第 2 個：⚪' },
-      { id: 4, cycle: ['🔴', '⚪', '🔵'], target: 60, correct: '🔵', options: ['🔴', '⚪', '🔵', '⭐'], reason: '60 ÷ 3 = 20 輪 … 餘 0（整除），整輪結束為最後一個：🔵' },
-      { id: 5, cycle: ['🔴', '⚪', '🔵'], target: 99, correct: '🔵', options: ['🔴', '⚪', '🔵', '🟣'], reason: '99 ÷ 3 = 33 輪 … 餘 0（整除），為第 33 輪最後一個：🔵' },
-      { id: 6, cycle: ['🔴', '⚪', '🔵'], target: 100, correct: '🔴', options: ['🔴', '⚪', '🔵', '🟩'], reason: '100 ÷ 3 = 33 輪 … 餘 1，為第 34 輪第 1 個：🔴' },
-      
-      // 4 圖形循環 (🔴 🔷 ⭐ 🔺)
-      { id: 7, cycle: ['🔴', '🔷', '⭐', '🔺'], target: 12, correct: '🔺', options: ['🔴', '🔷', '⭐', '🔺'], reason: '12 ÷ 4 = 3 輪 … 餘 0（整除），整除代表循環單元最後一個：🔺' },
-      { id: 8, cycle: ['🔴', '🔷', '⭐', '🔺'], target: 17, correct: '🔴', options: ['🔴', '🔷', '⭐', '🔺'], reason: '17 ÷ 4 = 4 輪 … 餘 1，對應單元第 1 個：🔴' },
-      { id: 9, cycle: ['🔴', '🔷', '⭐', '🔺'], target: 22, correct: '🔷', options: ['🔴', '🔷', '⭐', '🔺'], reason: '22 ÷ 4 = 5 輪 … 餘 2，對應單元第 2 個：🔷' },
-      { id: 10, cycle: ['🔴', '🔷', '⭐', '🔺'], target: 27, correct: '⭐', options: ['🔴', '🔷', '⭐', '🔺'], reason: '27 ÷ 4 = 6 輪 … 餘 3，對應單元第 3 個：⭐' },
-      { id: 11, cycle: ['🔴', '🔷', '⭐', '🔺'], target: 40, correct: '🔺', options: ['🔴', '🔷', '⭐', '🔺'], reason: '40 ÷ 4 = 10 輪 … 餘 0（整除），為單元最後一個：🔺' },
-      { id: 12, cycle: ['🔴', '🔷', '⭐', '🔺'], target: 41, correct: '🔴', options: ['🔴', '🔷', '⭐', '🔺'], reason: '41 ÷ 4 = 10 輪 … 餘 1，下一輪開頭第 1 個：🔴' },
+      // 週期 3 系列 (紅、白、藍)
+      { pattern: ['🚩 紅旗', '⚪ 白旗', '🔵 藍旗'], target: 4, isZero: false, story: '信號燈閃爍按「紅-白-藍」循環，第 4 面是什麼顏色？' },
+      { pattern: ['🚩 紅旗', '⚪ 白旗', '🔵 藍旗'], target: 6, isZero: true, story: '巡邏旗幟按「紅-白-藍」順序升起，第 6 面是哪一面？' },
+      { pattern: ['🚩 紅旗', '⚪ 白旗', '🔵 藍旗'], target: 9, isZero: true, story: '重要軍情信號：第 9 面旗幟依「紅-白-藍」排列，請問顏色是？' },
+      { pattern: ['🚩 紅旗', '⚪ 白旗', '🔵 藍旗'], target: 14, isZero: false, story: '水手觀察到旗語按「紅-白-藍」重複，第 14 面是什麼顏色？' },
+      { pattern: ['🚩 紅旗', '⚪ 白旗', '🔵 藍旗'], target: 21, isZero: true, story: '海港信號第 21 面旗（循環為紅-白-藍），小心整除陷阱！它是？' },
+      { pattern: ['🚩 紅旗', '⚪ 白旗', '🔵 藍旗'], target: 30, isZero: true, story: '整組信號以「紅-白-藍」為一輪，第 30 面旗幟是？' },
+      { pattern: ['🚩 紅旗', '⚪ 白旗', '🔵 藍旗'], target: 50, isZero: false, story: '航向燈塔的第 50 面旗幟（三色紅-白-藍循環）顏色為？' },
+      { pattern: ['🚩 紅旗', '⚪ 白旗', '🔵 藍旗'], target: 99, isZero: true, story: '超長距離信號！第 99 面旗幟按「紅-白-藍」循環，是誰？' },
+      { pattern: ['🚩 紅旗', '⚪ 白旗', '🔵 藍旗'], target: 100, isZero: false, story: '經典任務挑戰：第 100 面信號旗（紅-白-藍循環）究竟是哪面？' },
 
-      // 5 符號循環 (🚩 🏳️ 🏴 🏁 🎯)
-      { id: 13, cycle: ['🚩', '🏳️', '🏴', '🏁', '🎯'], target: 15, correct: '🎯', options: ['🚩', '🏳️', '🏁', '🎯'], reason: '15 ÷ 5 = 3 輪 … 餘 0（整除），剛好是最後一個：🎯' },
-      { id: 14, cycle: ['🚩', '🏳️', '🏴', '🏁', '🎯'], target: 21, correct: '🚩', options: ['🚩', '🏳️', '🏴', '🎯'], reason: '21 ÷ 5 = 4 輪 … 餘 1，對應單元第 1 個：🚩' },
-      { id: 15, cycle: ['🚩', '🏳️', '🏴', '🏁', '🎯'], target: 33, correct: '🏴', options: ['🚩', '🏳️', '🏴', '🏁'], reason: '33 ÷ 5 = 6 輪 … 餘 3，對應單元第 3 個：🏴' },
-      { id: 16, cycle: ['🚩', '🏳️', '🏴', '🏁', '🎯'], target: 50, correct: '🎯', options: ['🚩', '🏳️', '🏁', '🎯'], reason: '50 ÷ 5 = 10 輪 … 餘 0（整除），整除為最後一個：🎯' },
-      { id: 17, cycle: ['🚩', '🏳️', '🏴', '🏁', '🎯'], target: 74, correct: '🏁', options: ['🏳️', '🏴', '🏁', '🎯'], reason: '74 ÷ 5 = 14 輪 … 餘 4，對應單元第 4 個：🏁' },
+      // 週期 4 系列 (紅、藍、黃、綠)
+      { pattern: ['🚩 紅旗', '🔵 藍旗', '🟡 黃旗', '🟢 綠旗'], target: 8, isZero: true, story: '警示燈按「紅-藍-黃-綠」週期運作，第 8 盞是什麼燈？' },
+      { pattern: ['🚩 紅旗', '🔵 藍旗', '🟡 黃旗', '🟢 綠旗'], target: 11, isZero: false, story: '特工密碼「紅-藍-黃-綠」四位一組，第 11 個信號為？' },
+      { pattern: ['🚩 紅旗', '🔵 藍旗', '🟡 黃旗', '🟢 綠旗'], target: 16, isZero: true, story: '第 16 面防護旗（紅-藍-黃-綠循環）剛好整除，是哪一面？' },
+      { pattern: ['🚩 紅旗', '🔵 藍旗', '🟡 黃旗', '🟢 綠旗'], target: 25, isZero: false, story: '旗幟依「紅-藍-黃-綠」反覆排列，第 25 面旗的顏色是？' },
+      { pattern: ['🚩 紅旗', '🔵 藍旗', '🟡 黃旗', '🟢 綠旗'], target: 40, isZero: true, story: '神秘金庫密碼第 40 號（紅-藍-黃-綠），破譯結果為？' },
+      { pattern: ['🚩 紅旗', '🔵 藍旗', '🟡 黃旗', '🟢 綠旗'], target: 73, isZero: false, story: '第 73 個信號依四色「紅-藍-黃-綠」循環，應為？' },
+      { pattern: ['🚩 紅旗', '🔵 藍旗', '🟡 黃旗', '🟢 綠旗'], target: 100, isZero: true, story: '四色信號隊列排到第 100 位，小心整除！答案是？' },
 
-      // 生活規律與星期週期 (長度 7)
-      { id: 18, cycle: ['週一', '週二', '週三', '週四', '週五', '週六', '週日'], target: 14, correct: '週日', options: ['週一', '週五', '週六', '週日'], reason: '14 ÷ 7 = 2 輪 … 餘 0（整除），為週期最後一天：週日' },
-      { id: 19, cycle: ['週一', '週二', '週三', '週四', '週五', '週六', '週日'], target: 15, correct: '週一', options: ['週一', '週二', '週六', '週日'], reason: '15 ÷ 7 = 2 輪 … 餘 1，為新一週第 1 天：週一' },
-      { id: 20, cycle: ['週一', '週二', '週三', '週四', '週五', '週六', '週日'], target: 50, correct: '週一', options: ['週日', '週一', '週二', '週三'], reason: '50 ÷ 7 = 7 輪 … 餘 1，對應週期第 1 天：週一' },
+      // 週期 5 系列 (星形、菱形、三角、圓形、正方)
+      { pattern: ['⭐ 星形', '🔷 菱形', '🔺 三角', '🟣 圓形', '🟧 正方'], target: 10, isZero: true, story: '幾何密碼按「星-菱-三角-圓-正方」重複，第 10 個幾何圖案是？' },
+      { pattern: ['⭐ 星形', '🔷 菱形', '🔺 三角', '🟣 圓形', '🟧 正方'], target: 17, isZero: false, story: '古代石板依五種圖騰循環，第 17 個雕刻圖案是？' },
+      { pattern: ['⭐ 星形', '🔷 菱形', '🔺 三角', '🟣 圓形', '🟧 正方'], target: 25, isZero: true, story: '星際坐標第 25 個符號（五色幾何），剛好整除，最後一個是？' },
+      { pattern: ['⭐ 星形', '🔷 菱形', '🔺 三角', '🟣 圓形', '🟧 正方'], target: 33, isZero: false, story: '長度為 5 的圖騰重複排列，第 33 個圖案是？' },
+      { pattern: ['⭐ 星形', '🔷 菱形', '🔺 三角', '🟣 圓形', '🟧 正方'], target: 45, isZero: true, story: '密碼鎖齒輪第 45 格（5種圖形循環），會轉到哪一個？' },
+      { pattern: ['⭐ 星形', '🔷 菱形', '🔺 三角', '🟣 圓形', '🟧 正方'], target: 51, isZero: false, story: '第 51 面旗幟（星-菱-三角-圓-正方循環），會是誰？' },
 
-      // 四季循環 (春 夏 秋 冬)
-      { id: 21, cycle: ['🌸春', '☀️夏', '🍁秋', '❄️冬'], target: 16, correct: '❄️冬', options: ['🌸春', '☀️夏', '🍁秋', '❄️冬'], reason: '16 ÷ 4 = 4 輪 … 餘 0（整除），為單元最後一個：❄️冬' },
-      { id: 22, cycle: ['🌸春', '☀️夏', '🍁秋', '❄️冬'], target: 25, correct: '🌸春', options: ['🌸春', '☀️夏', '🍁秋', '❄️冬'], reason: '25 ÷ 4 = 6 輪 … 餘 1，為單元第 1 個：🌸春' },
+      // 週期 2 雙色對稱系列
+      { pattern: ['⚪ 白旗', '⚫ 黑旗'], target: 15, isZero: false, story: '燈號按「白-黑」黑白交替，第 15 次亮起的燈是？' },
+      { pattern: ['⚪ 白旗', '⚫ 黑旗'], target: 28, isZero: true, story: '黑白旗幟交替揮動，第 28 面旗幟會是？' },
+      { pattern: ['⚪ 白旗', '⚫ 黑旗'], target: 47, isZero: false, story: '按雙色頻率「白-黑」巡航，第 47 個信號是？' },
+      { pattern: ['⚪ 白旗', '⚫ 黑旗'], target: 100, isZero: true, story: '「白-黑」雙色信號第 100 面，整除對應的是？' },
 
-      // 雙色高頻推算 (黑 白) - 週期 2
-      { id: 23, cycle: ['⬛', '⬜'], target: 87, correct: '⬛', options: ['⬛', '⬜', '🟥', '🟦'], reason: '87 ÷ 2 = 43 輪 … 餘 1（奇數），對應第 1 個：⬛' },
-      { id: 24, cycle: ['⬛', '⬜'], target: 100, correct: '⬜', options: ['⬛', '⬜', '🟥', '🟨'], reason: '100 ÷ 2 = 50 輪 … 餘 0（偶數整除），對應最後一個：⬜' },
-
-      // 幾何方向循環 (⬆️ ➡️ ⬇️ ⬅️) - 週期 4
-      { id: 25, cycle: ['⬆️', '➡️', '⬇️', '⬅️'], target: 36, correct: '⬅️', options: ['⬆️', '➡️', '⬇️', '⬅️'], reason: '36 ÷ 4 = 9 輪 … 餘 0（整除），方向為最後一個：⬅️' },
-      { id: 26, cycle: ['⬆️', '➡️', '⬇️', '⬅️'], target: 39, correct: '⬇️', options: ['⬆️', '➡️', '⬇️', '⬅️'], reason: '39 ÷ 4 = 9 輪 … 餘 3，方向為第 3 個：⬇️' },
-
-      // 旗語音階 (Do Re Mi Fa Sol) - 週期 5
-      { id: 27, cycle: ['Do', 'Re', 'Mi', 'Fa', 'Sol'], target: 20, correct: 'Sol', options: ['Do', 'Mi', 'Fa', 'Sol'], reason: '20 ÷ 5 = 4 輪 … 餘 0（整除），為最後一個音：Sol' },
-      { id: 28, cycle: ['Do', 'Re', 'Mi', 'Fa', 'Sol'], target: 22, correct: 'Re', options: ['Do', 'Re', 'Mi', 'Sol'], reason: '22 ÷ 5 = 4 輪 … 餘 2，為單元第 2 個音：Re' },
-
-      // 4色燈號循環 (🟢 🟡 🔴 🔵)
-      { id: 29, cycle: ['🟢', '🟡', '🔴', '🔵'], target: 48, correct: '🔵', options: ['🟢', '🟡', '🔴', '🔵'], reason: '48 ÷ 4 = 12 輪 … 餘 0（整除），燈號為最後一個：🔵' },
-      { id: 30, cycle: ['🟢', '🟡', '🔴', '🔵'], target: 49, correct: '🟢', options: ['🟢', '🟡', '🔴', '🔵'], reason: '49 ÷ 4 = 12 輪 … 餘 1，燈號為新的一輪開頭：🟢' },
-
-      // 代號與天體循環題
-      { id: 31, cycle: ['甲', '乙', '丙'], target: 90, correct: '丙', options: ['甲', '乙', '丙', '丁'], reason: '90 ÷ 3 = 30 輪 … 餘 0（整除），對應循環最後一個：丙' },
-      { id: 32, cycle: ['甲', '乙', '丙'], target: 91, correct: '甲', options: ['甲', '乙', '丙', '丁'], reason: '91 ÷ 3 = 30 輪 … 餘 1，對應循環第 1 個：甲' },
-      { id: 33, cycle: ['A', 'B', 'C', 'D'], target: 80, correct: 'D', options: ['A', 'B', 'C', 'D'], reason: '80 ÷ 4 = 20 輪 … 餘 0（整除），整除必為單元尾端：D' },
-      { id: 34, cycle: ['A', 'B', 'C', 'D'], target: 82, correct: 'B', options: ['A', 'B', 'C', 'D'], reason: '82 ÷ 4 = 20 輪 … 餘 2，對應單元第 2 個字母：B' },
-      { id: 35, cycle: ['太陽', '月亮', '星星'], target: 300, correct: '星星', options: ['太陽', '月亮', '星星', '雲朵'], reason: '300 ÷ 3 = 100 輪 … 餘 0（整除），為最後一個：星星' },
-      { id: 36, cycle: ['太陽', '月亮', '星星'], target: 301, correct: '太陽', options: ['太陽', '月亮', '星星', '流星'], reason: '301 ÷ 3 = 100 輪 … 餘 1，新的一輪第 1 個：太陽' }
+      // 週期 6 與生活綜合系列
+      { pattern: ['🔴 紅', '🟠 橙', '🟡 黃', '🟢 綠', '🔵 藍', '🟣 紫'], target: 12, isZero: true, story: '彩虹光譜「紅橙黃綠藍紫」六色循環，第 12 道光是？' },
+      { pattern: ['🔴 紅', '🟠 橙', '🟡 黃', '🟢 綠', '🔵 藍', '🟣 紫'], target: 19, isZero: false, story: '六色信號連續發射，第 19 發信號彈的顏色是？' },
+      { pattern: ['🔴 紅', '🟠 橙', '🟡 黃', '🟢 綠', '🔵 藍', '🟣 紫'], target: 36, isZero: true, story: '第 36 次旋轉燈光（6種顏色循環），整除時該輪最後一個為？' },
+      { pattern: ['🔴 紅', '🟠 橙', '🟡 黃', '🟢 綠', '🔵 藍', '🟣 紫'], target: 50, isZero: false, story: '六色彩旗迎風排列，第 50 面彩旗是？' },
+      { pattern: ['☀️ 晴天', '🌧️ 雨天', '⛅ 多雲'], target: 18, isZero: true, story: '模擬氣候按「晴-雨-多雲」3天一週期，第 18 天天氣是？' },
+      { pattern: ['☀️ 晴天', '🌧️ 雨天', '⛅ 多雲'], target: 25, isZero: false, story: '氣候按「晴-雨-多雲」3天一循環，第 25 天是哪種天氣？' },
+      { pattern: ['🍎 蘋果', '🍌 香蕉', '🍇 葡萄', '🍉 西瓜'], target: 32, isZero: true, story: '水果圖示「蘋-蕉-葡-瓜」4個一循環，第 32 個是？' },
+      { pattern: ['🍎 蘋果', '🍌 香蕉', '🍇 葡萄', '🍉 西瓜'], target: 41, isZero: false, story: '傳送帶上按「蘋-蕉-葡-瓜」排列，第 41 個水果是？' },
+      { pattern: ['🚀 火箭', '🛰️ 衛星', '🛸 幽浮'], target: 60, isZero: true, story: '太空探索發射「火箭-衛星-幽浮」3種飛行器，第 60 架是？' },
+      { pattern: ['🚀 火箭', '🛰️ 衛星', '🛸 幽浮'], target: 61, isZero: false, story: '發射序列「火箭-衛星-幽浮」重複，第 61 架飛行器是？' },
+      { pattern: ['🚩 紅旗', '🔵 藍旗', '🟡 黃旗', '🟢 綠旗'], target: 80, isZero: true, story: '旗語訓練最後壓軸題：四色「紅藍黃綠」，第 80 面旗為？' }
     ];
 
-    // Fisher-Yates 無偏誤洗牌演算法
-    function shuffleArray(arr) {
-      const copy = [...arr];
-      for (let i = copy.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [copy[i], copy[j]] = [copy[j], copy[i]];
-      }
-      return copy;
-    }
-
-    /* ================= 網頁初始化 ================= */
+    // 初始化網頁與班級座號選單
     window.addEventListener('DOMContentLoaded', () => {
-      initSignalsCanvas();
-      initQRModal();
-      setupFullscreenEvents();
-      setupKeydownEvents();
-      renderShowcaseWall();
+      initStudentSelectors();
+      setPattern(currentPattern, 0);
+      calculatePatternStep();
     });
 
-    /* ================= 分頁導覽切換 ================= */
+    // 填充班級與座號選單（五年一班~五年十四班；1~28號，預設五年一班28號）
+    function initStudentSelectors() {
+      const classSelect = document.getElementById('class-select');
+      const seatSelect = document.getElementById('seat-select');
+      
+      classSelect.innerHTML = '';
+      seatSelect.innerHTML = '';
+
+      const chineseNums = ['一', '二', '三', '四', '五', '六', '七', '八', '九', '十', '十一', '十二', '十三', '十四'];
+      for (let i = 1; i <= 14; i++) {
+        const opt = document.createElement('option');
+        opt.value = `五年${chineseNums[i-1]}班`;
+        opt.textContent = `五年${chineseNums[i-1]}班`;
+        if (i === 1) opt.selected = true; // 預設五年一班
+        classSelect.appendChild(opt);
+      }
+
+      for (let s = 1; s <= 28; s++) {
+        const opt = document.createElement('option');
+        opt.value = `${s} 號`;
+        opt.textContent = `${s} 號`;
+        if (s === 28) opt.selected = true; // 預設 28 號
+        seatSelect.appendChild(opt);
+      }
+
+      syncStudentInfo();
+    }
+
+    function syncStudentInfo() {
+      studentProfile.className = document.getElementById('class-select').value;
+      studentProfile.seatNumber = document.getElementById('seat-select').value;
+      studentProfile.name = document.getElementById('student-name').value.trim() || '野比大雄';
+      
+      // 若當前在反思頁，連動更新反思開頭姓名
+      const factsArea = document.getElementById('reflect-facts');
+      if (factsArea && factsArea.value) {
+        factsArea.value = factsArea.value.replace(/我（.*?）/, `我（${studentProfile.className} ${studentProfile.seatNumber} ${studentProfile.name}）`);
+      }
+    }
+
+    // 分頁切換功能
     function switchTab(tabId) {
-      STATE.activeTab = tabId;
-      document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
-      document.querySelectorAll('.tab-btn').forEach(b => {
-        b.classList.remove('bg-indigo-600', 'text-white', 'shadow');
-        b.classList.add('text-slate-300');
+      activeTab = tabId;
+      document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+      document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('bg-white', 'text-blue-600', 'shadow-sm');
+        btn.classList.add('text-slate-600');
       });
 
-      const activePane = document.getElementById(tabId);
-      if (activePane) activePane.classList.remove('hidden');
-
-      const navBtnMap = {
-        'tab-intro': 'nav-intro',
-        'tab-core': 'nav-core',
-        'tab-game': 'nav-game',
-        'tab-showcase': 'nav-showcase'
-      };
-      const activeNav = document.getElementById(navBtnMap[tabId]);
-      if (activeNav) {
-        activeNav.classList.remove('text-slate-300');
-        activeNav.classList.add('bg-indigo-600', 'text-white', 'shadow');
+      const targetPane = document.getElementById(`tab-content-${tabId}`);
+      const targetBtn = document.getElementById(`tab-btn-${tabId}`);
+      if (targetPane) targetPane.classList.remove('hidden');
+      if (targetBtn) {
+        targetBtn.classList.add('bg-white', 'text-blue-600', 'shadow-sm');
+        targetBtn.classList.remove('text-slate-600');
       }
 
-      if (tabId === 'tab-intro') {
-        renderSignals();
+      if (tabId === 'reflect') {
+        if (!document.getElementById('reflect-facts').value) {
+          autoFillReflectFromGame();
+        }
       }
     }
 
-    /* ================= 活動一：信號動態繪圖與預測 ================= */
-    function initSignalsCanvas() {
-      renderSignals();
-    }
+    // 規律試驗室設定當前週期
+    function setPattern(elements, btnIdx) {
+      currentPattern = elements;
+      document.getElementById('cycle-length-badge').textContent = elements.length;
 
-    function renderSignals() {
-      const canvas = document.getElementById('canvas-signals');
-      if (!canvas) return;
-      const ctx = canvas.getContext('2d');
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      // 更新按鈕樣式
+      document.querySelectorAll('.pattern-switch-btn').forEach((btn, idx) => {
+        if (idx === btnIdx) {
+          btn.className = 'pattern-switch-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-blue-600 text-white shadow-sm hover:bg-blue-700 transition active:scale-95';
+        } else {
+          btn.className = 'pattern-switch-btn px-4 py-2.5 rounded-xl font-bold text-sm bg-slate-100 hover:bg-slate-200 text-slate-700 transition active:scale-95';
+        }
+      });
 
-      const count = STATE.signalIndex;
-      const flagWidth = 60;
-      const startX = 30;
-      const spacing = 90;
+      // 渲染最小循環單元
+      const cycleContainer = document.getElementById('cycle-elements-display');
+      cycleContainer.innerHTML = '';
+      elements.forEach((item, index) => {
+        const isLast = (index === elements.length - 1);
+        const div = document.createElement('div');
+        div.className = `px-3.5 py-2 rounded-xl font-black text-sm md:text-base flex items-center gap-1.5 shadow-sm border ${
+          isLast 
+          ? 'bg-amber-100 text-amber-900 border-amber-300 ring-2 ring-amber-400/50' 
+          : 'bg-white text-slate-800 border-slate-200'
+        }`;
+        div.innerHTML = `<span>${item}</span><span class="text-[11px] px-1.5 py-0.5 rounded-full ${isLast ? 'bg-amber-200 text-amber-900 font-bold' : 'bg-slate-100 text-slate-500'}">位置 ${index + 1}${isLast ? ' (餘0)' : ''}</span>`;
+        cycleContainer.appendChild(div);
+      });
 
-      for (let i = 0; i < count; i++) {
-        const cyclePos = i % 3; // 0=紅, 1=白, 2=藍
-        const x = startX + i * spacing;
-        const y = 35;
-
-        // 旗桿
-        ctx.strokeStyle = '#94a3b8';
-        ctx.lineWidth = 4;
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x, y + 80);
-        ctx.stroke();
-
-        // 旗幟布面
-        ctx.fillStyle = STATE.signalColors[cyclePos];
-        ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + flagWidth, y + 20);
-        ctx.lineTo(x, y + 40);
-        ctx.closePath();
-        ctx.fill();
-        ctx.strokeStyle = '#475569';
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-
-        // 編號
-        ctx.fillStyle = '#cbd5e1';
-        ctx.font = 'bold 13px Noto Sans TC';
-        ctx.textAlign = 'center';
-        ctx.fillText(`第${i + 1}面`, x + 15, y + 100);
-      }
-
-      const countLabel = document.getElementById('signal-count');
-      if (countLabel) countLabel.textContent = count;
-    }
-
-    function stepSignal() {
-      STATE.signalIndex = (STATE.signalIndex % 9) + 1;
-      renderSignals();
-    }
-
-    function toggleSignalPlay() {
-      const btn = document.getElementById('btn-signal-play');
-      if (STATE.signalTimer) {
-        clearInterval(STATE.signalTimer);
-        STATE.signalTimer = null;
-        if (btn) btn.innerHTML = '<i class="fa-solid fa-play mr-1"></i> 自動播放';
-      } else {
-        STATE.signalTimer = setInterval(() => {
-          stepSignal();
-        }, 800);
-        if (btn) btn.innerHTML = '<i class="fa-solid fa-pause mr-1"></i> 暫停播放';
-      }
-    }
-
-    function checkIntroAnswer(choice) {
-      const fb = document.getElementById('intro-feedback');
-      if (!fb) return;
-      fb.classList.remove('hidden', 'bg-rose-100', 'text-rose-900', 'border-rose-300', 'bg-emerald-100', 'text-emerald-900', 'border-emerald-300');
-
-      if (choice === '紅') {
-        fb.classList.add('bg-emerald-100', 'text-emerald-900', 'border-emerald-300');
-        fb.innerHTML = `
-          <div class="flex items-center space-x-2 text-lg font-black mb-1">
-            <i class="fa-solid fa-circle-check text-emerald-600"></i>
-            <span>太神了！完全正確！第 100 面旗幟正是「紅旗」！</span>
-          </div>
-          <div class="text-sm font-medium">
-            數學解析：100 ÷ 3 = 33 … 餘 1。商數 33 代表已經完整揮舞了 33 輪【紅 ➔ 白 ➔ 藍】，剩下的餘數 1 代表下一輪的「第 1 面」，也就是紅旗！
-          </div>
+      // 渲染前 15 個軌跡
+      const streamContainer = document.getElementById('pattern-stream');
+      streamContainer.innerHTML = '';
+      for (let i = 1; i <= 15; i++) {
+        const elementIndex = (i - 1) % elements.length;
+        const isEnd = (elementIndex === elements.length - 1);
+        const card = document.createElement('div');
+        card.className = `flex flex-col items-center justify-center p-2 rounded-xl border text-xs font-bold ${
+          isEnd ? 'bg-blue-100 border-blue-300 text-blue-900' : 'bg-white border-slate-200 text-slate-700'
+        }`;
+        card.innerHTML = `
+          <span class="text-base">${elements[elementIndex].split(' ')[0]}</span>
+          <span class="text-[10px] text-slate-400 mt-1">#${i}</span>
         `;
-      } else {
-        fb.classList.add('bg-rose-100', 'text-rose-900', 'border-rose-300');
-        fb.innerHTML = `
-          <div class="flex items-center space-x-2 text-lg font-black mb-1">
-            <i class="fa-solid fa-circle-xmark text-rose-600"></i>
-            <span>再想想看喔！你選了「${choice}旗」</span>
+        streamContainer.appendChild(card);
+      }
+
+      calculatePatternStep();
+    }
+
+    // 計算自訂 N 的算式與除盡迷思解析
+    function calculatePatternStep() {
+      let n = parseInt(document.getElementById('predict-n-input').value, 10);
+      if (isNaN(n) || n < 1) {
+        n = 1;
+        document.getElementById('predict-n-input').value = 1;
+      }
+      const cycleLen = currentPattern.length;
+      const quotient = Math.floor(n / cycleLen);
+      const remainder = n % cycleLen;
+
+      // 核心邏輯：餘數 0 為該循環的最後一個元素
+      const targetIndex = (remainder === 0) ? (cycleLen - 1) : (remainder - 1);
+      const answerElement = currentPattern[targetIndex];
+
+      const resultBox = document.getElementById('calculation-result-box');
+      resultBox.innerHTML = `
+        <div class="flex-1 text-left">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="text-xs font-black uppercase px-2 py-0.5 rounded-md bg-blue-100 text-blue-800">運算推導步驟</span>
+            <span class="text-xs text-slate-500 font-bold">週期長度：${cycleLen}</span>
           </div>
-          <div class="text-sm font-medium">
-            思考引導：100 ÷ 3 = 33 … 餘 1。餘數是「1」，請對照循環單元【1:紅 ➔ 2:白 ➔ 3:藍】，餘數 1 對應哪一種顏色呢？
+          <div class="text-lg md:text-xl font-mono font-black text-slate-900">
+            ${n} ÷ ${cycleLen} = <span class="text-indigo-600">${quotient}</span> (輪) ... 餘數 <span class="${remainder === 0 ? 'text-rose-600 bg-rose-50 px-2 py-0.5 rounded-lg border border-rose-200 font-black' : 'text-blue-600'}">${remainder}</span>
           </div>
-        `;
-      }
-    }
-
-    /* ================= 活動二：幾何密碼畫布與出題 ================= */
-    function addPatternSymbol(symbol) {
-      if (STATE.customPattern.length >= 6) {
-        showToast('為維護平板操作體驗，單元週期建議不超過 6 個元素！', 'warning');
-        return;
-      }
-      STATE.customPattern.push(symbol);
-      renderCustomPattern();
-    }
-
-    function clearCustomPattern() {
-      STATE.customPattern = [];
-      renderCustomPattern();
-      const res = document.getElementById('peer-calc-result');
-      if (res) res.classList.add('hidden');
-    }
-
-    function renderCustomPattern() {
-      const display = document.getElementById('current-pattern-display');
-      const lenLabel = document.getElementById('pattern-length');
-      const arrayContainer = document.getElementById('infinite-pattern-array');
-
-      if (!display || !lenLabel || !arrayContainer) return;
-
-      lenLabel.textContent = STATE.customPattern.length;
-
-      if (STATE.customPattern.length === 0) {
-        display.innerHTML = '<span class="text-slate-400 text-sm font-normal">請由上方點選圖形加入...</span>';
-        arrayContainer.innerHTML = '<span class="text-slate-500 text-sm">請於左側添加至少 2 個符號以啟動密碼延伸...</span>';
-        return;
-      }
-
-      display.innerHTML = STATE.customPattern.map(s => `<span>${s}</span>`).join(' ➔ ');
-
-      // 渲染無限延伸前 24 個元素
-      let arrayHtml = '';
-      for (let i = 0; i < 24; i++) {
-        const item = STATE.customPattern[i % STATE.customPattern.length];
-        const isCycleEnd = (i % STATE.customPattern.length) === (STATE.customPattern.length - 1);
-        arrayHtml += `
-          <div class="flex flex-col items-center bg-slate-900 border ${isCycleEnd ? 'border-amber-400/80 bg-amber-950/30' : 'border-slate-800'} px-2.5 py-1.5 rounded-xl shadow">
-            <span class="text-xl">${item}</span>
-            <span class="text-[10px] font-mono text-slate-400">#${i + 1}</span>
-          </div>
-        `;
-      }
-      arrayContainer.innerHTML = arrayHtml;
-    }
-
-    function calcPeerAnswer() {
-      const input = document.getElementById('input-peer-target');
-      const res = document.getElementById('peer-calc-result');
-      if (!input || !res) return;
-
-      if (STATE.customPattern.length < 2) {
-        showToast('請先在左側組合出至少 2 個圖形的循環單元！', 'warning');
-        return;
-      }
-
-      const target = parseInt(input.value);
-      if (isNaN(target) || target <= 0) {
-        showToast('請輸入大於 0 的有效推算位置！', 'warning');
-        return;
-      }
-
-      const cycleLen = STATE.customPattern.length;
-      const quotient = Math.floor(target / cycleLen);
-      const remainder = target % cycleLen;
-      
-      let answerSymbol = '';
-      let desc = '';
-
-      if (remainder === 0) {
-        answerSymbol = STATE.customPattern[cycleLen - 1];
-        desc = `整除！剛好走完 ${quotient} 個完整循環，對應單元的<strong>最後一個元素</strong>。`;
-      } else {
-        answerSymbol = STATE.customPattern[remainder - 1];
-        desc = `餘數為 ${remainder}，對應第 ${quotient + 1} 個循環中的<strong>第 ${remainder} 個元素</strong>。`;
-      }
-
-      res.classList.remove('hidden');
-      res.innerHTML = `
-        <div class="text-indigo-900 font-bold">推算算式：${target} ÷ ${cycleLen} = ${quotient} … 餘 ${remainder}</div>
-        <div class="text-base font-black text-emerald-600 flex items-center space-x-2">
-          <span>解密答案：${answerSymbol}</span>
+          <p class="text-xs md:text-sm text-slate-600 mt-1.5 leading-relaxed">
+            已完整重複 <strong class="text-indigo-700">${quotient}</strong> 整組循環。
+            ${remainder === 0 
+              ? `<b class="text-rose-600">⚠️ 餘數為 0 代表整除！</b> 正好是第 ${quotient} 輪的【最後一個元素】！` 
+              : `進入第 ${quotient + 1} 輪的第 <b class="text-blue-700">${remainder}</b> 個位置。`}
+          </p>
         </div>
-        <div class="text-xs text-slate-600 leading-relaxed">${desc}</div>
+
+        <div class="bg-gradient-to-tr from-blue-600 to-indigo-600 text-white px-5 py-3 rounded-2xl text-center shadow-md">
+          <span class="text-[11px] opacity-80 block font-bold">推算結果</span>
+          <span class="text-xl md:text-2xl font-black">${answerElement}</span>
+        </div>
       `;
     }
 
-    /* ================= 挑戰賽：2 分鐘旗語極速解密王 ================= */
-    function startGameChallenge() {
-      const nameInput = document.getElementById('game-player-name');
-      const playerName = nameInput ? nameInput.value.trim() : '';
+    // 洗牌佇列演算法 (Fisher-Yates) - 確保 36 題依序不重複
+    function buildShuffledQueue() {
+      const arr = [...QUESTION_BANK];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
 
-      STATE.game.timeLeft = 120;
-      STATE.game.totalTime = 120;
-      STATE.game.strikes = 0;
-      STATE.game.score = 0;
-      STATE.game.currentQIndex = 0;
-      STATE.game.answeredCount = 0;
-      STATE.game.correctCount = 0;
-      STATE.game.isAnswerLocked = false;
-      STATE.game.questions = shuffleArray(QUESTION_BANK);
+    // 遊戲流程控制
+    function startGame() {
+      // 確保音效引擎被使用者觸控喚醒
+      AudioEngine.init();
 
-      document.getElementById('game-start-panel').classList.add('hidden');
-      document.getElementById('game-result-panel').classList.add('hidden');
-      document.getElementById('game-active-panel').classList.remove('hidden');
+      // 初始化遊戲變數
+      timeLeft = 120;
+      hearts = 3;
+      score = 0;
+      streak = 0;
+      currentQuestionIndex = 0;
+      isProcessingAnswer = false;
+      shuffledQueue = buildShuffledQueue();
 
-      updateGameHearts();
-      updateScoreUI();
-      renderCurrentQuestion();
+      gameHistory = {
+        totalAnswered: 0,
+        correctCount: 0,
+        zeroRemainderCount: 0,
+        historyLogs: []
+      };
 
-      if (STATE.game.timer) clearInterval(STATE.game.timer);
-      STATE.game.timer = setInterval(() => {
-        STATE.game.timeLeft--;
-        updateGameTimerUI();
+      document.getElementById('game-start-screen').classList.add('hidden');
+      document.getElementById('game-end-screen').classList.add('hidden');
+      document.getElementById('game-play-screen').classList.remove('hidden');
 
-        if (STATE.game.timeLeft <= 0) {
-          terminateGame('時限抵達！完成 2 分鐘極速解密挑戰！');
+      updateHeartsUI();
+      updateGameStatsUI();
+      loadNextQuestion();
+
+      if (gameTimer) clearInterval(gameTimer);
+      gameTimer = setInterval(() => {
+        timeLeft--;
+        const min = String(Math.floor(timeLeft / 60)).padStart(2, '0');
+        const sec = String(timeLeft % 60).padStart(2, '0');
+        document.getElementById('game-timer').textContent = `${min}:${sec}`;
+
+        if (timeLeft <= 0) {
+          endGame('timeup');
         }
       }, 1000);
-      updateGameTimerUI();
     }
 
-    function updateGameTimerUI() {
-      const timerEl = document.getElementById('game-timer');
-      const progressEl = document.getElementById('game-progress-bar');
-      if (!timerEl || !progressEl) return;
-
-      const mins = Math.floor(STATE.game.timeLeft / 60);
-      const secs = STATE.game.timeLeft % 60;
-      timerEl.textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
-
-      const percent = (STATE.game.timeLeft / STATE.game.totalTime) * 100;
-      progressEl.style.width = `${percent}%`;
-
-      if (STATE.game.timeLeft <= 20) {
-        timerEl.classList.add('text-rose-400', 'animate-pulse');
-      } else {
-        timerEl.classList.remove('text-rose-400', 'animate-pulse');
-      }
-    }
-
-    function updateGameHearts() {
-      const container = document.getElementById('game-lives');
-      if (!container) return;
-      const remainingLives = STATE.game.maxStrikes - STATE.game.strikes;
-      let html = '';
-      for (let i = 0; i < STATE.game.maxStrikes; i++) {
-        if (i < remainingLives) {
-          html += '<i class="fa-solid fa-heart text-rose-500"></i>';
+    function updateHeartsUI() {
+      for (let i = 1; i <= 3; i++) {
+        const heartEl = document.getElementById(`heart-${i}`);
+        if (i <= hearts) {
+          heartEl.className = 'heart-active';
+          heartEl.textContent = '❤️';
         } else {
-          html += '<i class="fa-solid fa-heart text-slate-300"></i>';
+          heartEl.className = 'heart-lost';
+          heartEl.textContent = '💔';
         }
       }
-      container.innerHTML = html;
     }
 
-    function updateScoreUI() {
-      const scoreEl = document.getElementById('current-score');
-      const qIndexEl = document.getElementById('current-q-index');
-      if (scoreEl) scoreEl.textContent = STATE.game.score;
-      if (qIndexEl) qIndexEl.textContent = STATE.game.currentQIndex + 1;
+    function updateGameStatsUI() {
+      document.getElementById('game-score').textContent = score;
+      document.getElementById('game-streak-badge').textContent = `COMBO ${streak}`;
     }
 
-    function renderCurrentQuestion() {
-      STATE.game.isAnswerLocked = false;
-      const fb = document.getElementById('q-feedback');
-      if (fb) fb.classList.add('hidden');
+    function loadNextQuestion() {
+      isProcessingAnswer = false;
 
-      if (STATE.game.currentQIndex >= STATE.game.questions.length) {
-        terminateGame('題目全數作答完畢！你是最強旗語大師！');
-        return;
+      // 若題庫佇列用盡，重新洗牌補充，永不中斷
+      if (shuffledQueue.length === 0) {
+        shuffledQueue = buildShuffledQueue();
       }
 
-      const q = STATE.game.questions[STATE.game.currentQIndex];
-      STATE.game.activeQuestion = q;
+      currentQuestion = shuffledQueue.pop();
+      currentQuestionIndex++;
 
-      const qText = document.getElementById('q-text');
-      const qVisual = document.getElementById('q-pattern-visual');
-      const optionsContainer = document.getElementById('q-options');
+      document.getElementById('question-index-tag').textContent = `任務 ${currentQuestionIndex} / 35+`;
+      document.getElementById('question-text').textContent = currentQuestion.story;
 
-      if (qText) qText.textContent = `按照以下規律，第 ${q.target} 個元素是什麼？`;
-      if (qVisual) qVisual.textContent = q.cycle.join(' ➔ ');
-
-      const shuffledOptions = shuffleArray(q.options);
-      let btnHtml = '';
-      shuffledOptions.forEach(opt => {
-        btnHtml += `
-          <button onclick="handleAnswerChoice('${opt}', this)" class="opt-btn touch-btn py-4 px-4 bg-white hover:bg-indigo-50 border-2 border-slate-200 hover:border-indigo-400 rounded-2xl text-2xl sm:text-3xl font-black text-slate-800 shadow-sm active:scale-95 transition flex items-center justify-center">
-            ${opt}
-          </button>
-        `;
+      // 渲染題目圖形循環縮圖
+      const preview = document.getElementById('question-pattern-preview');
+      preview.innerHTML = '';
+      currentQuestion.pattern.forEach((item, idx) => {
+        const span = document.createElement('span');
+        span.className = 'px-2.5 py-1 bg-slate-100 rounded-lg text-xs font-bold text-slate-800 border border-slate-200';
+        span.textContent = `${idx + 1}. ${item}`;
+        preview.appendChild(span);
       });
-      if (optionsContainer) optionsContainer.innerHTML = btnHtml;
+
+      // 正確答案計算
+      const cycleLen = currentQuestion.pattern.length;
+      const remainder = currentQuestion.target % cycleLen;
+      const correctIndex = (remainder === 0) ? (cycleLen - 1) : (remainder - 1);
+      const correctAnswer = currentQuestion.pattern[correctIndex];
+
+      // 產生選項 (洗牌選項順序)
+      let options = [...currentQuestion.pattern];
+      options.sort(() => Math.random() - 0.5);
+
+      const optContainer = document.getElementById('options-container');
+      optContainer.innerHTML = '';
+      options.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'w-full py-4 md:py-5 px-6 bg-slate-50 hover:bg-blue-50 active:scale-98 border-2 border-slate-200 hover:border-blue-400 rounded-2xl text-lg md:text-xl font-black text-slate-800 transition flex items-center justify-between shadow-2xs';
+        btn.innerHTML = `
+          <span>${opt}</span>
+          <span class="text-xs px-2.5 py-1 bg-white rounded-lg text-slate-400 border border-slate-200">點擊確認</span>
+        `;
+        btn.onclick = () => handleAnswer(opt, correctAnswer);
+        optContainer.appendChild(btn);
+      });
+
+      // 隱藏反饋列
+      const fb = document.getElementById('feedback-bar');
+      fb.classList.add('hidden');
     }
 
-    function handleAnswerChoice(selected, btnEl) {
-      if (STATE.game.isAnswerLocked) return;
-      STATE.game.isAnswerLocked = true;
-      STATE.game.answeredCount++;
+    function handleAnswer(selected, correct) {
+      if (isProcessingAnswer) return; // 防止快速連點
+      isProcessingAnswer = true;
 
-      const q = STATE.game.activeQuestion;
-      const fb = document.getElementById('q-feedback');
-      const isCorrect = (selected === q.correct);
-
-      // 選項按鈕即時高亮反饋
-      if (btnEl) {
-        if (isCorrect) {
-          btnEl.classList.remove('bg-white', 'border-slate-200');
-          btnEl.classList.add('bg-emerald-500', 'text-white', 'border-emerald-600');
-        } else {
-          btnEl.classList.remove('bg-white', 'border-slate-200');
-          btnEl.classList.add('bg-rose-500', 'text-white', 'border-rose-600');
-        }
-      }
+      gameHistory.totalAnswered++;
+      const isCorrect = (selected === correct);
+      const fb = document.getElementById('feedback-bar');
+      fb.classList.remove('hidden');
 
       if (isCorrect) {
-        STATE.game.correctCount++;
-        STATE.game.score += 10;
-        showToast('答對了！+10分', 'success');
-        if (fb) {
-          fb.className = 'p-4 rounded-2xl font-bold text-sm bg-emerald-100 text-emerald-900 border border-emerald-300 block';
-          fb.innerHTML = `⭕ <strong>完全正確！</strong> ${q.reason}`;
-        }
-      } else {
-        STATE.game.strikes++;
-        updateGameHearts();
-        showToast('答錯了！失去 1 點生命值', 'error');
-        if (fb) {
-          fb.className = 'p-4 rounded-2xl font-bold text-sm bg-rose-100 text-rose-900 border border-rose-300 block';
-          fb.innerHTML = `❌ <strong>答錯囉！</strong> 正解為【${q.correct}】。<br>${q.reason}`;
-        }
+        AudioEngine.playCorrect();
+        score += (100 + streak * 20);
+        streak++;
+        gameHistory.correctCount++;
+        if (currentQuestion.isZero) gameHistory.zeroRemainderCount++;
 
-        if (STATE.game.strikes >= STATE.game.maxStrikes) {
-          setTimeout(() => {
-            terminateGame('累積失誤達 3 次，挑戰提前結束！');
-          }, 600);
+        fb.className = 'p-3.5 rounded-2xl text-center font-extrabold text-base bg-emerald-100 text-emerald-800 border border-emerald-300';
+        fb.innerHTML = `🎉 太棒了！答對了！${currentQuestion.isZero ? '★成功破解整除餘數 0 陷阱！' : ''}`;
+      } else {
+        AudioEngine.playWrong();
+        hearts--;
+        streak = 0;
+        updateHeartsUI();
+
+        fb.className = 'p-3.5 rounded-2xl text-center font-extrabold text-base bg-rose-100 text-rose-800 border border-rose-300';
+        fb.innerHTML = `❌ 哎呀！正確答案是：<strong>${correct}</strong>（${currentQuestion.target} ÷ ${currentQuestion.pattern.length} 餘 ${currentQuestion.target % currentQuestion.pattern.length}）`;
+
+        if (hearts <= 0) {
+          setTimeout(() => endGame('out_of_hearts'), 800);
           return;
         }
       }
 
-      updateScoreUI();
-
+      updateGameStatsUI();
+      // 停頓 700ms 後進入下一題
       setTimeout(() => {
-        STATE.game.currentQIndex++;
-        renderCurrentQuestion();
-      }, 550);
+        loadNextQuestion();
+      }, 750);
     }
 
-    function terminateGame(reason) {
-      if (STATE.game.timer) {
-        clearInterval(STATE.game.timer);
-        STATE.game.timer = null;
+    function endGame(reason) {
+      clearInterval(gameTimer);
+      AudioEngine.playSuccess();
+
+      document.getElementById('game-play-screen').classList.add('hidden');
+      document.getElementById('game-end-screen').classList.remove('hidden');
+
+      const titleEl = document.getElementById('end-status-title');
+      const descEl = document.getElementById('end-status-desc');
+      const iconEl = document.getElementById('end-status-icon');
+
+      if (reason === 'out_of_hearts') {
+        iconEl.innerHTML = '🛡️';
+        iconEl.className = 'w-20 h-20 rounded-3xl flex items-center justify-center text-4xl mb-4 shadow-inner bg-amber-100 text-amber-700';
+        titleEl.textContent = '防護罩破裂，任務終止！';
+        descEl.textContent = '答錯達 3 次觸發安全防護，但你的週期推導經驗已經大幅提升！';
+      } else {
+        iconEl.innerHTML = '🏆';
+        iconEl.className = 'w-20 h-20 rounded-3xl flex items-center justify-center text-4xl mb-4 shadow-inner bg-emerald-100 text-emerald-700';
+        titleEl.textContent = '2分鐘極速破譯完成！';
+        descEl.textContent = '時間截止！你成功抵達了旗語解密總部，太優秀了！';
       }
 
-      document.getElementById('game-active-panel').classList.add('hidden');
-      document.getElementById('game-result-panel').classList.remove('hidden');
+      // 結算指標展示
+      const acc = gameHistory.totalAnswered > 0 ? Math.round((gameHistory.correctCount / gameHistory.totalAnswered) * 100) : 0;
+      document.getElementById('stat-final-score').textContent = score;
+      document.getElementById('stat-correct-count').textContent = `${gameHistory.correctCount} / ${gameHistory.totalAnswered}`;
+      document.getElementById('stat-zero-count').textContent = `${gameHistory.zeroRemainderCount} 題`;
+      document.getElementById('stat-accuracy').textContent = `${acc}%`;
 
-      const reasonEl = document.getElementById('result-reason');
-      if (reasonEl) reasonEl.textContent = reason;
-
-      document.getElementById('res-score').textContent = STATE.game.score;
-      document.getElementById('res-total').textContent = STATE.game.answeredCount;
-      document.getElementById('res-correct').textContent = STATE.game.correctCount;
-      document.getElementById('res-strikes').textContent = STATE.game.strikes;
-
-      generateAuto4FReflection();
+      // 同步預填寫 4F 反思
+      autoFillReflectFromGame();
     }
 
-    function resetGame() {
-      document.getElementById('game-result-panel').classList.add('hidden');
-      document.getElementById('game-start-panel').classList.remove('hidden');
-      const nameInput = document.getElementById('game-player-name');
-      if (nameInput) nameInput.value = '';
+    function goToReflectionTab() {
+      switchTab('reflect');
     }
 
-    /* ================= 4F 智慧反思產出引擎 ================= */
-    function generateAuto4FReflection() {
-      const total = STATE.game.answeredCount;
-      const correct = STATE.game.correctCount;
-      const strikes = STATE.game.strikes;
-      const score = STATE.game.score;
-      const rate = total > 0 ? Math.round((correct / total) * 100) : 0;
+    // 自動根據答題戰績智慧生成 4F 思考模式初稿
+    function autoFillReflectFromGame() {
+      syncStudentInfo();
+      const cls = studentProfile.className;
+      const seat = studentProfile.seatNumber;
+      const name = studentProfile.name;
+      const total = gameHistory.totalAnswered || 8;
+      const correct = gameHistory.correctCount || 7;
+      const zero = gameHistory.zeroRemainderCount || 3;
 
-      const factsEl = document.getElementById('4f-facts');
-      if (factsEl) {
-        factsEl.textContent = `在 2 分鐘（120 秒）極速解密中，共完成 ${total} 道週期規律推算題，精準答對 ${correct} 題，失誤扣心 ${strikes} 次，最終結算成績為 ${score} 分，正解命中率為 ${rate}%。`;
-      }
+      // [Facts] 事實
+      document.getElementById('reflect-facts').value = 
+        `在本次旗語任務中，我（${cls} ${seat} ${name}）在 120 秒內一共挑戰了 ${total} 道信號題，精準答對了 ${correct} 題！其中遇到了 ${zero} 次「剛好整除（餘數為0）」的週期陷阱。最常見的最小循環週期包含了 3 到 5 面不同的旗幟或幾何圖形。`;
 
-      const findingsEl = document.getElementById('4f-findings');
-      if (findingsEl) {
-        findingsEl.textContent = `週期規律推算中，算式的「商數」代表循環了幾輪完整單元，「餘數」代表該輪內的第幾個位置。最關鍵的突破是破解了「餘數為 0」的盲區：整除並不是第 0 個，而是代表剛好走完一整輪的「最後一個元素」！`;
-      }
+      // [Feelings] 感受
+      document.getElementById('reflect-feelings').value = 
+        `當倒數計時不斷逼近時，一開始看見題目數字很大（例如算第 100 面）心裡會有些緊張。但當我運用除法算出商與餘數並立即推算成功時，感到非常興奮！特別是在遇到餘數為 0 時，能克服慌張並冷靜判斷，成就感十足。`;
 
-      const futureEl = document.getElementById('4f-future');
-      if (futureEl) {
-        futureEl.textContent = `這套「週期除法與餘數定位法」能廣泛應用在日常生活中：例如計算「50 天後是星期幾」、「每 4 年一次的閏年循環」、工廠輪班或交通號誌秒數推算，只要先找出循環長度，就能用除法快速預測未來任何時刻的狀態！`;
-      }
+      // [Findings] 洞察發現
+      document.getElementById('reflect-findings').value = 
+        `我發現：不需要死板地畫出 100 面旗子！「除法的商」代表整組循環已經完整重複了幾輪，而關鍵的「餘數」直接告訴我落在那一輪的第幾個位置。最寶貴的收穫是破除了「第零個迷思」：當算式整除（餘數為0）時，並不是不存在，而是代表該循環的「最後一個元素」！`;
+
+      // [Future] 未來應用
+      document.getElementById('reflect-future').value = 
+        `這套「週期 × 餘數」思維可以用在超多生活場景：例如推算 100 天後是星期幾（除以 7）、生肖十二年輪替、十字路口紅綠燈變換週期、旋轉密碼鎖排列，甚至電腦遊戲中的技能冷卻循環，都能用同樣的算式一秒破解！`;
     }
 
-    function selectFeelingTag(btn) {
-      const container = document.getElementById('feeling-tags-container');
-      container.querySelectorAll('.tag-btn').forEach(b => {
-        b.classList.remove('bg-amber-500', 'text-white', 'border-amber-600');
-        b.classList.add('bg-white', 'text-slate-700');
-      });
-      btn.classList.remove('bg-white', 'text-slate-700');
-      btn.classList.add('bg-amber-500', 'text-white', 'border-amber-600');
-
-      const customInput = document.getElementById('4f-feelings-custom');
-      if (customInput) customInput.value = btn.textContent.trim();
-    }
-
-    /* ================= 成果發布至展示牆 ================= */
-    function publishToWall() {
-      const nameInput = document.getElementById('game-player-name');
-      const author = (nameInput && nameInput.value.trim()) ? nameInput.value.trim() : '數感小偵探';
-
-      const facts = document.getElementById('4f-facts').textContent;
-      const feelingInput = document.getElementById('4f-feelings-custom');
-      const feelings = (feelingInput && feelingInput.value.trim()) ? feelingInput.value.trim() : '⚡ 挑戰過程專注且充滿成就感！';
-      const findings = document.getElementById('4f-findings').textContent;
-      const future = document.getElementById('4f-future').textContent;
-
-      const newWork = {
-        id: Date.now(),
-        author: author,
-        score: STATE.game.score,
-        time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        likes: 0,
-        facts: facts,
-        feelings: feelings,
-        findings: findings,
-        future: future
-      };
-
-      STATE.showcaseWorks.unshift(newWork);
-      renderShowcaseWall();
-      showToast('成果已成功發布至展示牆！', 'success');
-      switchTab('tab-showcase');
-    }
-
-    function renderShowcaseWall() {
-      const container = document.getElementById('showcase-container');
-      const badge = document.getElementById('showcase-badge');
-      if (!container || !badge) return;
-
-      badge.textContent = STATE.showcaseWorks.length;
-
-      if (STATE.showcaseWorks.length === 0) {
-        container.innerHTML = `
-          <div class="col-span-full py-16 text-center text-slate-400">
-            <i class="fa-solid fa-cloud-moon text-5xl mb-3 text-slate-300"></i>
-            <p class="text-base font-bold">目前展示牆尚無成果記錄</p>
-            <p class="text-xs text-slate-400 mt-1">請先前往「極速挑戰賽」進行 2 分鐘闖關並發布 4F 反思！</p>
-          </div>
-        `;
-        return;
-      }
-
-      let html = '';
-      STATE.showcaseWorks.forEach(work => {
-        html += `
-          <div class="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200 shadow-sm space-y-4 relative overflow-hidden">
-            <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-              <div class="flex items-center space-x-3">
-                <div class="w-10 h-10 bg-indigo-100 text-indigo-700 rounded-xl flex items-center justify-center font-black text-lg">
-                  <i class="fa-solid fa-user-astronaut"></i>
-                </div>
-                <div>
-                  <h4 class="font-black text-slate-900 text-lg">${escapeHtml(work.author)}</h4>
-                  <span class="text-xs text-slate-400">${work.time} ｜ 榮譽得分：${work.score}分</span>
-                </div>
-              </div>
-              <button onclick="likeWork(${work.id})" class="touch-btn px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl font-bold text-xs flex items-center space-x-1.5 transition active:scale-95">
-                <i class="fa-solid fa-heart"></i>
-                <span>${work.likes}</span>
-              </button>
-            </div>
-
-            <!-- 4F 圖卡 -->
-            <div class="space-y-2.5 text-xs sm:text-sm">
-              <div class="p-2.5 bg-sky-50 rounded-xl border border-sky-100">
-                <strong class="text-sky-800">[Facts 客觀事實]</strong>
-                <p class="text-slate-700 mt-0.5">${escapeHtml(work.facts)}</p>
-              </div>
-              <div class="p-2.5 bg-amber-50 rounded-xl border border-amber-100">
-                <strong class="text-amber-800">[Feelings 感受體驗]</strong>
-                <p class="text-slate-700 mt-0.5">${escapeHtml(work.feelings)}</p>
-              </div>
-              <div class="p-2.5 bg-emerald-50 rounded-xl border border-emerald-100">
-                <strong class="text-emerald-800">[Findings 規律洞察]</strong>
-                <p class="text-slate-700 mt-0.5">${escapeHtml(work.findings)}</p>
-              </div>
-              <div class="p-2.5 bg-purple-50 rounded-xl border border-purple-100">
-                <strong class="text-purple-800">[Future 生活遷移]</strong>
-                <p class="text-slate-700 mt-0.5">${escapeHtml(work.future)}</p>
-              </div>
-            </div>
-          </div>
-        `;
-      });
-      container.innerHTML = html;
-    }
-
-    function likeWork(workId) {
-      const work = STATE.showcaseWorks.find(w => w.id === workId);
-      if (work) {
-        work.likes++;
-        renderShowcaseWall();
-        showToast('為同儕的數感成果送出愛心！', 'success');
-      }
-    }
-
-    /* ================= 匯出展示牆為高解析 PNG 圖檔 (雙軌備援引擎) ================= */
-    async function exportShowcasePNG() {
-      if (STATE.showcaseWorks.length === 0) {
-        showToast('展示牆目前沒有作品可供匯出！', 'warning');
-        return;
-      }
-
-      showToast('正在合成高解析海報圖片，請稍候...', 'info');
-      const target = document.getElementById('showcase-container');
-
-      try {
-        if (typeof html2canvas !== 'undefined') {
-          const canvas = await html2canvas(target, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: '#f8fafc'
-          });
-          downloadCanvas(canvas);
-        } else {
-          fallbackExportPNG();
-        }
-      } catch (err) {
-        console.warn('html2canvas 遭遇環境阻斷，啟動原生 Canvas 備援引擎：', err);
-        fallbackExportPNG();
-      }
-    }
-
-    function downloadCanvas(canvas) {
-      const link = document.createElement('a');
-      link.download = `旗語解密大行動_全班成果展示牆_${new Date().toISOString().slice(0, 10)}.png`;
-      link.href = canvas.toDataURL('image/png');
-      link.click();
-      showToast('成果海報已成功下載！', 'success');
-    }
-
-    // 原生 Canvas 2D 離線備援渲染引擎
-    function fallbackExportPNG() {
-      const canvas = document.createElement('canvas');
-      canvas.width = 1000;
-      const cardHeight = 280;
-      canvas.height = 140 + STATE.showcaseWorks.length * cardHeight;
+    // 匯出成果證書圖片 (高解析度 Retina 2x Canvas，支援 iOS 長按儲存)
+    function exportCertificateImage() {
+      syncStudentInfo();
+      const canvas = document.getElementById('exportCanvas');
       const ctx = canvas.getContext('2d');
 
-      // 背景
-      ctx.fillStyle = '#0f172a';
+      // 設定高畫質畫布尺寸 (1200 x 850)
+      canvas.width = 1200;
+      canvas.height = 850;
+
+      const cls = studentProfile.className;
+      const seat = studentProfile.seatNumber;
+      const name = studentProfile.name;
+      const facts = document.getElementById('reflect-facts').value;
+      const findings = document.getElementById('reflect-findings').value;
+
+      // 1. 繪製背景與精緻邊框
+      ctx.fillStyle = '#ffffff';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 抬頭標題
-      ctx.fillStyle = '#ffffff';
-      ctx.font = 'bold 30px Noto Sans TC';
+      // 上下色塊
+      ctx.fillStyle = '#0284c7';
+      ctx.fillRect(0, 0, canvas.width, 24);
+      ctx.fillRect(0, canvas.height - 24, canvas.width, 24);
+
+      // 內部金色外框
+      ctx.strokeStyle = '#e2e8f0';
+      ctx.lineWidth = 4;
+      ctx.strokeRect(30, 45, canvas.width - 60, canvas.height - 90);
+
+      // 內部藍色細框
+      ctx.strokeStyle = '#0284c7';
+      ctx.lineWidth = 1.5;
+      ctx.strokeRect(38, 53, canvas.width - 76, canvas.height - 106);
+
+      // 2. 標題與校定課程徽章
+      ctx.fillStyle = '#0f172a';
+      ctx.font = 'bold 36px "Inter", sans-serif';
       ctx.textAlign = 'center';
-      ctx.fillText('旗語解密大行動 - 全班學習成果報告', canvas.width / 2, 55);
+      ctx.fillText('數感實驗室：旗語解密大行動 · 榮譽結業證書', canvas.width / 2, 115);
 
-      ctx.fillStyle = '#94a3b8';
-      ctx.font = '16px Noto Sans TC';
-      ctx.fillText(`匯出日期：${new Date().toLocaleDateString()} ｜ 數感實驗室 | Design：S.C. Kuo`, canvas.width / 2, 90);
+      ctx.fillStyle = '#64748b';
+      ctx.font = 'bold 18px "Inter", sans-serif';
+      ctx.fillText('國小五年級素養導向數學 · 週期規律與餘數認知思維認證', canvas.width / 2, 150);
 
-      // 繪製卡片
-      STATE.showcaseWorks.forEach((work, index) => {
-        const y = 130 + index * cardHeight;
-        ctx.fillStyle = '#1e293b';
-        ctx.fillRect(40, y, 920, 250);
+      // 3. 學員資料區塊
+      ctx.fillStyle = '#f8fafc';
+      ctx.fillRect(60, 180, canvas.width - 120, 75);
+      ctx.strokeStyle = '#cbd5e1';
+      ctx.lineWidth = 1;
+      ctx.strokeRect(60, 180, canvas.width - 120, 75);
 
-        ctx.fillStyle = '#38bdf8';
-        ctx.font = 'bold 20px Noto Sans TC';
-        ctx.textAlign = 'left';
-        ctx.fillText(`【${work.author}】 得分：${work.score} 分 ｜ 時間：${work.time}`, 60, y + 40);
+      ctx.fillStyle = '#0369a1';
+      ctx.font = 'bold 24px "Inter", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(`解密特工：${cls}  ${seat}  ${name} 同學`, 85, 226);
 
-        ctx.fillStyle = '#cbd5e1';
-        ctx.font = '14px Noto Sans TC';
-        drawWrappedText(ctx, `[Facts] ${work.facts}`, 60, y + 75, 880, 22);
-        drawWrappedText(ctx, `[Findings] ${work.findings}`, 60, y + 135, 880, 22);
-        drawWrappedText(ctx, `[Future] ${work.future}`, 60, y + 195, 880, 22);
-      });
+      ctx.fillStyle = '#10b981';
+      ctx.font = 'bold 22px "Inter", sans-serif';
+      ctx.textAlign = 'right';
+      ctx.fillText(`破譯戰績：${score} 分  |  破解整除陷阱：${gameHistory.zeroRemainderCount} 次`, canvas.width - 85, 226);
 
-      downloadCanvas(canvas);
+      // 4. 4F 思考模式核心摘記 (左 Facts / 右 Findings)
+      // 左側卡片 (Facts)
+      ctx.fillStyle = '#f0f9ff';
+      ctx.fillRect(60, 280, 525, 360);
+      ctx.strokeStyle = '#bae6fd';
+      ctx.strokeRect(60, 280, 525, 360);
+
+      ctx.fillStyle = '#0369a1';
+      ctx.font = 'bold 20px "Inter", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('【 Facts 事實觀察與客觀紀錄 】', 80, 320);
+
+      ctx.fillStyle = '#334155';
+      ctx.font = '15px "Inter", sans-serif';
+      wrapText(ctx, facts, 80, 360, 485, 26);
+
+      // 右側卡片 (Findings)
+      ctx.fillStyle = '#faf5ff';
+      ctx.fillRect(615, 280, 525, 360);
+      ctx.strokeStyle = '#e9d5ff';
+      ctx.strokeRect(615, 280, 525, 360);
+
+      ctx.fillStyle = '#7e22ce';
+      ctx.font = 'bold 20px "Inter", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText('【 Findings 核心洞察：破解第零個迷思 】', 635, 320);
+
+      ctx.fillStyle = '#334155';
+      ctx.font = '15px "Inter", sans-serif';
+      wrapText(ctx, findings, 635, 360, 485, 26);
+
+      // 5. 證書印鑑與頁尾文字
+      ctx.fillStyle = '#ef4444';
+      ctx.beginPath();
+      ctx.arc(1060, 720, 52, 0, Math.PI * 2);
+      ctx.strokeStyle = '#ef4444';
+      ctx.lineWidth = 4;
+      ctx.stroke();
+
+      ctx.font = 'bold 16px "Inter", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('數感實驗室', 1060, 715);
+      ctx.fillText('特工認證章', 1060, 735);
+
+      ctx.fillStyle = '#64748b';
+      ctx.font = '16px "Inter", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillText('數感實驗室  | 互動學習系統 | Design：S.C. Kuo', canvas.width / 2, 745);
+
+      // 6. 生成圖檔並呼叫彈窗（支援 iPad 觸控長按存入相簿）
+      const imageURL = canvas.toDataURL('image/png');
+      const previewImg = document.getElementById('cert-preview-img');
+      const downloadLink = document.getElementById('cert-download-link');
+
+      previewImg.src = imageURL;
+      downloadLink.href = imageURL;
+      downloadLink.download = `旗語解密大行動成果證書_${cls}_${seat}_${name}.png`;
+
+      openCertPreviewModal();
+
+      // 嘗試直接觸發原生下載
+      try {
+        const tempLink = document.createElement('a');
+        tempLink.download = `旗語解密大行動成果證書_${cls}_${seat}_${name}.png`;
+        tempLink.href = imageURL;
+        document.body.appendChild(tempLink);
+        tempLink.click();
+        document.body.removeChild(tempLink);
+      } catch(e) {}
     }
 
-    function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+    // Canvas 文字自動折行輔助函式
+    function wrapText(context, text, x, y, maxWidth, lineHeight) {
+      if (!text) return;
+      const words = text.split('');
       let line = '';
-      for (let n = 0; n < text.length; n++) {
-        const testLine = line + text[n];
-        const metrics = ctx.measureText(testLine);
-        if (metrics.width > maxWidth && n > 0) {
-          ctx.fillText(line, x, y);
-          line = text[n];
+      for (let n = 0; n < words.length; n++) {
+        const testLine = line + words[n];
+        const metrics = context.measureText(testLine);
+        const testWidth = metrics.width;
+        if (testWidth > maxWidth && n > 0) {
+          context.fillText(line, x, y);
+          line = words[n];
           y += lineHeight;
         } else {
           line = testLine;
         }
       }
-      ctx.fillText(line, x, y);
+      context.fillText(line, x, y);
     }
 
-    /* ================= 頂部三大純圖示功能 (QR Code / 全螢幕 / 課程設計說明) ================= */
-    function initQRModal() {
-      const btnQr = document.getElementById('btn-qr');
-      if (btnQr) {
-        btnQr.addEventListener('click', () => {
-          openQRModal();
-        });
-      }
+    // 全螢幕切換功能 (含 iOS Safari 降級支援)
+    let isPseudoFullscreen = false;
+    function toggleFullScreen() {
+      const root = document.getElementById('app-root');
+      const icon = document.getElementById('fullscreen-icon');
 
-      const btnGuide = document.getElementById('btn-guide');
-      if (btnGuide) {
-        btnGuide.addEventListener('click', () => {
-          openModal('modal-guide');
-        });
-      }
-    }
-
-    function openQRModal() {
-      const container = document.getElementById('qrcode-box');
-      if (container) {
-        container.innerHTML = '';
-        try {
-          new QRCode(container, {
-            text: window.location.href,
-            width: 180,
-            height: 180,
-            colorDark: '#0f172a',
-            colorLight: '#ffffff',
-            correctLevel: QRCode.CorrectLevel.H
-          });
-        } catch (e) {
-          container.innerHTML = `<img src="https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(window.location.href)}" alt="QR Code" class="mx-auto">`;
+      if (!document.fullscreenElement && !document.webkitFullscreenElement && !isPseudoFullscreen) {
+        if (document.documentElement.requestFullscreen) {
+          document.documentElement.requestFullscreen().catch(() => enablePseudoFullscreen(root, icon));
+        } else if (document.documentElement.webkitRequestFullscreen) {
+          document.documentElement.webkitRequestFullscreen().catch(() => enablePseudoFullscreen(root, icon));
+        } else {
+          enablePseudoFullscreen(root, icon);
         }
+        updateFullscreenIcon(true);
+      } else {
+        if (document.exitFullscreen) {
+          document.exitFullscreen().catch(() => {});
+        } else if (document.webkitExitFullscreen) {
+          document.webkitExitFullscreen().catch(() => {});
+        }
+        if (isPseudoFullscreen) {
+          disablePseudoFullscreen(root, icon);
+        }
+        updateFullscreenIcon(false);
       }
-      openModal('modal-qr');
     }
 
+    function enablePseudoFullscreen(root, icon) {
+      isPseudoFullscreen = true;
+      root.classList.add('pseudo-fullscreen');
+      updateFullscreenIcon(true);
+    }
+
+    function disablePseudoFullscreen(root, icon) {
+      isPseudoFullscreen = false;
+      root.classList.remove('pseudo-fullscreen');
+      updateFullscreenIcon(false);
+    }
+
+    function updateFullscreenIcon(isFullscreen) {
+      const icon = document.getElementById('fullscreen-icon');
+      if (isFullscreen) {
+        icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />`;
+      } else {
+        icon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0 0l-5-5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />`;
+      }
+    }
+
+    // 監聽 ESC 退出全螢幕
+    document.addEventListener('fullscreenchange', () => {
+      updateFullscreenIcon(!!document.fullscreenElement);
+    });
+    document.addEventListener('webkitfullscreenchange', () => {
+      updateFullscreenIcon(!!document.webkitFullscreenElement);
+    });
+
+    // 動態產生 QR Code (沙盒與真實網址偵錯)
+    function generateQrCode() {
+      const qrcodeContainer = document.getElementById('qrcode-box');
+      qrcodeContainer.innerHTML = '';
+      
+      let currentUrl = window.location.href;
+      // 若在 iframe 沙盒或 about:srcdoc 內部，回退至安全課堂專用入口
+      if (!currentUrl || currentUrl.startsWith('about:') || currentUrl.startsWith('blob:')) {
+        currentUrl = 'https://math-sense.edu.tw/flag-cipher';
+        document.getElementById('url-status-note').textContent = '當前為課堂沙盒預覽模式';
+      } else {
+        document.getElementById('url-status-note').textContent = '已自動偵測載具即時網址';
+      }
+
+      new QRCode(qrcodeContainer, {
+        text: currentUrl,
+        width: 180,
+        height: 180,
+        colorDark: "#0f172a",
+        colorLight: "#ffffff",
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    function openQrModal() {
+      generateQrCode();
+      document.getElementById('modal-qrcode').classList.remove('hidden');
+    }
+
+    function closeQrModal() {
+      document.getElementById('modal-qrcode').classList.add('hidden');
+    }
+
+    // 一鍵複製當前網址
     function copyCurrentUrl() {
-      const url = window.location.href;
+      let url = window.location.href;
+      if (!url || url.startsWith('about:') || url.startsWith('blob:')) {
+        url = 'https://math-sense.edu.tw/flag-cipher';
+      }
+      const copyBtnText = document.getElementById('copy-btn-text');
+
       if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(url).then(() => {
-          showToast('網址已成功複製至剪貼簿！', 'success');
+          showCopySuccess();
         }).catch(() => {
           fallbackCopyText(url);
         });
       } else {
         fallbackCopyText(url);
       }
-    }
 
-    function fallbackCopyText(text) {
-      const textArea = document.createElement('textarea');
-      textArea.value = text;
-      document.body.appendChild(textArea);
-      textArea.select();
-      try {
-        document.execCommand('copy');
-        showToast('網址已成功複製！', 'success');
-      } catch (err) {
-        showToast('無法自動複製網址，請手動複製', 'error');
-      }
-      document.body.removeChild(textArea);
-    }
-
-    function setupFullscreenEvents() {
-      const btnFs = document.getElementById('btn-fullscreen');
-      if (!btnFs) return;
-
-      btnFs.addEventListener('click', () => {
-        if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-          const docEl = document.documentElement;
-          if (docEl.requestFullscreen) {
-            docEl.requestFullscreen().catch(err => console.log(err));
-          } else if (docEl.webkitRequestFullscreen) {
-            docEl.webkitRequestFullscreen();
-          }
-        } else {
-          if (document.exitFullscreen) {
-            document.exitFullscreen().catch(err => console.log(err));
-          } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-          }
-        }
-      });
-
-      const updateFsIcon = () => {
-        const icon = document.getElementById('fullscreen-icon');
-        if (!icon) return;
-        if (document.fullscreenElement || document.webkitFullscreenElement) {
-          icon.classList.remove('fa-expand');
-          icon.classList.add('fa-compress');
-        } else {
-          icon.classList.remove('fa-compress');
-          icon.classList.add('fa-expand');
-        }
-      };
-
-      document.addEventListener('fullscreenchange', updateFsIcon);
-      document.addEventListener('webkitfullscreenchange', updateFsIcon);
-    }
-
-    function setupKeydownEvents() {
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') {
-          closeModal('modal-qr');
-          closeModal('modal-guide');
-        }
-      });
-
-      ['modal-qr', 'modal-guide'].forEach(id => {
-        const modal = document.getElementById(id);
-        if (modal) {
-          modal.addEventListener('click', (e) => {
-            if (e.target === modal) {
-              closeModal(id);
-            }
-          });
-        }
-      });
-    }
-
-    function openModal(id) {
-      const el = document.getElementById(id);
-      if (el) el.classList.remove('hidden');
-    }
-
-    function closeModal(id) {
-      const el = document.getElementById(id);
-      if (el) el.classList.add('hidden');
-    }
-
-    /* ================= 自訂 Toast 訊息提示元件 ================= */
-    let toastTimeout = null;
-    function showToast(msg, type = 'info') {
-      const toast = document.getElementById('toast');
-      const toastMsg = document.getElementById('toast-msg');
-      const toastIcon = document.getElementById('toast-icon');
-      if (!toast || !toastMsg || !toastIcon) return;
-
-      toastMsg.textContent = msg;
-
-      if (type === 'success') {
-        toastIcon.className = 'fa-solid fa-circle-check text-emerald-400';
-      } else if (type === 'warning') {
-        toastIcon.className = 'fa-solid fa-triangle-exclamation text-amber-400';
-      } else if (type === 'error') {
-        toastIcon.className = 'fa-solid fa-circle-xmark text-rose-400';
-      } else {
-        toastIcon.className = 'fa-solid fa-circle-info text-indigo-400';
+      function showCopySuccess() {
+        copyBtnText.textContent = '✅ 已成功複製網址！';
+        setTimeout(() => {
+          copyBtnText.textContent = '一鍵複製目前網址';
+        }, 2200);
       }
 
-      toast.classList.remove('hidden');
-
-      if (toastTimeout) clearTimeout(toastTimeout);
-      toastTimeout = setTimeout(() => {
-        toast.classList.add('hidden');
-      }, 2400);
+      function fallbackCopyText(text) {
+        const textArea = document.createElement("textarea");
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand('copy');
+          showCopySuccess();
+        } catch (err) {}
+        document.body.removeChild(textArea);
+      }
     }
 
-    function escapeHtml(str) {
-      if (!str) return '';
-      return String(str)
-        .replace(/&/g, '&amp;')
-        .replace(/</g, '&lt;')
-        .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;')
-        .replace(/'/g, '&#039;');
+    // 課程指引 Modal 控制
+    function openGuideModal() {
+      document.getElementById('modal-guide').classList.remove('hidden');
+    }
+
+    function closeGuideModal() {
+      document.getElementById('modal-guide').classList.add('hidden');
+    }
+
+    // 證書預覽 Modal 控制
+    function openCertPreviewModal() {
+      document.getElementById('modal-cert-preview').classList.remove('hidden');
+    }
+
+    function closeCertPreviewModal() {
+      document.getElementById('modal-cert-preview').classList.add('hidden');
     }
   </script>
 </body>
